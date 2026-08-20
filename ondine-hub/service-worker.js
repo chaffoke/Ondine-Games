@@ -22,7 +22,7 @@
 // même avec du wifi disponible (stale-while-revalidate rafraîchit le
 // cache existant, mais un nom de cache identique ne déclenche pas de
 // nettoyage de l'ancien contenu).
-const CACHE_VERSION = 'ondine-games-v3';
+const CACHE_VERSION = 'ondine-games-v5';
 
 const PRECACHE_FILES = [
   './',
