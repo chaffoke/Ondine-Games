@@ -1,0 +1,33 @@
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;}
+#homeStatsTetris{display:flex;gap:7px;width:100%;max-width:300px;}
+
+#sg{align-items:center;padding:8px;gap:6px;}
+.tetris-layout{display:flex;gap:8px;align-items:flex-start;justify-content:center;}
+.tetris-side{display:flex;flex-direction:column;gap:8px;width:64px;}
+.tetris-side-box{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:6px;text-align:center;}
+.tetris-side-label{font-size:8px;color:var(--text2);text-transform:uppercase;}
+.mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:4px;}
+.mini-cell{aspect-ratio:1;background:rgba(255,255,255,.05);border-radius:1px;}
+
+#tetrisGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:1px;width:180px;aspect-ratio:0.5;background:rgba(0,0,0,.35);padding:3px;border-radius:8px;}
+.tcell{background:rgba(255,255,255,.04);border-radius:1px;}
+.tcell.filled{border-radius:2px;}
+.tcell.ghost{border:1.5px dashed;opacity:.35;}
+
+.tetris-hud{display:flex;gap:10px;font-family:'Fredoka One',cursive;font-size:12px;}
+#tetrisOverBanner{font-family:'Fredoka One',cursive;color:var(--cr);font-size:22px;text-align:center;line-height:1.5;background:rgba(6,8,30,.55);border:1px solid rgba(248,113,113,.35);border-radius:14px;padding:10px 16px;backdrop-filter:blur(4px);}
+#tetrisOverBanner .tetris-over-score{font-size:13px;color:var(--text);font-family:'Nunito',sans-serif;font-weight:800;}
+#tetrisOverBanner .tetris-over-best{font-size:11px;color:var(--co);font-family:'Nunito',sans-serif;font-weight:700;}
+
+.tetris-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:320px;}
+.tetris-btn{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:12px 0;text-align:center;font-size:18px;cursor:pointer;}
+.tetris-btn:active{background:var(--glass3);}

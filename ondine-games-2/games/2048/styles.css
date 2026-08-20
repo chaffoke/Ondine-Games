@@ -1,0 +1,30 @@
+/* games/2048/styles.css */
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;}
+#homeStats2048{display:flex;gap:7px;width:100%;max-width:300px;}
+
+#sg{align-items:center;padding:14px;gap:12px;touch-action:none;}
+.hud2048{display:flex;gap:10px;width:100%;max-width:320px;justify-content:center;}
+.hud2048 .box{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:8px 16px;text-align:center;}
+.hud2048 .box .n{font-family:'Fredoka One',cursive;font-size:20px;color:var(--c1);}
+.hud2048 .box .l{font-size:9px;color:var(--text2);text-transform:uppercase;}
+
+#banner2048{font-family:'Fredoka One',cursive;font-size:16px;color:var(--co);}
+
+#grid2048{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:320px;aspect-ratio:1;background:rgba(0,0,0,.25);padding:8px;border-radius:16px;}
+.tile2048{border-radius:10px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-weight:800;transition:all .1s;}
+.tile2048.filled{animation:tilePop .15s ease;}
+@keyframes tilePop{from{transform:scale(.7);}to{transform:scale(1);}}
+
+.footer2048{display:flex;gap:8px;width:100%;max-width:320px;flex-wrap:wrap;justify-content:center;}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+#achList2048{width:100%;display:flex;flex-direction:column;gap:6px;}

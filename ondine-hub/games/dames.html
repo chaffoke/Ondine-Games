@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Dames × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;--c1:#38bdf8;--c2:#7dd3fc;--cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);--text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;--sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:20px;cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:22px;max-width:320px;width:100%;box-shadow:var(--sh2);}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(34px,10vw,48px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+#sg{align-items:center;padding:8px;gap:8px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;}
+.turn-badge{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:6px 14px;font-family:'Fredoka One',cursive;font-size:12px;}
+.turn-dot{width:14px;height:14px;border-radius:50%;}
+.turn-dot.p1{background:radial-gradient(circle at 35% 30%,#666,#0a0a0a 70%);}
+.turn-dot.p2{background:radial-gradient(circle at 35% 30%,#fff,#cbd5e1 70%);}
+.score-row{display:flex;gap:8px;}
+.score-pill{display:flex;align-items:center;gap:5px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
+
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+.board{display:grid;grid-template-columns:repeat(10,1fr);gap:1px;background:#3d2410;border:2px solid #2a1a0a;border-radius:8px;padding:3px;max-width:400px;width:100%;aspect-ratio:1;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4, même cause) */
+@media (min-width:900px){.board{max-width:600px;}}
+.cell{position:relative;display:flex;align-items:center;justify-content:center;}
+.cell.dark{background:#5c3a1e;cursor:pointer;}
+.cell.light{background:#e8d4b8;}
+.cell.selected{box-shadow:inset 0 0 0 3px var(--co);}
+.cell.dest::after{content:'';width:26%;height:26%;border-radius:50%;background:rgba(52,211,153,.7);}
+.piece{width:78%;height:78%;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:14px;transition:transform .25s;}
+.piece.p1{background:radial-gradient(circle at 35% 28%,#4a4a4a,#0a0a0a 72%);}
+.piece.p2{background:radial-gradient(circle at 35% 28%,#fff,#c7d2e0 72%);}
+.piece.king::after{content:'♛';font-size:15px;color:var(--co);}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:400px;}
+
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+</style>
+</head>
+<body>
+
+<div id="toastHost" class="ondine-toast"></div>
+
+<!-- ═══════ HOME ═══════ -->
+<div class="screen" id="sh">
+  <div class="logo">DAMES</div>
+  <div class="logo-sub">× Ondine — Règles françaises</div>
+
+  <div class="section-title">Mode</div>
+  <div class="opt-grid">
+    <div class="opt-card sel" id="mode2p" onclick="setMode('2p')"><div class="opt-icon">👥</div><div class="opt-name">2 Joueurs</div></div>
+    <div class="opt-card" id="modeSolo" onclick="setMode('solo')"><div class="opt-icon">🤖</div><div class="opt-name">Solo vs IA</div></div>
+  </div>
+
+  <div class="hbtns" style="margin-top:8px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">⚫ Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" id="resumeBtn" onclick="resumeGame()" style="display:none;">▶ Reprendre la partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showRules()">ⓘ Règles du jeu</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
+  </div>
+
+  <div class="hstats" id="homeStats"></div>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════ GAME ═══════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div class="icon-btn" onclick="confirmLeaveGame()">🏠</div>
+    <div class="turn-badge" id="turnBadge"></div>
+    <div class="icon-btn" onclick="showRules()">ⓘ</div>
+  </div>
+  <div class="score-row" id="scoreRow"></div>
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+  <div class="game-footer">
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="confirmLeaveGame()">🏠 Accueil</button>
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="confirmNewGame()">🔄 Nouvelle partie</button>
+  </div>
+</div>
+
+<!-- ═══════ RESULT ═══════ -->
+<div class="screen hidden" id="sres">
+  <div class="res-icon" id="resIcon">🏆</div>
+  <div class="res-title" id="resTitle"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;">Succès</div>
+    <div class="ach-list" id="achList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// RÈGLES — dames françaises 10×10, validées par tests isolés avant
+// intégration (capture arrière, rafles, dame volante). Simplification
+// documentée : la "prise maximale" n'est pas imposée — toute séquence
+// de capture valide est acceptée, pas nécessairement la plus longue.
+// ═══════════════════════════════════════════════════════════════
+const ALL_DIAG = [[-1,-1],[-1,1],[1,-1],[1,1]];
+function inBounds(r,c) { return r>=0 && r<10 && c>=0 && c<10; }
+function forwardDirs(player) { return player === 1 ? [[1,-1],[1,1]] : [[-1,-1],[-1,1]]; }
+function getSimpleMoves(board, r, c) {
+  const piece = board[r][c];
+  if (!piece) return [];
+  const moves = [];
+  if (piece.king) {
+    for (const [dr,dc] of ALL_DIAG) {
+      let rr=r+dr, cc=c+dc;
+      while (inBounds(rr,cc) && !board[rr][cc]) { moves.push({ to:[rr,cc] }); rr+=dr; cc+=dc; }
+    }
+  } else {
+    for (const [dr,dc] of forwardDirs(piece.player)) {
+      const rr=r+dr, cc=c+dc;
+      if (inBounds(rr,cc) && !board[rr][cc]) moves.push({ to:[rr,cc] });
+    }
+  }
+  return moves;
+}
+function getCaptureMovesForMan(board, r, c, player) {
+  const results = [];
+  for (const [dr,dc] of ALL_DIAG) {
+    const mr=r+dr, mc=c+dc, lr=r+2*dr, lc=c+2*dc;
+    if (inBounds(mr,mc) && inBounds(lr,lc) && board[mr][mc] && board[mr][mc].player!==player && !board[lr][lc]) {
+      results.push({ to:[lr,lc], captured:[mr,mc] });
+    }
+  }
+  return results;
+}
+function getCaptureMovesForKing(board, r, c, player) {
+  const results = [];
+  for (const [dr,dc] of ALL_DIAG) {
+    let rr=r+dr, cc=c+dc;
+    while (inBounds(rr,cc) && !board[rr][cc]) { rr+=dr; cc+=dc; }
+    if (!inBounds(rr,cc)) continue;
+    if (board[rr][cc] && board[rr][cc].player !== player) {
+      const captR=rr, captC=cc;
+      let lr=rr+dr, lc=cc+dc;
+      while (inBounds(lr,lc) && !board[lr][lc]) { results.push({ to:[lr,lc], captured:[captR,captC] }); lr+=dr; lc+=dc; }
+    }
+  }
+  return results;
+}
+function getImmediateCaptures(board, r, c, player) {
+  const piece = board[r][c];
+  if (!piece) return [];
+  return piece.king ? getCaptureMovesForKing(board,r,c,player) : getCaptureMovesForMan(board,r,c,player);
+}
+function getAllCaptureSequences(board, r, c, player) {
+  const piece = board[r][c];
+  const immediate = getImmediateCaptures(board, r, c, player);
+  if (immediate.length === 0) return [[]];
+  let sequences = [];
+  for (const move of immediate) {
+    const nb = board.map(row=>row.slice());
+    nb[r][c] = null;
+    nb[move.captured[0]][move.captured[1]] = null;
+    const [tr,tc] = move.to;
+    nb[tr][tc] = piece;
+    const rest = getAllCaptureSequences(nb, tr, tc, player);
+    rest.forEach(r2 => sequences.push([move, ...r2]));
+  }
+  return sequences;
+}
+function isPromotionRow(player, r) { return player === 1 ? r === 9 : r === 0; }
+function boardHasCaptures(board, player) {
+  for (let r=0;r<10;r++) for (let c=0;c<10;c++) {
+    const p = board[r][c];
+    if (p && p.player===player && getImmediateCaptures(board,r,c,player).length>0) return true;
+  }
+  return false;
+}
+function selectablePieces(board, player) {
+  const mandatory = boardHasCaptures(board, player);
+  const result = [];
+  for (let r=0;r<10;r++) for (let c=0;c<10;c++) {
+    const p = board[r][c];
+    if (!p || p.player!==player) continue;
+    const hasMove = mandatory ? getImmediateCaptures(board,r,c,player).length>0 : getSimpleMoves(board,r,c).length>0;
+    if (hasMove) result.push([r,c]);
+  }
+  return { mandatory, pieces: result };
+}
+function countPieces(board) {
+  let p1=0,p2=0,p1k=0,p2k=0;
+  for (const row of board) for (const p of row) {
+    if (!p) continue;
+    if (p.player===1) { p1++; if (p.king) p1k++; } else { p2++; if (p.king) p2k++; }
+  }
+  return { p1, p2, p1k, p2k };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IA — simple : capture obligatoire = choisit la rafle la plus
+// longue disponible ; sinon coup simple avec légère préférence pour
+// le centre et l'avancée, en évitant de s'exposer à une capture
+// immédiate quand une alternative existe.
+// ═══════════════════════════════════════════════════════════════
+function aiChooseMove(board, player) {
+  const { mandatory, pieces } = selectablePieces(board, player);
+  if (!pieces.length) return null;
+  if (mandatory) {
+    let best = null, bestLen = -1;
+    pieces.forEach(([r,c]) => {
+      const seqs = getAllCaptureSequences(board, r, c, player).filter(s=>s.length>0);
+      seqs.forEach(seq => { if (seq.length > bestLen) { bestLen = seq.length; best = { from:[r,c], seq }; } });
+    });
+    return { type:'capture', from: best.from, seq: best.seq };
+  }
+  const opponent = player===1?2:1;
+  let best = null, bestScore = -Infinity;
+  pieces.forEach(([r,c]) => {
+    getSimpleMoves(board, r, c).forEach(m => {
+      const [tr,tc] = m.to;
+      let score = 4 - Math.abs(tr-4.5) - Math.abs(tc-4.5); // préférence centre
+      score += player===1 ? tr*0.3 : (9-tr)*0.3; // préférence avancée
+      const nb = board.map(row=>row.slice());
+      nb[r][c] = null; nb[tr][tc] = board[r][c];
+      if (boardHasCaptures(nb, opponent)) score -= 5; // évite de s'exposer si possible
+      if (score > bestScore) { bestScore = score; best = { type:'simple', from:[r,c], to:[tr,tc] }; }
+    });
+  });
+  return best;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'dames_ondine_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats: {}, achievements: [], save: null }, loadStore());
+function statGet(k, d=0) { return k in STORE.stats ? STORE.stats[k] : d; }
+function statInc(k, n=1) { STORE.stats[k] = (STORE.stats[k]||0)+n; saveStore(STORE); return STORE.stats[k]; }
+function achUnlock(id, name, icon) {
+  if (STORE.achievements.includes(id)) return;
+  STORE.achievements.push(id); saveStore(STORE);
+  playSound('unlock'); toast(`${icon} Succès : ${name}`);
+}
+const ACHIEVEMENTS = [
+  { id:'first_win', name:'Première Victoire', desc:'Gagner sa première partie', icon:'🎯' },
+  { id:'first_king', name:'Couronnement', desc:'Promouvoir un pion en dame', icon:'👑' },
+  { id:'big_rafle', name:'Grande Rafle', desc:'Capturer 3 pièces en un seul coup', icon:'💥' },
+  { id:'wins_10', name:'10 victoires', desc:'Gagner 10 parties', icon:'🏅' },
+  { id:'flawless', name:'Sans Perte', desc:'Gagner sans perdre une seule pièce', icon:'🛡️' },
+];
+
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toastHost');
+  t.textContent = msg; t.classList.remove('ondine-toast-show'); void t.offsetWidth; t.classList.add('ondine-toast-show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('ondine-toast-show'), 2000);
+}
+let audioCtx = null;
+function tone(freq, dur, type='sine', vol=.12) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+dur);
+    osc.start(); osc.stop(audioCtx.currentTime+dur);
+  } catch(e) {}
+}
+function playSound(name) {
+  const P = {
+    move: () => tone(500,.07,'sine',.12),
+    capture: () => tone(300,.09,'square',.1),
+    king: () => [660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,.15,'sine',.15),i*80)),
+    win: () => [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.16),i*100)),
+    lose: () => [392,330,262].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.12),i*120)),
+    error: () => tone(220,.15,'sawtooth',.1),
+    unlock: () => [660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,.14,'sine',.14),i*80)),
+  };
+  (P[name]||(()=>{}))();
+}
+function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let CONFIG = { mode: '2p' };
+let G = null;
+
+function setMode(m) {
+  CONFIG.mode = m;
+  document.getElementById('mode2p').classList.toggle('sel', m==='2p');
+  document.getElementById('modeSolo').classList.toggle('sel', m==='solo');
+}
+
+function initialBoard() {
+  const b = Array.from({length:10}, () => Array(10).fill(null));
+  for (let r=0;r<4;r++) for (let c=0;c<10;c++) if ((r+c)%2===1) b[r][c] = { player:2, king:false };
+  for (let r=6;r<10;r++) for (let c=0;c<10;c++) if ((r+c)%2===1) b[r][c] = { player:1, king:false };
+  return b;
+}
+
+function startGame() {
+  G = { board: initialBoard(), current: 1, selected: null, over: false, winner: null, capturesLostByWinner: 0, piecesLostByPlayer1: 0, piecesLostByPlayer2: 0 };
+  STORE.save = null; saveStore(STORE);
+  showScreen('sg');
+  renderAll();
+  maybeAiTurn();
+}
+function resumeGame() {
+  if (!STORE.save) { toast('Aucune partie sauvegardée'); return; }
+  G = STORE.save.G; CONFIG = STORE.save.CONFIG;
+  showScreen('sg');
+  renderAll();
+  toast('▶ Partie reprise');
+  maybeAiTurn();
+}
+function persistSave() { STORE.save = { G: {...G, selected:null}, CONFIG }; saveStore(STORE); }
+function goHome() { updateHomeStats(); showScreen('sh'); document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none'; }
+
+async function confirmLeaveGame() {
+  if (G && !G.over) {
+    const ok = await confirmDialog('Quitter la partie ?', 'Ta partie sera sauvegardée.', 'Quitter', 'Continuer');
+    if (!ok) return;
+    persistSave();
+  }
+  goHome();
+}
+async function confirmNewGame() {
+  const ok = await confirmDialog('Nouvelle partie ?', 'La partie en cours sera abandonnée.', 'Nouvelle partie', 'Annuler');
+  if (ok) startGame();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAME FLOW
+// ═══════════════════════════════════════════════════════════════
+function isHumanTurn() { return CONFIG.mode === '2p' || G.current === 1; }
+
+function selectCell(r, c) {
+  if (!G || G.over || !isHumanTurn()) return;
+  const { mandatory, pieces } = selectablePieces(G.board, G.current);
+
+  if (G.selected) {
+    const [sr,sc] = G.selected;
+    const dests = mandatory ? getImmediateCaptures(G.board, sr, sc, G.current) : getSimpleMoves(G.board, sr, sc);
+    const dest = dests.find(d => d.to[0]===r && d.to[1]===c);
+    if (dest) { applyStep(sr, sc, dest); return; }
+  }
+  const piece = G.board[r][c];
+  if (piece && piece.player === G.current && pieces.some(([pr,pc])=>pr===r&&pc===c)) {
+    G.selected = [r,c];
+    renderBoard();
+    return;
+  }
+  if (G.selected) { playSound('error'); }
+}
+
+function applyStep(r, c, dest) {
+  const piece = G.board[r][c];
+  const [tr,tc] = dest.to;
+  G.board[r][c] = null;
+  if (dest.captured) {
+    G.board[dest.captured[0]][dest.captured[1]] = null;
+    if (piece.player === 1) G.piecesLostByPlayer2 = (G.piecesLostByPlayer2||0)+1; else G.piecesLostByPlayer1 = (G.piecesLostByPlayer1||0)+1;
+    playSound('capture'); vibrate(20);
+  } else { playSound('move'); vibrate(10); }
+  G.board[tr][tc] = piece;
+
+  let becameKing = false;
+  if (!piece.king && isPromotionRow(piece.player, tr)) { piece.king = true; becameKing = true; playSound('king'); achUnlock('first_king','Couronnement','👑'); }
+
+  if (dest.captured && !becameKing) {
+    const more = getImmediateCaptures(G.board, tr, tc, piece.player);
+    if (more.length > 0) { G.selected = [tr,tc]; renderAll(); return; } // rafle : continuer avec la même pièce
+  }
+  G.selected = null;
+  endTurnCheck();
+}
+
+function endTurnCheck() {
+  const next = G.current === 1 ? 2 : 1;
+  const { pieces } = selectablePieces(G.board, next);
+  if (pieces.length === 0) { endGame(G.current); return; }
+  G.current = next;
+  renderAll();
+  persistSave();
+  maybeAiTurn();
+}
+
+function maybeAiTurn() {
+  if (!G || G.over) return;
+  if (CONFIG.mode !== 'solo' || G.current !== 2) return;
+  renderAll();
+  setTimeout(() => {
+    const move = aiChooseMove(G.board, 2);
+    if (!move) { endGame(1); return; }
+    if (move.type === 'capture') {
+      let [r,c] = move.from;
+      move.seq.forEach(step => { applyStepSilent(r,c,step); r = step.to[0]; c = step.to[1]; });
+      G.selected = null;
+      endTurnCheck();
+    } else {
+      applyStepSilent(move.from[0], move.from[1], { to: move.to });
+      G.selected = null;
+      endTurnCheck();
+    }
+  }, 550);
+}
+function applyStepSilent(r, c, dest) {
+  const piece = G.board[r][c];
+  const [tr,tc] = dest.to;
+  G.board[r][c] = null;
+  if (dest.captured) {
+    G.board[dest.captured[0]][dest.captured[1]] = null;
+    if (piece.player === 1) G.piecesLostByPlayer2 = (G.piecesLostByPlayer2||0)+1; else G.piecesLostByPlayer1 = (G.piecesLostByPlayer1||0)+1;
+  }
+  G.board[tr][tc] = piece;
+  if (!piece.king && isPromotionRow(piece.player, tr)) piece.king = true;
+}
+
+function endGame(winner) {
+  G.over = true; G.winner = winner;
+  STORE.save = null; saveStore(STORE);
+  statInc('games');
+  if (CONFIG.mode === 'solo') {
+    if (winner === 1) {
+      statInc('wins'); playSound('win'); vibrate([20,40,20]);
+      achUnlock('first_win','Première Victoire','🎯');
+      if ((G.piecesLostByPlayer1||0) === 0) achUnlock('flawless','Sans Perte','🛡️');
+      if (statGet('wins') >= 10) achUnlock('wins_10','10 victoires','🏅');
+    } else { statInc('losses'); playSound('lose'); }
+  }
+  setTimeout(showResult, 500);
+}
+function showResult() {
+  const { p1, p2 } = countPieces(G.board);
+  document.getElementById('resIcon').textContent = G.winner === 1 ? '🏆' : (CONFIG.mode==='solo' ? '🤖' : '🏆');
+  document.getElementById('resTitle').textContent = CONFIG.mode==='solo'
+    ? (G.winner===1 ? 'Victoire !' : "L'IA gagne...")
+    : (G.winner===1 ? 'Noir gagne !' : 'Blanc gagne !');
+  document.getElementById('resSub').textContent = `${p1} pièces noires — ${p2} pièces blanches restantes`;
+  document.getElementById('sres').classList.remove('hidden'); /* audit UX fin de partie : overlay sans masquer le plateau/la grille en dessous */
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderAll() { renderBoard(); renderHud(); }
+function renderHud() {
+  const badge = document.getElementById('turnBadge');
+  const aiThinking = CONFIG.mode==='solo' && G.current===2;
+  badge.innerHTML = `<span class="turn-dot ${G.current===1?'p1':'p2'}"></span>${aiThinking ? "L'IA réfléchit…" : (CONFIG.mode==='solo' ? (G.current===1?'À toi':'IA') : (G.current===1?'Noir':'Blanc')+' joue')}`;
+  const { p1, p2 } = countPieces(G.board);
+  document.getElementById('scoreRow').innerHTML = `<div class="score-pill"><span class="turn-dot p1"></span>${p1}</div><div class="score-pill"><span class="turn-dot p2"></span>${p2}</div>`;
+}
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  const { mandatory } = selectablePieces(G.board, G.current);
+  let destSet = [];
+  if (G.selected) {
+    const [sr,sc] = G.selected;
+    destSet = (mandatory ? getImmediateCaptures(G.board,sr,sc,G.current) : getSimpleMoves(G.board,sr,sc)).map(d=>d.to);
+  }
+  for (let r=0;r<10;r++) for (let c=0;c<10;c++) {
+    const cell = document.createElement('div');
+    const isDark = (r+c)%2===1;
+    cell.className = 'cell ' + (isDark ? 'dark' : 'light');
+    if (G.selected && G.selected[0]===r && G.selected[1]===c) cell.classList.add('selected');
+    if (destSet.some(([dr,dc])=>dr===r&&dc===c)) cell.classList.add('dest');
+    const piece = G.board[r][c];
+    if (piece) {
+      const el = document.createElement('div');
+      el.className = 'piece p'+piece.player + (piece.king?' king':'');
+      cell.appendChild(el);
+    }
+    if (isDark) cell.onclick = () => selectCell(r, c);
+    board.appendChild(cell);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION / STATS / RULES
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id==='sstats') renderStatsScreen();
+}
+function updateHomeStats() {
+  const host = document.getElementById('homeStats'); host.innerHTML = '';
+  [{v:statGet('games'),l:'🎮 Parties'},{v:statGet('wins'),l:'🏆 Victoires'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.style.flex='1';
+      el.innerHTML = `<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
+}
+function renderStatsScreen() {
+  const grid = document.getElementById('statsGrid'); grid.innerHTML = '';
+  [{v:statGet('games'),l:'Parties'},{v:statGet('wins'),l:'Victoires'},{v:statGet('losses'),l:'Défaites'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; grid.appendChild(el); });
+  const list = document.getElementById('achList'); list.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = STORE.achievements.includes(a.id);
+    const el = document.createElement('div'); el.className='achCard'+(unlocked?' unlocked':'');
+    el.innerHTML = `<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`;
+    list.appendChild(el);
+  });
+}
+function showRules() {
+  const overlay = document.getElementById('modalOverlay');
+  overlay.innerHTML = `<div class="modal-box"><div class="modal-title">⚫ Règles des Dames françaises</div>
+    <div class="modal-body">Plateau 10×10. Chaque pion avance en diagonale.<br><br>
+    <b>Capture obligatoire</b> : si une prise est possible, tu dois la jouer.<br>
+    <b>Capture arrière</b> : un pion peut capturer dans les 4 diagonales, même vers l'arrière.<br>
+    <b>Rafle</b> : après une capture, si une nouvelle capture est possible avec la même pièce, tu dois continuer.<br>
+    <b>Dame</b> : un pion arrivé au bout du plateau devient une dame, qui se déplace et capture sur toute la diagonale (dame volante).</div>
+    <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdClose">Compris !</button></div></div>`;
+  overlay.classList.remove('hidden');
+  document.getElementById('mdClose').onclick = () => overlay.classList.add('hidden');
+}
+function confirmDialog(title, message, confirmLabel, cancelLabel) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.innerHTML = `<div class="modal-box"><div class="modal-title">${title}</div><div class="modal-body">${message}</div>
+      <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdConfirm">${confirmLabel}</button>
+      <button class="ondine-btn ondine-btn-secondary" id="mdCancel">${cancelLabel}</button></div></div>`;
+    overlay.classList.remove('hidden');
+    document.getElementById('mdConfirm').onclick = () => { overlay.classList.add('hidden'); resolve(true); };
+    document.getElementById('mdCancel').onclick = () => { overlay.classList.add('hidden'); resolve(false); };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+updateHomeStats();
+document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none';
+window.setMode=setMode; window.startGame=startGame; window.resumeGame=resumeGame; window.goHome=goHome;
+window.showScreen=showScreen; window.confirmLeaveGame=confirmLeaveGame; window.confirmNewGame=confirmNewGame;
+window.showRules=showRules; window.selectCell=selectCell;
+</script>
+</body>
+</html>

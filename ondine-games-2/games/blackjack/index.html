@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Blackjack × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/design-tokens.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">BLACKJACK</div>
+  <div class="ondine-logo-sub">× Ondine — monnaie virtuelle uniquement</div>
+  <div id="homeStatsBlackjack"></div>
+  <div class="bet-row">
+    <button onclick="setBet(parseInt(document.getElementById('currentBet').textContent)-25)">−</button>
+    <span id="currentBet">25</span>
+    <button onclick="setBet(parseInt(document.getElementById('currentBet').textContent)+25)">+</button>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startRound()">🃏 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="resetBankroll()">🔄 Réinitialiser le solde</button>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="bj-header">
+    <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
+    <div id="bankrollDisplay"></div>
+  </div>
+
+  <div class="bj-dealer-area">
+    <div class="bj-label">Croupier</div>
+    <div id="dealerHand"></div>
+    <div id="dealerValue"></div>
+  </div>
+
+  <div id="playerHands"></div>
+
+  <div id="bjResults" style="display:none;"></div>
+
+  <div id="bjActions">
+    <button class="ondine-btn ondine-btn-primary" onclick="onHit()">🃏 Tirer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="onStand()">✋ Rester</button>
+    <button class="ondine-btn ondine-btn-secondary" id="doubleBtn" onclick="onDouble()">⏫ Doubler</button>
+    <button class="ondine-btn ondine-btn-secondary" id="splitBtn" onclick="onSplit()">✂️ Split</button>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" id="nextRoundBtn" onclick="nextRound()" style="display:none;">🔄 Manche suivante</button>
+</div>
+
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListBlackjack"></div>
+</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

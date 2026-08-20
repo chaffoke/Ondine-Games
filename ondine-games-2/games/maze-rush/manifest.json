@@ -1,0 +1,10 @@
+{
+  "id": "maze-rush",
+  "name": "Maze Rush",
+  "icon": "🌀",
+  "category": "action",
+  "description": "Labyrinthe arcade original. Choisis ton personnage, échappe aux ennemis, 10 niveaux. Moteur testé sur 100 labyrinthes et 24000 ticks de simulation IA.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}

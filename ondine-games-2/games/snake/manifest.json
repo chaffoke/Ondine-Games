@@ -1,0 +1,10 @@
+{
+  "id": "snake",
+  "name": "Snake",
+  "icon": "🐍",
+  "category": "action",
+  "description": "Le classique serpent. Vitesse progressive, jamais de traversée du corps — testé sur 3000 parties.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}

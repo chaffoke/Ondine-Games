@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Shut the Box × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ONDINE GAMES — Design Tokens
+   Source unique de vérité pour les couleurs, rayons, ombres.
+   Ces variables étaient dupliquées à l'identique (ou presque) dans
+   Solitaire, Sudoku et YAMS. Toute évolution de la DA se fait ICI,
+   et se répercute automatiquement sur tous les jeux qui l'importent.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#06081e;
+  --bg2:#090c24;
+  --c1:#38bdf8;   /* aqua principal */
+  --c2:#7dd3fc;   /* aqua clair */
+  --c3:#bae6fd;   /* aqua très clair */
+  --cp:#818cf8;   /* indigo */
+  --cp2:#a5b4fc;
+  --cg:#34d399;   /* succès / vert */
+  --co:#fbbf24;   /* or / avertissement */
+  --co2:#fde68a;
+  --cr:#f87171;   /* erreur / rouge */
+  --cm:#f472b6;   /* magenta / accent rare */
+
+  --glass:rgba(255,255,255,.05);
+  --glass2:rgba(255,255,255,.09);
+  --glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);
+  --border2:rgba(56,189,248,.22);
+
+  --text:#e0f2fe;
+  --text2:#94a3b8;
+
+  --r:14px;
+  --r2:20px;
+
+  --sh:0 4px 20px rgba(0,0,0,.5);
+  --sh2:0 8px 32px rgba(0,0,0,.6);
+}
+
+/* Reset commun — identique dans les 3 jeux, factorisé ici */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+</style>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   UI SDK — styles des composants
+   Un composant = un bloc ici, préfixé .ondine-*. Les couleurs et
+   rayons viennent des variables de design-tokens.css — jamais de
+   valeur en dur.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Toast ── */
+.ondine-toast{
+  position:fixed;bottom:90px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:rgba(15,25,60,.92);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:10px 18px;
+  font-size:13px;font-weight:700;color:var(--text);
+  backdrop-filter:blur(12px);
+  z-index:9999;opacity:0;
+  transition:all .3s;
+  white-space:nowrap;max-width:80vw;text-align:center;
+  pointer-events:none;
+}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.ondine-toast[data-variant="error"]{border-color:rgba(248,113,113,.4);}
+.ondine-toast[data-variant="success"]{border-color:rgba(52,211,153,.4);}
+
+/* ── Button ── */
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:var(--r2);cursor:pointer;transition:transform .12s,box-shadow .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:18px;box-shadow:0 6px 24px rgba(14,116,144,.45),inset 0 1px 0 rgba(255,255,255,.12);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;backdrop-filter:blur(8px);}
+.ondine-btn-danger{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.35);color:var(--cr);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-btn:disabled{opacity:.4;cursor:default;}
+.ondine-btn-icon{margin-right:6px;}
+
+.ondine-icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:transform .14s;}
+.ondine-icon-btn:active{transform:scale(.88);}
+
+/* ── Badge ── */
+.ondine-badge{display:inline-block;padding:2px 9px;border-radius:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;}
+.ondine-badge-default{background:var(--glass);color:var(--text2);border:1px solid var(--border);}
+.ondine-badge-success{background:rgba(52,211,153,.12);color:var(--cg);border:1px solid rgba(52,211,153,.3);}
+.ondine-badge-warning{background:rgba(251,191,36,.12);color:var(--co);border:1px solid rgba(251,191,36,.3);}
+
+/* ── Stat Card ── */
+.ondine-stat-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;text-align:center;}
+.ondine-stat-icon{font-size:18px;margin-bottom:4px;}
+.ondine-stat-value{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c1);}
+.ondine-stat-label{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+
+/* ── Achievement Card ── */
+.ondine-ach-card{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;}
+.ondine-ach-card.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.ondine-ach-icon{font-size:24px;flex-shrink:0;}
+.ondine-ach-body{flex:1;}
+.ondine-ach-name{font-weight:800;font-size:12px;}
+.ondine-ach-desc{font-size:10px;color:var(--text2);margin-top:1px;}
+.ondine-ach-badge{font-size:10px;font-weight:800;flex-shrink:0;color:var(--text2);}
+.ondine-ach-card.unlocked .ondine-ach-badge{color:var(--co);}
+
+/* ── Modal ── */
+.ondine-modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.ondine-modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;max-width:340px;width:100%;box-shadow:var(--sh2);}
+.ondine-modal-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.ondine-modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.ondine-modal-actions{display:flex;flex-direction:column;gap:8px;}
+
+</style>
+<style>
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:12px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(30px,9vw,44px);letter-spacing:1px;
+  background:linear-gradient(160deg,#e0f2fe 0%,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:300px;text-align:left;margin-top:6px;}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:300px;}
+.mode-card{background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.mode-card.sel{border-color:var(--c1);background:var(--glass3);}
+.mode-icon{font-size:20px;margin-bottom:4px;}
+.mode-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.mode-desc{font-size:9px;color:var(--text2);margin-top:2px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:300px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:300px;}
+
+#sg{align-items:center;justify-content:center;padding:20px;gap:26px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;}
+.score-badge{font-family:'Fredoka One',cursive;font-size:16px;color:var(--co);background:var(--glass);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:6px 14px;}
+
+.tiles{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:420px;}
+.tile{width:54px;height:72px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:26px;cursor:pointer;transition:all .2s;
+  background:linear-gradient(160deg,#0f1d3d,#0d1a38);border:2.5px solid var(--border2);color:var(--text);}
+.tile.selected{border-color:var(--co);background:rgba(251,191,36,.18);box-shadow:0 0 16px rgba(251,191,36,.35);transform:translateY(-4px);}
+.tile.shut{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.05);color:var(--text2);opacity:.35;cursor:default;transform:rotateY(180deg);}
+.tile.disabled{opacity:.35;cursor:default;}
+
+.dice-row{display:flex;gap:20px;justify-content:center;}
+.die{width:68px;height:68px;border-radius:16px;background:linear-gradient(145deg,#fff,#e2e8f0);color:#0f172a;
+  display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:36px;
+  box-shadow:0 8px 20px rgba(0,0,0,.45);}
+.die.rolling{animation:dieRoll .5s ease;}
+@keyframes dieRoll{0%{transform:rotate(0);}50%{transform:rotate(180deg) scale(1.1);}100%{transform:rotate(360deg);}}
+
+.sum-indicator{font-family:'Fredoka One',cursive;font-size:17px;color:var(--text2);text-align:center;
+  padding:10px 18px;border-radius:14px;transition:all .2s;}
+.sum-indicator .target{color:var(--c1);}
+.sum-indicator .selected{color:var(--co);}
+.sum-indicator.bust{background:rgba(248,113,113,.14);border:1.5px solid rgba(248,113,113,.4);color:var(--cr);font-size:15px;}
+
+#svic{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:10px;padding:20px;}
+.vic-icon{font-size:60px;}
+.vic-title{font-family:'Fredoka One',cursive;font-size:24px;color:var(--c2);}
+.vic-sub{font-size:13px;color:var(--text2);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:20px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+</style>
+</head>
+<body>
+
+<!-- ═══════ HOME ═══════ -->
+<div class="screen" id="sh">
+  <div class="logo">SHUT THE BOX</div>
+  <div class="logo-sub">× Ondine</div>
+
+  <div class="section-title">Tuiles</div>
+  <div class="mode-grid">
+    <div class="mode-card sel" id="tiles9" onclick="setTileCount(9)">
+      <div class="mode-icon">🔢</div><div class="mode-name">1 à 9</div><div class="mode-desc">Classique</div>
+    </div>
+    <div class="mode-card" id="tiles12" onclick="setTileCount(12)">
+      <div class="mode-icon">🔢</div><div class="mode-name">1 à 12</div><div class="mode-desc">Plus long</div>
+    </div>
+  </div>
+
+  <div class="section-title">Règle des dés</div>
+  <div class="mode-grid">
+    <div class="mode-card sel" id="ruleAlways2" onclick="setDiceRule('always2')">
+      <div class="mode-icon">🎲🎲</div><div class="mode-name">Toujours 2 dés</div>
+    </div>
+    <div class="mode-card" id="ruleAdaptive" onclick="setDiceRule('adaptive')">
+      <div class="mode-icon">🎲</div><div class="mode-name">1 dé sous 6</div><div class="mode-desc">Règle avancée</div>
+    </div>
+  </div>
+
+  <div class="hbtns" style="margin-top:8px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🎲 Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
+  </div>
+
+  <div class="hstats" id="homeStats"></div>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════ GAME ═══════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div id="btnHome"></div>
+    <div class="score-badge" id="scoreBadge">Total ouvert : 45</div>
+  </div>
+  <div class="tiles" id="tilesRow"></div>
+  <div class="dice-row" id="diceRow"></div>
+  <div class="sum-indicator" id="sumIndicator"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" id="btnValidate" onclick="confirmSelection()">✓ Valider la sélection</button>
+    <button class="ondine-btn ondine-btn-secondary" id="btnRoll" onclick="rollTiles()">🎲 Lancer les dés</button>
+  </div>
+</div>
+
+<!-- ═══════ VICTORY / END ═══════ -->
+<div class="screen hidden" id="svic">
+  <div class="vic-icon" id="vicIcon">🏆</div>
+  <div class="vic-title" id="vicTitle"></div>
+  <div class="vic-sub" id="vicSub"></div>
+  <div class="hbtns" style="margin-top:14px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div id="btnBackStats"></div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;">Succès</div>
+    <div class="ach-list" id="achList"></div>
+  </div>
+</div>
+
+<script>
+const CoreBundle = (function() {
+// ── engines/grid-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Grid Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur une grille 2D (création, accès,
+//        voisinage, flood fill). Ne connaît ni Puissance 4, ni
+//        Démineur, ni Sudoku, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir le mot "mine", "disque", "case sûre" ou
+//        toute notion spécifique à un jeu.
+// ═══════════════════════════════════════════════════════════════
+
+/** Crée une grille rows×cols, chaque cellule initialisée à `fill`. */
+function createGrid(rows, cols, fill = null) {
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => (typeof fill === 'function' ? fill() : fill))
+  );
+}
+
+function inBounds(grid, r, c) {
+  return r >= 0 && r < grid.length && c >= 0 && c < grid[0].length;
+}
+
+function getCell(grid, r, c) {
+  return inBounds(grid, r, c) ? grid[r][c] : undefined;
+}
+
+function setCell(grid, r, c, value) {
+  if (inBounds(grid, r, c)) grid[r][c] = value;
+}
+
+function forEachCell(grid, fn) {
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[r].length; c++) fn(grid[r][c], r, c);
+  }
+}
+
+/** Coordonnées des 4 voisins orthogonaux valides. */
+function neighbors4(grid, r, c) {
+  return [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].filter(([rr, cc]) =>
+    inBounds(grid, rr, cc)
+  );
+}
+
+/** Coordonnées des 8 voisins (orthogonaux + diagonales) valides. */
+function neighbors8(grid, r, c) {
+  const out = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const rr = r + dr, cc = c + dc;
+      if (inBounds(grid, rr, cc)) out.push([rr, cc]);
+    }
+  }
+  return out;
+}
+
+/**
+ * Flood fill générique à partir de (r,c). `matchFn(value, r, c)` décide
+ * si une cellule doit être incluse dans la propagation ; `visitFn(value, r, c)`
+ * est appelé pour chaque cellule visitée (une seule fois). Ne décide
+ * jamais lui-même de la condition d'arrêt — c'est au jeu de la fournir.
+ */
+function floodFill(grid, startR, startC, matchFn, visitFn, useDiagonals = true) {
+  const visited = createGrid(grid.length, grid[0].length, false);
+  const stack = [[startR, startC]];
+  while (stack.length) {
+    const [r, c] = stack.pop();
+    if (!inBounds(grid, r, c) || visited[r][c]) continue;
+    visited[r][c] = true;
+    if (!matchFn(grid[r][c], r, c)) continue;
+    visitFn(grid[r][c], r, c);
+    const neigh = useDiagonals ? neighbors8(grid, r, c) : neighbors4(grid, r, c);
+    for (const [rr, cc] of neigh) if (!visited[rr][cc]) stack.push([rr, cc]);
+  }
+}
+
+/** Compte les lignes de N valeurs identiques consécutives à partir de
+ *  (r,c) dans une direction (dr,dc), dans les deux sens. Utile pour
+ *  toute détection d'alignement (Puissance 4, Morpion, Othello...). */
+function countAligned(grid, r, c, dr, dc, matchFn) {
+  let count = 1;
+  let rr = r + dr, cc = c + dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr += dr; cc += dc; }
+  rr = r - dr; cc = c - dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr -= dr; cc -= dc; }
+  return count;
+}
+
+
+// ── engines/card-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Card Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur un tableau de cartes (peu importe
+//        ce qu'est une "carte" — le jeu décide de sa forme : {color,
+//        value} pour Uno, {suit,rank} pour Solitaire...). Ne connaît
+//        ni Uno, ni Solitaire, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir une notion de couleur/valeur/famille
+//        spécifique à un jeu de cartes précis.
+// ═══════════════════════════════════════════════════════════════
+
+/** Fisher-Yates — mélange en place et retourne le même tableau. */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/** Construit un deck mélangé à partir d'une liste de cartes (copie). */
+function createDeck(cards) {
+  return shuffle([...cards]);
+}
+
+/** Retire et retourne les `n` cartes du dessus (fin du tableau = dessus). */
+function draw(deck, n = 1) {
+  return deck.splice(Math.max(0, deck.length - n), n).reverse();
+}
+
+/** Distribue `cardsPerPlayer` cartes à `playerCount` joueurs, à tour de
+ *  rôle (comme une vraie distribution), depuis le sommet du deck. */
+function deal(deck, playerCount, cardsPerPlayer) {
+  const hands = Array.from({ length: playerCount }, () => []);
+  for (let round = 0; round < cardsPerPlayer; round++) {
+    for (let p = 0; p < playerCount; p++) {
+      const card = draw(deck, 1)[0];
+      if (card) hands[p].push(card);
+    }
+  }
+  return hands;
+}
+
+/**
+ * Reconstitue un deck épuisé à partir d'une pile de défausse, en
+ * gardant la carte du dessus en place (pattern stock/waste commun à
+ * Solitaire, Uno, et beaucoup de jeux de cartes à pioche).
+ */
+function reshuffleDiscardIntoDeck(discardPile, keepTopCard = true) {
+  if (discardPile.length <= 1) return [];
+  const top = keepTopCard ? discardPile.pop() : null;
+  const rest = shuffle(discardPile.splice(0, discardPile.length));
+  if (top) discardPile.push(top);
+  return rest;
+}
+
+
+// ── engines/dice-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Dice Engine
+// ───────────────────────────────────────
+// RÔLE : lancer et gérer des pools de dés (valeur + verrou), compter
+//        les valeurs obtenues. Ne connaît ni YAMS, ni Shut the Box,
+//        ni aucune règle de score.
+// NE DOIT JAMAIS : contenir une notion de catégorie de score, de
+//        combinaison gagnante, ou de règle spécifique à un jeu.
+// ═══════════════════════════════════════════════════════════════
+
+function rollDie(sides = 6) {
+  return 1 + Math.floor(Math.random() * sides);
+}
+
+function rollDice(count, sides = 6) {
+  return Array.from({ length: count }, () => rollDie(sides));
+}
+
+/** Crée un pool de dés à l'état initial : valeur nulle, non verrouillé. */
+function createDicePool(count) {
+  return Array.from({ length: count }, () => ({ value: null, locked: false }));
+}
+
+/** Relance uniquement les dés non verrouillés du pool (mutation + retour). */
+function rollUnlocked(pool, sides = 6) {
+  pool.forEach((d) => { if (!d.locked) d.value = rollDie(sides); });
+  return pool;
+}
+
+function toggleLock(pool, index) {
+  if (pool[index]) pool[index].locked = !pool[index].locked;
+  return pool;
+}
+
+/** Compte les occurrences de chaque valeur — utile à toute règle de
+ *  score basée sur des combinaisons (brelan, suite, etc.). */
+function countValues(values) {
+  const counts = {};
+  values.forEach((v) => { counts[v] = (counts[v] || 0) + 1; });
+  return counts;
+}
+
+
+// ── engines/ai-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// AI Engine
+// ───────────────────────────────────────
+// RÔLE : recherche de meilleur coup par minimax + élagage alpha-bêta,
+//        entièrement générique. Le jeu fournit 4 fonctions pures
+//        (getMoves, applyMove, isTerminal, evaluate) ; ce moteur ne
+//        connaît aucune règle de Puissance 4, Othello ou autre.
+// NE DOIT JAMAIS : contenir une notion de "disque", de "colonne",
+//        de "plateau 8×8" ou toute règle spécifique à un jeu.
+// ───────────────────────────────────────
+// Contrat attendu (fns) :
+//   getMoves(state)                    → tableau de coups possibles
+//   applyMove(state, move)             → nouvel état après le coup (ne mute pas)
+//   isTerminal(state)                  → true si partie finie
+//   evaluate(state, player, depth)     → score du point de vue de `player`.
+//     `depth` (profondeur RESTANTE au moment où le terminal est
+//     détecté) est optionnel — un jeu peut l'ignorer, mais il est
+//     fortement recommandé de l'ajouter à un score de victoire/défaite
+//     (ex: `1000 + depth` / `-1000 - depth`) pour que l'IA préfère la
+//     victoire la plus rapide et retarde la défaite la plus longtemps
+//     possible. Sans ça, deux victoires à profondeurs différentes sont
+//     à égalité et l'IA peut sembler hésiter (bug réel découvert en
+//     développant Puissance 4 : une "double menace" laissait l'IA
+//     ignorer un coup gagnant immédiat au profit d'un coup neutre qui
+//     gagnait quand même, 2 coups plus tard).
+//   currentPlayer(state)               → identifiant du joueur au trait
+// ═══════════════════════════════════════════════════════════════
+
+function minimax(state, depth, alpha, beta, maximizing, player, fns) {
+  if (depth === 0 || fns.isTerminal(state)) {
+    return fns.evaluate(state, player, depth);
+  }
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return fns.evaluate(state, player);
+
+  if (maximizing) {
+    let best = -Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, false, player, fns);
+      best = Math.max(best, val);
+      alpha = Math.max(alpha, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, true, player, fns);
+      best = Math.min(best, val);
+      beta = Math.min(beta, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+/**
+ * Retourne le meilleur coup pour `player` à la profondeur `depth`.
+ * Si plusieurs coups sont à égalité, un choix aléatoire parmi eux
+ * évite un bot parfaitement déterministe et prévisible.
+ */
+function chooseBestMove(state, depth, player, fns) {
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return null;
+  let bestScore = -Infinity;
+  let bestMoves = [];
+  for (const move of moves) {
+    const next = fns.applyMove(state, move);
+    const score = minimax(next, depth - 1, -Infinity, Infinity, false, player, fns);
+    if (score > bestScore) { bestScore = score; bestMoves = [move]; }
+    else if (score === bestScore) bestMoves.push(move);
+  }
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}
+
+/** Coup aléatoire simple — utile pour une difficulté "facile" sans
+ *  avoir à écrire un second moteur. */
+function chooseRandomMove(state, fns) {
+  const moves = fns.getMoves(state);
+  return moves.length ? moves[Math.floor(Math.random() * moves.length)] : null;
+}
+
+
+// ── engines/rhythm-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Rhythm Engine
+// ───────────────────────────────────────
+// RÔLE : logique générique d'un jeu de rythme — horloge précise basée
+//        sur AudioContext, chargement de morceau depuis une donnée
+//        JSON, jugement des appuis (perfect/good/ok/miss), combo,
+//        multiplicateur, score, précision. Ne connaît ni guitare, ni
+//        piano, ni tambour, ni "Rhythm Hero" — un jeu de rythme
+//        FUTUR (Piano Tiles, Taiko, Beat Saber 2D...) doit pouvoir
+//        utiliser ce moteur SANS AUCUNE modification.
+// NE DOIT JAMAIS : contenir un nom de touche, une image de note, un
+//        rendu visuel, ou une notion de "corde de guitare"/"tambour".
+//        Le rendu (lanes verticales, cercles Taiko, dalles Piano
+//        Tiles...) reste entièrement l'affaire du jeu.
+// ───────────────────────────────────────
+// Format de chart (donnée JSON, chargeable indépendamment du moteur) :
+//   {
+//     title: string,
+//     bpm: number,
+//     offsetMs: number,        // décalage audio/notes, optionnel
+//     lanes: number,           // nombre de pistes (3, 4, 5...)
+//     audioUrl: string|null,   // piste audio réelle, optionnelle
+//     notes: [{ time: ms, lane: index, duration?: ms }]
+//     // `duration` absente ou 0 = note simple (tap). `duration` > 0
+//     // = note longue (hold) : le jeu doit maintenir l'appui jusqu'à
+//     // time + duration pour obtenir le bonus de maintien.
+//   }
+// ═══════════════════════════════════════════════════════════════
+
+/** Valide et normalise une donnée de chart brute (déjà parsée depuis
+ *  du JSON, ou un objet construit dynamiquement par un jeu). */
+function parseChart(data) {
+  if (!data || typeof data.bpm !== 'number' || !Array.isArray(data.notes)) {
+    throw new Error('[rhythm-engine] chart invalide : bpm et notes[] requis');
+  }
+  const notes = data.notes
+    .map((n, i) => ({
+      id: i, time: n.time, lane: n.lane, duration: n.duration || 0,
+      judged: false, judgement: null,
+      holdActive: false, holdSuccess: null,
+    }))
+    .sort((a, b) => a.time - b.time);
+  return {
+    title: data.title || 'Sans titre',
+    bpm: data.bpm,
+    offsetMs: data.offsetMs || 0,
+    lanes: data.lanes || 4,
+    audioUrl: data.audioUrl || null,
+    notes,
+  };
+}
+
+/** Charge un chart depuis une URL JSON (nécessite un serveur HTTP —
+ *  échoue en protocole file://, comme tout fetch/import de ce
+ *  projet). Fonction utilitaire, jamais appelée par le moteur
+ *  lui-même — c'est au jeu de décider s'il charge depuis une URL ou
+ *  depuis une donnée déjà en mémoire. */
+async function loadChartFromUrl(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`[rhythm-engine] impossible de charger ${url} (${res.status})`);
+  return parseChart(await res.json());
+}
+
+// ── Réglages par défaut — un jeu peut les remplacer intégralement ──
+const DEFAULT_WINDOWS = {
+  easy: { perfect: 120, good: 200, ok: 280 },
+  normal: { perfect: 80, good: 150, ok: 220 },
+  hard: { perfect: 50, good: 100, ok: 160 },
+  expert: { perfect: 35, good: 70, ok: 120 },
+};
+const DEFAULT_POINTS = { perfect: 100, good: 60, ok: 25, miss: 0, holdBonus: 100 };
+const DEFAULT_MULTIPLIER_TIERS = [
+  { combo: 0, mult: 1 }, { combo: 10, mult: 2 }, { combo: 25, mult: 3 }, { combo: 50, mult: 4 },
+];
+
+/**
+ * Horloge de jeu basée sur AudioContext.currentTime — jamais sur
+ * setTimeout/Date.now(), qui dérivent et désynchronisent visuel et
+ * audio sur une session de plusieurs dizaines de secondes. C'est la
+ * pièce la plus importante pour une "synchronisation parfaite".
+ */
+function createClock(audioCtx) {
+  let startAt = null;
+  let pausedAt = null;
+  return {
+    /** `atTime`, optionnel, permet de démarrer l'horloge à un instant
+     *  précis de l'AudioContext plutôt que "maintenant" — utile pour
+     *  s'aligner exactement sur un événement audio déjà planifié à
+     *  l'avance (ex : le premier clic d'un métronome programmé via
+     *  `osc.start(t)`). Sans ça, le clock et l'audio démarreraient à
+     *  deux instants légèrement différents et dériveraient. */
+    start(atTime = audioCtx.currentTime) { startAt = atTime; pausedAt = null; },
+    pause() { if (startAt !== null && pausedAt === null) pausedAt = audioCtx.currentTime; },
+    resume() { if (pausedAt !== null) { startAt += audioCtx.currentTime - pausedAt; pausedAt = null; } },
+    nowMs() {
+      if (startAt === null) return 0;
+      const t = pausedAt !== null ? pausedAt : audioCtx.currentTime;
+      return (t - startAt) * 1000;
+    },
+    isRunning() { return startAt !== null && pausedAt === null; },
+  };
+}
+
+/**
+ * Crée une session de jeu à partir d'un chart déjà parsé. Toute la
+ * logique de jugement/score/combo vit ici, indépendamment du rendu.
+ */
+function createSession(chart, opts = {}) {
+  const windows = opts.windows || DEFAULT_WINDOWS.normal;
+  const points = opts.points || DEFAULT_POINTS;
+  const multiplierTiers = opts.multiplierTiers || DEFAULT_MULTIPLIER_TIERS;
+
+  const state = {
+    score: 0,
+    combo: 0,
+    maxCombo: 0,
+    multiplier: 1,
+    counts: { perfect: 0, good: 0, ok: 0, miss: 0 },
+    notes: chart.notes.map((n) => ({ ...n })),
+  };
+
+  function currentMultiplier() {
+    let m = 1;
+    for (const tier of multiplierTiers) if (state.combo >= tier.combo) m = tier.mult;
+    return m;
+  }
+
+  function judgeDelta(absDelta) {
+    if (absDelta <= windows.perfect) return 'perfect';
+    if (absDelta <= windows.good) return 'good';
+    if (absDelta <= windows.ok) return 'ok';
+    return null;
+  }
+
+  function applyJudgement(judgement) {
+    if (judgement === 'miss') {
+      state.combo = 0;
+      state.counts.miss++;
+    } else {
+      state.combo++;
+      state.maxCombo = Math.max(state.maxCombo, state.combo);
+      state.counts[judgement]++;
+      state.score += points[judgement] * currentMultiplier();
+    }
+    state.multiplier = currentMultiplier();
+  }
+
+  /** Tente de "taper" la lane `lane` à l'instant `timeMs`. Retourne
+   *  { note, judgement, delta } si une note a été jugée, sinon null
+   *  (aucune note assez proche — le jeu décide s'il pénalise un "hit
+   *  à vide" ou l'ignore, le moteur reste neutre là-dessus). */
+  function hitLane(lane, timeMs) {
+    let best = null, bestDelta = Infinity;
+    for (const n of state.notes) {
+      if (n.lane !== lane || n.judged) continue;
+      const delta = Math.abs(n.time - timeMs);
+      if (delta < bestDelta) { bestDelta = delta; best = n; }
+    }
+    if (!best) return null;
+    const judgement = judgeDelta(bestDelta);
+    if (!judgement) return null;
+    best.judged = true; best.judgement = judgement;
+    applyJudgement(judgement);
+    return { note: best, judgement, delta: timeMs - best.time };
+  }
+
+  /**
+   * Point d'entrée pour une PRESSION (appui) — identique à `hitLane`
+   * pour le jugement du départ, mais initialise en plus le suivi de
+   * maintien si la note visée est une note longue (`duration > 0`).
+   * Un jeu qui n'a pas de notes longues peut ignorer cette fonction
+   * et utiliser `hitLane` directement — les deux restent équivalentes
+   * pour une note simple.
+   */
+  function pressLane(lane, timeMs) {
+    const result = hitLane(lane, timeMs);
+    if (result && result.note.duration > 0) {
+      result.note.holdActive = true;
+      result.note.holdEndTime = result.note.time + result.note.duration;
+    }
+    return result ? { ...result, isHold: result.note.duration > 0 } : null;
+  }
+
+  /**
+   * Point d'entrée pour un RELÂCHEMENT — à appeler quand le jeu
+   * détecte que le joueur relâche la lane (pointerup/pointercancel).
+   * Retourne { note, success } si une note était en cours de maintien
+   * dans cette lane, sinon null (rien à relâcher — ne jamais pénaliser
+   * un relâchement "à vide", le moteur reste neutre là-dessus comme
+   * pour `hitLane`).
+   */
+  function releaseLane(lane, timeMs) {
+    const note = state.notes.find((n) => n.lane === lane && n.holdActive);
+    if (!note) return null;
+    note.holdActive = false;
+    const success = timeMs >= note.holdEndTime - windows.ok;
+    note.holdSuccess = success;
+    if (success) state.score += points.holdBonus * currentMultiplier();
+    return { note, success };
+  }
+
+  /** À appeler à chaque frame : marque "miss" toute note dont la
+   *  fenêtre est expirée sans avoir été jugée, ET complète
+   *  automatiquement tout maintien dont le temps de fin est dépassé
+   *  (au cas où le jeu n'appelle pas explicitement `releaseLane`
+   *  avant, par exemple si le joueur maintient au-delà de la fin de
+   *  la note). Retourne les notes fraîchement ratées. */
+  function tick(timeMs) {
+    const newlyMissed = [];
+    for (const n of state.notes) {
+      if (n.holdActive && timeMs >= n.holdEndTime) {
+        n.holdActive = false;
+        n.holdSuccess = true;
+        state.score += points.holdBonus * currentMultiplier();
+      }
+      if (n.judged) continue;
+      if (timeMs - n.time > windows.ok) {
+        n.judged = true; n.judgement = 'miss';
+        applyJudgement('miss');
+        newlyMissed.push(n);
+      }
+    }
+    return newlyMissed;
+  }
+
+  /** Notes à afficher pour la fenêtre de rendu courante — ne dit RIEN
+   *  sur la position à l'écran, juste le sous-ensemble temporel
+   *  pertinent. Le jeu calcule sa propre position pixel. */
+  function visibleNotes(timeMs, lookAheadMs) {
+    return state.notes.filter((n) => {
+      const endTime = n.time + (n.duration || 0);
+      return endTime >= timeMs - 300 && n.time <= timeMs + lookAheadMs;
+    });
+  }
+
+  function accuracy() {
+    const c = state.counts;
+    const total = c.perfect + c.good + c.ok + c.miss;
+    if (total === 0) return 100;
+    const weighted = c.perfect * 1 + c.good * 0.7 + c.ok * 0.4;
+    return Math.round((weighted / total) * 1000) / 10;
+  }
+
+  function isFullCombo() {
+    return state.counts.miss === 0 && (state.counts.perfect + state.counts.good + state.counts.ok) === chart.notes.length;
+  }
+
+  function isComplete(timeMs) {
+    const lastEndTime = chart.notes.reduce((max, n) => Math.max(max, n.time + (n.duration || 0)), 0);
+    const allResolved = state.notes.every((n) => n.judged && !n.holdActive);
+    return allResolved || timeMs > lastEndTime + windows.ok + 400;
+  }
+
+  return { state, hitLane, pressLane, releaseLane, tick, visibleNotes, accuracy, isFullCombo, isComplete };
+}
+
+
+// ── ui/components.js ──
+// ═══════════════════════════════════════════════════════════════
+// UI SDK — bibliothèque de composants Ondine Games
+// ───────────────────────────────────────
+// Chaque fonction retourne un élément DOM prêt à être inséré dans
+// la page. Aucune fonction ici ne connaît un jeu en particulier.
+// Le style visuel (couleurs, rayons, ombres) vient TOUJOURS de
+// core/design-tokens.css via les variables --c1, --glass, etc.
+// Ne jamais coder une couleur en dur dans un composant.
+// ═══════════════════════════════════════════════════════════════
+const UI = {
+  /**
+   * Crée l'élément hôte du toast. À insérer une fois dans la page,
+   * puis à passer à NotificationService.mount(el).
+   */
+  toastHost() {
+    const el = document.createElement('div');
+    el.className = 'ondine-toast';
+    el.id = 'ondineToast';
+    return el;
+  },
+
+  button(label, { variant = 'primary', onClick, icon, disabled = false } = {}) {
+    const el = document.createElement('button');
+    el.className = `ondine-btn ondine-btn-${variant}`;
+    el.innerHTML = (icon ? `<span class="ondine-btn-icon">${icon}</span>` : '') + label;
+    if (disabled) el.disabled = true;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  iconButton(icon, { onClick, title = '' } = {}) {
+    const el = document.createElement('button');
+    el.className = 'ondine-icon-btn';
+    el.textContent = icon;
+    if (title) el.title = title;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  badge(text, { variant = 'default' } = {}) {
+    const el = document.createElement('span');
+    el.className = `ondine-badge ondine-badge-${variant}`;
+    el.textContent = text;
+    return el;
+  },
+
+  statCard({ value, label, icon = '' } = {}) {
+    const el = document.createElement('div');
+    el.className = 'ondine-stat-card';
+    el.innerHTML = `${icon ? `<div class="ondine-stat-icon">${icon}</div>` : ''}
+      <div class="ondine-stat-value">${value}</div>
+      <div class="ondine-stat-label">${label}</div>`;
+    return el;
+  },
+
+  achievementCard({ icon, name, desc, unlocked, xp }) {
+    const el = document.createElement('div');
+    el.className = 'ondine-ach-card' + (unlocked ? ' unlocked' : '');
+    el.innerHTML = `<div class="ondine-ach-icon">${icon}</div>
+      <div class="ondine-ach-body">
+        <div class="ondine-ach-name">${name}</div>
+        <div class="ondine-ach-desc">${desc}</div>
+      </div>
+      <div class="ondine-ach-badge">${unlocked ? '✓' : '🔒'}${xp ? ` +${xp} XP` : ''}</div>`;
+    return el;
+  },
+
+  /**
+   * Modale générique : titre, corps (élément DOM déjà construit),
+   * boutons d'action. Retourne { el, close } — `el` est déjà attaché
+   * à un overlay plein écran, prêt à être inséré dans document.body.
+   * Utilisée en interne par DialogService — un jeu peut aussi
+   * l'utiliser directement pour ses propres besoins d'affichage.
+   */
+  modal({ title, bodyEl, actions = [] } = {}) {
+    const overlay = document.createElement('div');
+    overlay.className = 'ondine-modal-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'ondine-modal-box';
+
+    if (title) {
+      const h = document.createElement('div');
+      h.className = 'ondine-modal-title';
+      h.textContent = title;
+      box.appendChild(h);
+    }
+    if (bodyEl) {
+      const body = document.createElement('div');
+      body.className = 'ondine-modal-body';
+      body.appendChild(bodyEl);
+      box.appendChild(body);
+    }
+    if (actions.length) {
+      const row = document.createElement('div');
+      row.className = 'ondine-modal-actions';
+      actions.forEach((btnEl) => row.appendChild(btnEl));
+      box.appendChild(row);
+    }
+    overlay.appendChild(box);
+
+    function close() { overlay.remove(); }
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    return { el: overlay, close };
+  },
+
+  // Les composants suivants (progressBar, tabs, list, grid,
+  // bottomSheet, emptyState, loading, gameCard, profileCard...)
+  // seront ajoutés au moment où un jeu en a réellement besoin.
+};
+
+
+// ── services/NotificationService.js ──
+// ═══════════════════════════════════════════════════════════════
+// NotificationService
+// ───────────────────────────────────────
+// RÔLE : afficher des messages brefs et non bloquants (toasts).
+// POSSÈDE : l'élément DOM du toast, son minuteur d'auto-masquage.
+// NE DOIT JAMAIS : connaître un jeu, une règle de jeu, ou un texte
+//        spécifique à un jeu — le texte affiché vient toujours de
+//        l'appelant (le jeu, via le SDK).
+// ───────────────────────────────────────
+// Remplace les fonctions toast() précédemment dupliquées à
+// l'identique dans Solitaire, Sudoku et YAMS.
+// ═══════════════════════════════════════════════════════════════
+const NotificationService = (function () {
+  let hostEl = null;
+  let hideTimer = null;
+  const DEFAULT_DURATION_MS = 2200;
+
+  /**
+   * Doit être appelé une fois par le Hub ou par la page du jeu,
+   * en lui passant l'élément DOM créé par UI.toastHost().
+   */
+  function mount(el) {
+    hostEl = el;
+  }
+
+  function show(message, variant = 'info', duration = DEFAULT_DURATION_MS) {
+    if (!hostEl) {
+      // Dégradation silencieuse : pas de host monté = pas de toast,
+      // mais ça ne doit jamais casser le jeu.
+      console.warn('[NotificationService] show() appelé avant mount() :', message);
+      return;
+    }
+    hostEl.textContent = message;
+    hostEl.dataset.variant = variant;
+    hostEl.classList.remove('ondine-toast-show');
+    void hostEl.offsetWidth; // force le reflow pour relancer la transition
+    hostEl.classList.add('ondine-toast-show');
+
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => hostEl.classList.remove('ondine-toast-show'), duration);
+  }
+
+  return { mount, show };
+})();
+
+
+// ── services/StatsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// StatsService
+// ───────────────────────────────────────
+// RÔLE : stocker des compteurs numériques par jeu (parties jouées,
+//        victoires, meilleur score...). Ne connaît aucun nom de
+//        statistique métier — le jeu choisit ses propres clés.
+// POSSÈDE : une entrée localStorage par jeu (`ondine_stats_<gameId>`).
+// NE DOIT JAMAIS : interpréter le sens d'une statistique (ex. ne sait
+//        pas que "victories" est "positif" ou que "errors" est
+//        "négatif" — c'est au jeu d'agir en conséquence).
+// ═══════════════════════════════════════════════════════════════
+function keyFor(gameId) { return `ondine_stats_${gameId}`; }
+
+function readAll(gameId) {
+  try {
+    return JSON.parse(localStorage.getItem(keyFor(gameId)) || '{}');
+  } catch (e) {
+    console.warn('[StatsService] lecture corrompue pour', gameId, e);
+    return {};
+  }
+}
+
+function writeAll(gameId, data) {
+  localStorage.setItem(keyFor(gameId), JSON.stringify(data));
+}
+
+const StatsService = {
+  get(gameId, key, defaultValue = 0) {
+    const all = readAll(gameId);
+    return key in all ? all[key] : defaultValue;
+  },
+  set(gameId, key, value) {
+    const all = readAll(gameId);
+    all[key] = value;
+    writeAll(gameId, all);
+  },
+  increment(gameId, key, n = 1) {
+    const all = readAll(gameId);
+    all[key] = (all[key] || 0) + n;
+    writeAll(gameId, all);
+    return all[key];
+  },
+  /** Ne met à jour que si `value` dépasse la valeur actuelle (utile
+   *  pour un meilleur score / meilleur temps). */
+  setMax(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value > all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  setMin(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value < all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  getAll(gameId) { return readAll(gameId); },
+  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+};
+
+
+// ── services/AchievementsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AchievementsService
+// ───────────────────────────────────────
+// RÔLE : savoir quels succès sont débloqués, par jeu. Ne connaît
+//        jamais la LISTE des succès d'un jeu ni leur condition de
+//        déblocage — ça reste entièrement défini côté jeu (via
+//        sdk.achievement.unlock(id), appelé quand le jeu a lui-même
+//        vérifié sa propre condition).
+// POSSÈDE : une entrée localStorage par jeu (`ondine_ach_<gameId>`).
+// ═══════════════════════════════════════════════════════════════
+function keyFor(gameId) { return `ondine_ach_${gameId}`; }
+
+function readUnlocked(gameId) {
+  try { return JSON.parse(localStorage.getItem(keyFor(gameId)) || '[]'); }
+  catch (e) { console.warn('[AchievementsService] lecture corrompue pour', gameId, e); return []; }
+}
+
+const AchievementsService = {
+  isUnlocked(gameId, achId) {
+    return readUnlocked(gameId).includes(achId);
+  },
+  /** Débloque `achId` s'il ne l'était pas déjà. Retourne true si
+   *  c'est une NOUVELLE unlock (utile pour déclencher un toast une
+   *  seule fois), false si déjà débloqué. */
+  unlock(gameId, achId) {
+    const list = readUnlocked(gameId);
+    if (list.includes(achId)) return false;
+    list.push(achId);
+    localStorage.setItem(keyFor(gameId), JSON.stringify(list));
+    return true;
+  },
+  unlockedList(gameId) { return readUnlocked(gameId); },
+  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+};
+
+
+// ── services/AudioService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AudioService
+// ───────────────────────────────────────
+// RÔLE : jouer des sons courts synthétisés (Web Audio), via une
+//        petite bibliothèque de presets génériques partagés par
+//        tous les jeux (click, place, success, error...). Ne connaît
+//        aucun jeu — les presets décrivent une SENSATION sonore
+//        générique, jamais un événement de jeu précis.
+// NE DOIT JAMAIS : contenir un preset nommé d'après un jeu (pas de
+//        "unoSkip" ou "yamsRoll" — le jeu choisit lui-même quel
+//        preset générique correspond le mieux à son événement).
+// ───────────────────────────────────────
+// Remplace les fonctions playTone()/tone() dupliquées à l'identique
+// dans Solitaire, Sudoku et YAMS.
+// ═══════════════════════════════════════════════════════════════
+let audioCtx = null;
+let enabled = true;
+
+function getCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { console.warn('[AudioService] Web Audio indisponible', e); }
+  }
+  return audioCtx;
+}
+
+function playTone(freq, dur, type = 'sine', vol = 0.15) {
+  if (!enabled) return;
+  const ctx = getCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
+  } catch (e) { /* silencieux : l'audio ne doit jamais casser le jeu */ }
+}
+
+// Bibliothèque de presets — génériques, réutilisables par n'importe
+// quel jeu. Chaque preset est une petite séquence de tons.
+const PRESETS = {
+  click:   () => playTone(880, 0.06, 'sine', 0.10),
+  place:   () => { playTone(660, 0.1, 'sine', 0.14); setTimeout(() => playTone(880, 0.08, 'sine', 0.10), 60); },
+  success: () => [523, 659, 784].forEach((f, i) => setTimeout(() => playTone(f, 0.18, 'sine', 0.16), i * 90)),
+  error:   () => playTone(220, 0.16, 'sawtooth', 0.12),
+  win:     () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.22, 'sine', 0.18), i * 110)),
+  lose:    () => [392, 330, 262].forEach((f, i) => setTimeout(() => playTone(f, 0.22, 'sine', 0.14), i * 120)),
+  flip:    () => playTone(440, 0.06, 'triangle', 0.10),
+  unlock:  () => [660, 880, 1100].forEach((f, i) => setTimeout(() => playTone(f, 0.15, 'sine', 0.15), i * 80)),
+};
+
+const AudioService = {
+  play(presetName) {
+    const preset = PRESETS[presetName];
+    if (!preset) { console.warn('[AudioService] preset inconnu :', presetName); return; }
+    preset();
+  },
+  setEnabled(v) { enabled = v; },
+  isEnabled() { return enabled; },
+};
+
+
+// ── services/SaveService.js ──
+// ═══════════════════════════════════════════════════════════════
+// SaveService
+// ───────────────────────────────────────
+// RÔLE : persister/restaurer l'état de partie en cours d'un jeu,
+//        sous forme de blob JSON opaque. Ne connaît jamais la forme
+//        de cet état — c'est entièrement défini par le jeu.
+// POSSÈDE : une entrée localStorage par jeu (`ondine_save_<gameId>`).
+// ═══════════════════════════════════════════════════════════════
+function keyFor(gameId) { return `ondine_save_${gameId}`; }
+
+const SaveService = {
+  write(gameId, state) {
+    try { localStorage.setItem(keyFor(gameId), JSON.stringify(state)); return true; }
+    catch (e) { console.warn('[SaveService] échec de sauvegarde pour', gameId, e); return false; }
+  },
+  read(gameId) {
+    try {
+      const raw = localStorage.getItem(keyFor(gameId));
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { console.warn('[SaveService] sauvegarde corrompue pour', gameId, e); return null; }
+  },
+  hasSave(gameId) { return localStorage.getItem(keyFor(gameId)) !== null; },
+  clear(gameId) { localStorage.removeItem(keyFor(gameId)); },
+};
+
+
+// ── services/DialogService.js ──
+// ═══════════════════════════════════════════════════════════════
+// DialogService
+// ───────────────────────────────────────
+// RÔLE : afficher une boîte de dialogue de confirmation bloquante
+//        (au sens UX, pas au sens JS — l'appel est asynchrone) et
+//        retourner la réponse de l'utilisateur. Remplace les
+//        `confirm()` natifs du navigateur, incohérents visuellement
+//        avec le reste de la plateforme.
+// NE DOIT JAMAIS : connaître le texte ou le contexte d'un jeu — tout
+//        le contenu est fourni par l'appelant.
+// ───────────────────────────────────────
+// S'appuie sur UI.modal() — c'est le seul service qui a le droit
+// d'importer un composant UI directement (car il EST la logique
+// derrière ce composant, pas un jeu qui le consommerait).
+// ═══════════════════════════════════════════════════════════════
+
+const DialogService = {
+  /**
+   * Retourne une Promise<boolean> : true si confirmé, false si annulé.
+   */
+  confirm({ title = '', message = '', confirmLabel = 'OK', cancelLabel = 'Annuler' } = {}) {
+    return new Promise((resolve) => {
+      const bodyEl = document.createElement('div');
+      bodyEl.textContent = message;
+
+      const confirmBtn = UI.button(confirmLabel, {
+        variant: 'primary',
+        onClick: () => { modal.close(); resolve(true); },
+      });
+      const cancelBtn = UI.button(cancelLabel, {
+        variant: 'secondary',
+        onClick: () => { modal.close(); resolve(false); },
+      });
+
+      const modal = UI.modal({ title, bodyEl, actions: [confirmBtn, cancelBtn] });
+      document.body.appendChild(modal.el);
+    });
+  },
+};
+
+
+// ── sdk/createSDK.js ──
+// ═══════════════════════════════════════════════════════════════
+// Game SDK
+// ───────────────────────────────────────
+// SEULE API que les jeux sont autorisés à utiliser pour parler à la
+// plateforme. Un jeu ne doit jamais importer un service de
+// core/services/ directement.
+//
+// Un jeu appelle createSDK(gameId) une fois au chargement et garde
+// l'objet retourné. gameId sert à namespacer les données du jeu
+// dans les services qui en ont besoin (stats, save, etc.) — ce
+// n'est pas encore utilisé par sdk.toast (qui est global à la
+// plateforme, pas par jeu), mais la signature est prête pour les
+// prochains namespaces.
+// ═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+function createSDK(gameId) {
+  return {
+    gameId,
+
+    toast: {
+      success: (msg) => NotificationService.show(msg, 'success'),
+      error: (msg) => NotificationService.show(msg, 'error'),
+      info: (msg) => NotificationService.show(msg, 'info'),
+    },
+
+    stats: {
+      get: (key, defaultValue = 0) => StatsService.get(gameId, key, defaultValue),
+      set: (key, value) => StatsService.set(gameId, key, value),
+      increment: (key, n = 1) => StatsService.increment(gameId, key, n),
+      setMax: (key, value) => StatsService.setMax(gameId, key, value),
+      setMin: (key, value) => StatsService.setMin(gameId, key, value),
+      getAll: () => StatsService.getAll(gameId),
+      reset: () => StatsService.reset(gameId),
+    },
+
+    achievement: {
+      isUnlocked: (id) => AchievementsService.isUnlocked(gameId, id),
+      /** Débloque `id` et affiche un toast de succès si c'est une
+       *  NOUVELLE unlock (idempotent — sans risque à rappeler). */
+      unlock(id, { name, icon = '🏅' } = {}) {
+        const isNew = AchievementsService.unlock(gameId, id);
+        if (isNew) {
+          AudioService.play('unlock');
+          NotificationService.show(`${icon} Succès : ${name || id}`, 'success');
+        }
+        return isNew;
+      },
+      unlockedList: () => AchievementsService.unlockedList(gameId),
+      reset: () => AchievementsService.reset(gameId),
+    },
+
+    audio: {
+      play: (presetName) => AudioService.play(presetName),
+      setEnabled: (v) => AudioService.setEnabled(v),
+      isEnabled: () => AudioService.isEnabled(),
+    },
+
+    save: (state) => SaveService.write(gameId, state),
+    load: () => SaveService.read(gameId),
+    hasSave: () => SaveService.hasSave(gameId),
+    clearSave: () => SaveService.clear(gameId),
+
+    dialog: {
+      confirm: (opts) => DialogService.confirm(opts),
+    },
+
+    // Prochains namespaces (profile, reward, challenge, cloud) —
+    // ajoutés au moment où un jeu concret en aura réellement besoin.
+  };
+}
+
+
+return { createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, shuffle, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, parseChart, loadChartFromUrl, createClock, createSession, DEFAULT_WINDOWS, DEFAULT_POINTS, DEFAULT_MULTIPLIER_TIERS, UI, NotificationService, StatsService, AchievementsService, AudioService, SaveService, DialogService, createSDK };
+})();
+
+// ── bootstrap SDK (imports convertis en déstructuration) ──
+
+const { createSDK } = CoreBundle;
+const { UI } = CoreBundle;
+const { NotificationService } = CoreBundle;
+const { rollDice, countValues } = CoreBundle;
+
+window.sdk = createSDK('shutthebox');
+window.UI = UI;
+window.OndineDice = { rollDice, countValues };
+
+const toastEl = UI.toastHost();
+document.body.appendChild(toastEl);
+NotificationService.mount(toastEl);
+
+</script>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════
+const ACHIEVEMENTS = [
+  { id: 'first_game', name: 'Première Partie', desc: 'Terminer une partie', icon: '🎲', xp: 20 },
+  { id: 'shutout', name: 'Boîte Fermée', desc: 'Fermer complètement la boîte (score 0)', icon: '🏆', xp: 100 },
+  { id: 'under_10', name: 'Bon Score', desc: 'Terminer avec un score inférieur à 10', icon: '🎯', xp: 40 },
+  { id: 'games_10', name: 'Habitué', desc: 'Jouer 10 parties', icon: '🏅', xp: 30 },
+];
+let CONFIG = { tileCount: 9, diceRule: 'always2' };
+let G = null;
+
+// ═══════════════════════════════════════════════════════════════
+// PURE LOGIC — subset-sum sur les tuiles ouvertes
+// ═══════════════════════════════════════════════════════════════
+function hasAnyValidCombo(openValues, target) {
+  function rec(idx, remaining) {
+    if (remaining === 0) return true;
+    if (idx >= openValues.length || remaining < 0) return false;
+    return rec(idx + 1, remaining - openValues[idx]) || rec(idx + 1, remaining);
+  }
+  return rec(0, target);
+}
+function openSum() { return G.tiles.filter((t) => t.open).reduce((s, t) => s + t.value, 0); }
+
+// ═══════════════════════════════════════════════════════════════
+// GAME FLOW
+// ═══════════════════════════════════════════════════════════════
+function setTileCount(n) {
+  CONFIG.tileCount = n;
+  document.getElementById('tiles9').classList.toggle('sel', n === 9);
+  document.getElementById('tiles12').classList.toggle('sel', n === 12);
+}
+function setDiceRule(r) {
+  CONFIG.diceRule = r;
+  document.getElementById('ruleAlways2').classList.toggle('sel', r === 'always2');
+  document.getElementById('ruleAdaptive').classList.toggle('sel', r === 'adaptive');
+}
+
+function startGame() {
+  G = {
+    tiles: Array.from({ length: CONFIG.tileCount }, (_, i) => ({ value: i + 1, open: true, selected: false })),
+    dice: [], rollTotal: 0, over: false, score: null, rolls: 0,
+  };
+  sdk.clearSave();
+  showScreen('sg');
+  renderTiles();
+  document.getElementById('diceRow').innerHTML = '';
+  const indicator = document.getElementById('sumIndicator');
+  indicator.classList.remove('bust');
+  indicator.textContent = 'Lance les dés pour commencer';
+  document.getElementById('btnValidate').style.display = 'none';
+  document.getElementById('btnRoll').style.display = '';
+  sdk.audio.play('click');
+}
+
+function goHome() { updateHomeStats(); showScreen('sh'); }
+
+function diceCountForRoll() {
+  if (CONFIG.diceRule === 'always2') return 2;
+  return openSum() <= 6 ? 1 : 2;
+}
+
+function rollTiles() {
+  if (!G || G.over) return;
+  const count = diceCountForRoll();
+  G.dice = OndineDice.rollDice(count, 6);
+  G.rollTotal = G.dice.reduce((a, b) => a + b, 0);
+  G.rolls++;
+  G.tiles.forEach((t) => (t.selected = false));
+  sdk.audio.play('flip');
+  renderDice();
+  renderTiles();
+  document.getElementById('btnRoll').style.display = 'none';
+  document.getElementById('btnValidate').style.display = '';
+
+  const openValues = G.tiles.filter((t) => t.open).map((t) => t.value);
+  if (!hasAnyValidCombo(openValues, G.rollTotal)) {
+    document.getElementById('btnValidate').style.display = 'none';
+    document.getElementById('btnRoll').style.display = 'none';
+    const indicator = document.getElementById('sumIndicator');
+    indicator.classList.add('bust');
+    indicator.innerHTML = `💥 Somme <span class="target">${G.rollTotal}</span> — aucune combinaison possible, partie terminée`;
+    setTimeout(() => endGame('bust'), 1100);
+    return;
+  }
+  document.getElementById('sumIndicator').classList.remove('bust');
+  updateSumIndicator();
+  sdk.save({ G, CONFIG });
+}
+
+function toggleTile(idx) {
+  if (!G || G.over) return;
+  const t = G.tiles[idx];
+  if (!t.open) return;
+  if (G.dice.length === 0) { sdk.toast.error('Lance les dés d\'abord'); return; }
+  t.selected = !t.selected;
+  sdk.audio.play('click');
+  renderTiles();
+  updateSumIndicator();
+}
+
+function updateSumIndicator() {
+  const sel = G.tiles.filter((t) => t.selected).reduce((s, t) => s + t.value, 0);
+  document.getElementById('sumIndicator').innerHTML =
+    `Dés : <span class="target">${G.rollTotal}</span> — Sélection : <span class="selected">${sel}</span>`;
+}
+
+function confirmSelection() {
+  if (!G || G.over) return;
+  const selectedTiles = G.tiles.filter((t) => t.selected);
+  const sum = selectedTiles.reduce((s, t) => s + t.value, 0);
+  if (selectedTiles.length === 0) { sdk.toast.error('Sélectionne au moins une tuile'); return; }
+  if (sum !== G.rollTotal) { sdk.toast.error(`La somme (${sum}) ne correspond pas au(x) dé(s) (${G.rollTotal})`); sdk.audio.play('error'); return; }
+
+  selectedTiles.forEach((t) => { t.open = false; t.selected = false; });
+  sdk.audio.play('success');
+  renderTiles();
+  document.getElementById('btnValidate').style.display = 'none';
+  document.getElementById('btnRoll').style.display = '';
+  document.getElementById('diceRow').innerHTML = '';
+  G.dice = [];
+
+  if (G.tiles.every((t) => !t.open)) { endGame('shutout'); return; }
+  document.getElementById('sumIndicator').textContent = 'Bien joué — relance les dés';
+  sdk.save({ G, CONFIG });
+}
+
+function endGame(reason) {
+  G.over = true;
+  const score = reason === 'shutout' ? 0 : openSum();
+  G.score = score;
+  sdk.clearSave();
+  sdk.stats.increment('games');
+  sdk.stats.setMin('bestScore', score);
+  sdk.achievement.unlock('first_game', { name: 'Première Partie', icon: '🎲' });
+  if (sdk.stats.get('games') >= 10) sdk.achievement.unlock('games_10', { name: 'Habitué', icon: '🏅' });
+  if (score === 0) { sdk.stats.increment('shutouts'); sdk.achievement.unlock('shutout', { name: 'Boîte Fermée', icon: '🏆' }); sdk.audio.play('win'); }
+  else if (score < 10) { sdk.achievement.unlock('under_10', { name: 'Bon Score', icon: '🎯' }); sdk.audio.play('success'); }
+  else { sdk.audio.play('lose'); }
+  setTimeout(() => showVictory(reason, score), 500);
+}
+
+function showVictory(reason, score) {
+  const icon = document.getElementById('vicIcon');
+  const title = document.getElementById('vicTitle');
+  const sub = document.getElementById('vicSub');
+  if (reason === 'shutout') { icon.textContent = '🏆'; title.textContent = 'Boîte fermée !'; sub.textContent = 'Score parfait : 0'; }
+  else { icon.textContent = score < 10 ? '🎯' : '🎲'; title.textContent = 'Partie terminée'; sub.textContent = `Score : ${score} (total des tuiles restées ouvertes)`; }
+  document.getElementById('svic').classList.remove('hidden'); /* audit UX fin de partie : overlay sans masquer le plateau/la grille en dessous */
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderTiles() {
+  const row = document.getElementById('tilesRow');
+  row.innerHTML = '';
+  G.tiles.forEach((t, i) => {
+    const el = document.createElement('div');
+    el.className = 'tile' + (!t.open ? ' shut' : (t.selected ? ' selected' : '')) + (G.dice.length === 0 && t.open ? ' disabled' : '');
+    el.textContent = t.value;
+    if (t.open) el.onclick = () => toggleTile(i);
+    row.appendChild(el);
+  });
+  document.getElementById('scoreBadge').textContent = 'Total ouvert : ' + openSum();
+}
+function renderDice() {
+  const row = document.getElementById('diceRow');
+  row.innerHTML = '';
+  const faces = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+  G.dice.forEach((v) => {
+    const d = document.createElement('div');
+    d.className = 'die rolling';
+    d.textContent = faces[v];
+    row.appendChild(d);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION & HOME
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id === 'sstats') renderStatsScreen();
+}
+function updateHomeStats() {
+  const host = document.getElementById('homeStats');
+  host.innerHTML = '';
+  host.appendChild(UI.statCard({ value: sdk.stats.get('games'), label: 'Parties', icon: '🎲' }));
+  host.appendChild(UI.statCard({ value: sdk.stats.get('shutouts'), label: 'Boîtes fermées', icon: '🏆' }));
+  const best = sdk.stats.get('bestScore', null);
+  host.appendChild(UI.statCard({ value: best === null ? '—' : best, label: 'Meilleur score', icon: '🎯' }));
+}
+function renderStatsScreen() {
+  const grid = document.getElementById('statsGrid');
+  grid.innerHTML = '';
+  const best = sdk.stats.get('bestScore', null);
+  [
+    { value: sdk.stats.get('games'), label: 'Parties', icon: '🎲' },
+    { value: sdk.stats.get('shutouts'), label: 'Boîtes fermées', icon: '🏆' },
+    { value: best === null ? '—' : best, label: 'Meilleur score', icon: '🎯' },
+  ].forEach((e) => grid.appendChild(UI.statCard(e)));
+
+  const list = document.getElementById('achList');
+  list.innerHTML = '';
+  const unlocked = sdk.achievement.unlockedList();
+  ACHIEVEMENTS.forEach((a) => list.appendChild(UI.achievementCard({ ...a, unlocked: unlocked.includes(a.id) })));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+function init() {
+  document.getElementById('btnHome').appendChild(UI.iconButton('🏠', { title: 'Accueil', onClick: confirmLeaveGame }));
+  document.getElementById('btnBackStats').appendChild(UI.iconButton('←', { onClick: goHome }));
+  updateHomeStats();
+}
+async function confirmLeaveGame() {
+  if (G && !G.over) {
+    sdk.save({ G, CONFIG });
+    sdk.toast.info('Partie sauvegardée');
+  }
+  goHome();
+}
+
+window.setTileCount = setTileCount; window.setDiceRule = setDiceRule; window.startGame = startGame;
+window.goHome = goHome; window.showScreen = showScreen; window.rollTiles = rollTiles;
+window.confirmSelection = confirmSelection;
+init();
+</script>
+</body>
+</html>

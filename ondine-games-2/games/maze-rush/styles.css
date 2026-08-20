@@ -1,0 +1,55 @@
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+.char-picker-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+#mzCharacterPicker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:380px;}
+.char-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer;}
+.char-card.sel{border-color:var(--c1);background:var(--glass3);}
+.char-symbol{font-size:24px;}
+.char-name{font-size:8px;color:var(--text2);margin-top:2px;}
+
+/* ── Accueil ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:8px;background:radial-gradient(ellipse at 50% 20%,#2a1550,#0a0620 70%);}
+.mz-stats-row{display:flex;gap:8px;width:100%;max-width:340px;margin:4px 0;}
+.diff-row{display:flex;gap:8px;width:100%;max-width:380px;}
+.mz-diff-card{flex:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px;text-align:center;cursor:pointer;font-weight:800;font-size:12px;}
+.mz-diff-card.sel{border-color:var(--co);background:rgba(251,191,36,.08);}
+
+/* ── Sélection de niveau ── */
+#slevels{align-items:center;padding:20px;gap:10px;}
+#levelGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:380px;}
+.level-card{aspect-ratio:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;position:relative;}
+.level-card.locked{opacity:.4;cursor:default;}
+.lv-lock{position:absolute;font-size:12px;}
+
+/* ── Jeu ── */
+#sg{padding:8px;gap:6px;align-items:center;}
+.mz-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:460px;flex-wrap:wrap;gap:4px;}
+.mz-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
+#hudCombo{color:var(--co);min-width:36px;}
+#mazeCanvas{width:100%;max-width:420px;aspect-ratio:1;border-radius:12px;box-shadow:var(--sh2);}
+@media (min-width:900px){#mazeCanvas{max-width:640px;}}
+.dpad{display:grid;grid-template-columns:56px 56px 56px;grid-template-rows:56px 56px 56px;gap:4px;margin-top:4px;}
+.dpad-btn{background:var(--glass);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--text2);user-select:none;}
+.dpad-btn:active{background:var(--glass3);color:var(--c1);}
+.dpad-up{grid-column:2;grid-row:1;}
+.dpad-left{grid-column:1;grid-row:2;}
+.dpad-right{grid-column:3;grid-row:2;}
+.dpad-down{grid-column:2;grid-row:3;}
+
+/* ── Overlays (résultat niveau / game over / victoire finale) — le
+   labyrinthe #sg reste visible en dessous ── */
+#slevelcomplete,#sgameover,#sfinal{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.result-icon{font-size:56px;}
+.result-title{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);}
+.result-stats{display:flex;gap:8px;width:100%;max-width:320px;margin:8px 0;flex-wrap:wrap;}
+.result-stat{flex:1;min-width:90px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 6px;}
+.result-stat .rv{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c1);}
+.result-stat .rl{font-size:8px;color:var(--text2);text-transform:uppercase;}
+.result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
+.result-btns button{flex:1;min-width:130px;}

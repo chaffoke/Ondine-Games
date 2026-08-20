@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Ondine Games</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;--c1:#38bdf8;--c2:#7dd3fc;--c3:#bae6fd;
+  --cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);
+  --text:#e0f2fe;--text2:#94a3b8;--r:14px;--r2:20px;
+  --sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;min-height:100%;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+body{background:
+  radial-gradient(ellipse at 20% -10%, rgba(56,189,248,.12), transparent 50%),
+  radial-gradient(ellipse at 90% 10%, rgba(129,140,248,.10), transparent 45%),
+  var(--bg);
+  padding-bottom:24px;}
+
+.header{position:sticky;top:0;z-index:50;background:rgba(6,8,30,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:16px 16px 12px;}
+.logo-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.logo{font-family:'Fredoka One',cursive;font-size:24px;
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+
+.search-box{display:flex;align-items:center;gap:8px;background:var(--glass);border:1.5px solid var(--border);border-radius:14px;padding:9px 14px;margin-bottom:10px;}
+.search-box input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;}
+.search-box input::placeholder{color:var(--text2);}
+
+.cat-tabs{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
+.cat-tabs::-webkit-scrollbar{display:none;}
+.cat-tab{flex-shrink:0;font-family:'Fredoka One',cursive;font-size:12px;background:var(--glass);border:1.5px solid var(--border);border-radius:12px;padding:7px 14px;cursor:pointer;white-space:nowrap;color:var(--text2);transition:all .15s;}
+.cat-tab.active{border-color:var(--c1);background:var(--glass3);color:var(--c2);}
+
+.content{padding:14px 16px;max-width:640px;margin:0 auto;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;margin:14px 0 8px;display:flex;align-items:center;justify-content:space-between;}
+
+.recent-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;}
+.recent-row::-webkit-scrollbar{display:none;}
+.recent-card{flex-shrink:0;width:84px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:10px 6px;text-align:center;cursor:pointer;transition:transform .12s;}
+.recent-card:active{transform:scale(.94);}
+.recent-card .ic{font-size:26px;margin-bottom:4px;}
+.recent-card .nm{font-size:10px;font-weight:800;line-height:1.2;}
+
+.game-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+/* Polish desktop (trouvé par capture réelle à 1440px) : la grille restait
+   plafonnée à 640px/2 colonnes alors que la barre de recherche du header
+   s'étirait sur toute la largeur — déséquilibre visuel net sur grand écran.
+   Placé APRÈS la règle de base pour gagner la cascade CSS (même sélecteur,
+   media query doit suivre, pas précéder). Purement additif : n'affecte
+   aucun comportement en dessous de 900px. */
+@media (min-width:900px){
+  .content{max-width:1100px;}
+  .game-grid{grid-template-columns:repeat(3,1fr);}
+  .header .logo-row,.header .search-box,.header .cat-tabs{max-width:1100px;margin-left:auto;margin-right:auto;}
+}
+@media (min-width:1300px){
+  .content{max-width:1320px;}
+  .game-grid{grid-template-columns:repeat(4,1fr);}
+  .header .logo-row,.header .search-box,.header .cat-tabs{max-width:1320px;}
+}
+.game-card{position:relative;background:var(--glass);border:1.5px solid var(--border);border-radius:var(--r2);padding:16px 12px;cursor:pointer;transition:transform .12s,border-color .15s;overflow:hidden;}
+.game-card:active{transform:scale(.96);}
+.game-card::before{content:'';position:absolute;inset:0;background:linear-gradient(160deg,var(--card-c,var(--c1)) 0%,transparent 60%);opacity:.08;pointer-events:none;}
+.game-card .ic{font-size:34px;margin-bottom:8px;}
+.game-card .nm{font-family:'Fredoka One',cursive;font-size:14px;margin-bottom:2px;}
+.game-card .desc{font-size:10px;color:var(--text2);line-height:1.35;}
+.game-card .fav-btn{position:absolute;top:10px;right:10px;font-size:15px;opacity:.35;cursor:pointer;z-index:2;}
+.game-card .fav-btn.active{opacity:1;}
+.game-card .cat-badge{position:absolute;bottom:10px;right:10px;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);background:rgba(255,255,255,.06);border-radius:6px;padding:2px 6px;}
+
+.empty-state{text-align:center;padding:40px 20px;color:var(--text2);}
+.empty-state .ic{font-size:40px;margin-bottom:10px;opacity:.5;}
+.empty-state .txt{font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-row">
+    <div class="logo">Ondine Games</div>
+    <div class="icon-btn" onclick="toggleFavOnly()" id="favFilterBtn">⭐</div>
+  </div>
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" id="searchInput" placeholder="Chercher un jeu…" oninput="renderGrid()">
+  </div>
+  <div class="cat-tabs" id="catTabs"></div>
+</div>
+
+<div class="content">
+  <div id="recentSection" style="display:none;">
+    <div class="section-title">Récemment joué</div>
+    <div class="recent-row" id="recentRow"></div>
+  </div>
+
+  <div class="section-title" id="gridTitle">Tous les jeux</div>
+  <div class="game-grid" id="gameGrid"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="ic">🔍</div>
+    <div class="txt">Aucun jeu ne correspond à ta recherche</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// REGISTRE DES JEUX — source unique de vérité pour le Hub. Ajouter
+// un jeu = ajouter une entrée ici + déposer son fichier dans games/.
+// Chaque jeu reste un fichier HTML totalement autonome (aucune
+// dépendance au Hub pour fonctionner de manière indépendante) ; le
+// Hub ne fait que les lister et y naviguer par simple lien relatif —
+// robuste sous file:// et content://, sans iframe ni import ES.
+// ═══════════════════════════════════════════════════════════════
+const CATEGORIES = [
+  { id:'all', label:'Tous', short:'Tous' },
+  { id:'plateau', label:'🎯 Plateau', short:'Plateau' },
+  { id:'cartes', label:'🃏 Cartes', short:'Cartes' },
+  { id:'des', label:'🎲 Dés', short:'Dés' },
+  { id:'reflexion', label:'🧠 Réflexion', short:'Réflexion' },
+  { id:'action', label:'⚡ Action', short:'Action' },
+];
+const GAMES = [
+  { id:'solitaire', name:'Solitaire', icon:'🃏', desc:'Klondike classique', path:'games/solitaire.html', cat:'cartes', color:'#38bdf8' },
+  { id:'uno', name:'Uno', icon:'🎴', desc:'Le grand classique en famille', path:'games/uno.html', cat:'cartes', color:'#f472b6' },
+  { id:'puissance4', name:'Puissance 4', icon:'🔴', desc:'Aligne 4 pions avant l’IA', path:'games/puissance4.html', cat:'plateau', color:'#fbbf24' },
+  { id:'othello', name:'Othello', icon:'⚫', desc:'Retourne le plateau', path:'games/othello.html', cat:'plateau', color:'#818cf8' },
+  { id:'dames', name:'Dames', icon:'⚪', desc:'Règles françaises, dame volante', path:'games/dames.html', cat:'plateau', color:'#fb923c' },
+  { id:'demineur', name:'Démineur', icon:'💣', desc:'Déjoue les mines', path:'games/demineur.html', cat:'reflexion', color:'#f87171' },
+  { id:'sudoku', name:'Sudoku', icon:'🔢', desc:'Logique et chiffres', path:'games/sudoku.html', cat:'reflexion', color:'#34d399' },
+  { id:'mastermind', name:'Mastermind', icon:'🧠', desc:'Devine la combinaison secrète', path:'games/mastermind.html', cat:'reflexion', color:'#c084fc' },
+  { id:'mahjong', name:'Mahjong Solitaire', icon:'🀄', desc:'Associe les paires de tuiles', path:'games/mahjong.html', cat:'reflexion', color:'#22d3ee' },
+  { id:'yams', name:'YAMS', icon:'🎲', desc:'Le jeu de dés familial', path:'games/yams.html', cat:'des', color:'#fbbf24' },
+  { id:'421', name:'421', icon:'🎲', desc:'Le classique du comptoir', path:'games/421.html', cat:'des', color:'#34d399' },
+  { id:'shutthebox', name:'Shut the Box', icon:'📦', desc:'Ferme toutes les cases', path:'games/shutthebox.html', cat:'des', color:'#7dd3fc' },
+  { id:'rhythmhero', name:'Rhythm Hero', icon:'🎵', desc:'Suis le rythme', path:'games/rhythmhero.html', cat:'action', color:'#f472b6' },
+  { id:'maze-rush', name:'Maze Rush', icon:'🌀', desc:'Labyrinthe arcade, choisis ton personnage', path:'games/maze-rush.html', cat:'action', color:'#818cf8' },
+  { id:'puzzle-mosaique', name:'Puzzle Mosaïque', icon:'🧩', desc:'Sudoku irrégulier 8×8, choisis ton personnage', path:'games/puzzle-mosaique.html', cat:'reflexion', color:'#fbbf24' },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE — propre au Hub (indépendant des localStorage de chaque
+// jeu, qui restent chacun dans leur propre espace de stockage)
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'ondine_hub_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ favorites: [], recent: [] }, loadStore());
+
+let activeCategory = 'all';
+let favOnly = false;
+
+function toggleFav(id, ev) {
+  ev.stopPropagation();
+  const idx = STORE.favorites.indexOf(id);
+  if (idx === -1) STORE.favorites.push(id); else STORE.favorites.splice(idx, 1);
+  saveStore(STORE);
+  renderGrid();
+}
+function toggleFavOnly() {
+  favOnly = !favOnly;
+  document.getElementById('favFilterBtn').style.opacity = favOnly ? '1' : '.5';
+  document.getElementById('favFilterBtn').style.background = favOnly ? 'var(--glass3)' : 'var(--glass)';
+  renderGrid();
+}
+function openGame(game) {
+  STORE.recent = [game.id, ...STORE.recent.filter(id => id !== game.id)].slice(0, 8);
+  saveStore(STORE);
+  window.location.href = game.path;
+}
+
+function setCategory(id) {
+  activeCategory = id;
+  renderTabs();
+  renderGrid();
+}
+
+function renderTabs() {
+  const host = document.getElementById('catTabs');
+  host.innerHTML = '';
+  CATEGORIES.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'cat-tab' + (c.id===activeCategory ? ' active' : '');
+    el.textContent = c.label;
+    el.onclick = () => setCategory(c.id);
+    host.appendChild(el);
+  });
+}
+
+function renderRecent() {
+  const section = document.getElementById('recentSection');
+  const row = document.getElementById('recentRow');
+  const recentGames = STORE.recent.map(id => GAMES.find(g => g.id===id)).filter(Boolean);
+  if (recentGames.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  row.innerHTML = '';
+  recentGames.forEach(g => {
+    const el = document.createElement('div');
+    el.className = 'recent-card';
+    el.innerHTML = `<div class="ic">${g.icon}</div><div class="nm">${g.name}</div>`;
+    el.onclick = () => openGame(g);
+    row.appendChild(el);
+  });
+}
+
+function renderGrid() {
+  const grid = document.getElementById('gameGrid');
+  const empty = document.getElementById('emptyState');
+  const query = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = GAMES.filter(g => activeCategory==='all' || g.cat===activeCategory);
+  if (favOnly) list = list.filter(g => STORE.favorites.includes(g.id));
+  if (query) list = list.filter(g => g.name.toLowerCase().includes(query) || g.desc.toLowerCase().includes(query));
+
+  document.getElementById('gridTitle').textContent = favOnly ? 'Favoris' : (activeCategory==='all' ? 'Tous les jeux' : CATEGORIES.find(c=>c.id===activeCategory).short);
+
+  grid.innerHTML = '';
+  if (list.length === 0) { empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  list.forEach(g => {
+    const isFav = STORE.favorites.includes(g.id);
+    const el = document.createElement('div');
+    el.className = 'game-card';
+    el.style.setProperty('--card-c', g.color);
+    el.innerHTML = `
+      <div class="fav-btn ${isFav?'active':''}">${isFav?'⭐':'☆'}</div>
+      <div class="ic">${g.icon}</div>
+      <div class="nm">${g.name}</div>
+      <div class="desc">${g.desc}</div>
+      <div class="cat-badge">${CATEGORIES.find(c=>c.id===g.cat).short}</div>`;
+    el.onclick = () => openGame(g);
+    el.querySelector('.fav-btn').onclick = (ev) => toggleFav(g.id, ev);
+    grid.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+renderTabs();
+renderRecent();
+renderGrid();
+window.toggleFav=toggleFav; window.toggleFavOnly=toggleFavOnly; window.setCategory=setCategory; window.renderGrid=renderGrid;
+</script>
+</body>
+</html>

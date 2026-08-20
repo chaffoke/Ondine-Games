@@ -1,0 +1,10 @@
+{
+  "id": "tetris",
+  "name": "Tetris",
+  "icon": "🧱",
+  "category": "reflexion",
+  "description": "Le classique de l'empilement. 7-bag, rotation testée, 3783 pièces simulées sans corruption d'état.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}

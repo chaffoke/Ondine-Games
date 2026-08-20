@@ -1,0 +1,62 @@
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── Accueil ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px;}
+.pc-mascot{font-size:52px;}
+#homeStatsPuzzleChats{display:flex;gap:8px;width:100%;max-width:340px;margin:6px 0;}
+.char-picker-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+#characterPicker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:380px;}
+.char-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer;}
+.char-card.sel{border-color:var(--c1);background:var(--glass3);}
+.char-symbol{font-size:24px;}
+.char-name{font-size:8px;color:var(--text2);margin-top:2px;}
+.diff-row{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:380px;justify-content:center;}
+.diff-card{flex:1;min-width:80px;background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;}
+.diff-card.sel{border-color:var(--c1);background:var(--glass3);}
+.diff-card .dc-name{font-weight:800;font-size:12px;}
+.diff-card .dc-clues{font-size:9px;color:var(--text2);}
+
+/* ── Jeu ── */
+#sg{padding:8px;gap:8px;align-items:center;position:relative;}
+.pc-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:460px;}
+.pc-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
+#puzzleGrid{display:grid;grid-template-columns:repeat(8,1fr);width:100%;max-width:460px;aspect-ratio:1;border-radius:10px;overflow:hidden;box-shadow:var(--sh2);border:2.5px solid var(--text);}
+/* Polish desktop (même correctif que les autres jeux à grille du projet,
+   même cause : max-width jamais adapté au-delà du mobile). Additif. */
+@media (min-width:900px){#puzzleGrid{max-width:620px;}}
+.pc-cell{display:flex;align-items:center;justify-content:center;cursor:pointer;border:.5px solid rgba(255,255,255,.06);transition:transform .1s;}
+.pc-token{position:relative;width:78%;height:78%;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:min(3.4vw,17px);box-shadow:0 1px 3px rgba(0,0,0,.4);}
+.pc-token b{position:absolute;bottom:-2px;right:-1px;font-size:8px;font-weight:900;color:rgba(255,255,255,.85);background:rgba(0,0,0,.35);border-radius:4px;padding:0 2px;line-height:1.3;}
+.cat-btn .pc-token{width:100%;height:100%;font-size:18px;}
+.cat-btn .pc-token b{font-size:8px;}
+.pc-cell.given{cursor:default;filter:brightness(.82);}
+.pc-cell.selected{outline:2px solid var(--c1);outline-offset:-2px;z-index:2;position:relative;}
+.pc-cell.conflict{background:rgba(248,113,113,.35) !important;}
+.pc-cell:not(.given):active{transform:scale(.92);}
+#catPalette{display:flex;gap:6px;width:100%;max-width:460px;justify-content:center;flex-wrap:wrap;}
+.cat-btn{width:42px;height:42px;border-radius:10px;background:var(--glass);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;}
+.cat-btn:active{transform:scale(.9);}
+.erase-btn{font-size:16px;background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);}
+.pc-actions{display:flex;gap:8px;width:100%;max-width:460px;}
+.pc-actions button{flex:1;}
+#genOverlay{display:none;position:absolute;inset:0;background:rgba(6,8,30,.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:50;border-radius:16px;}
+#genOverlay .spin{font-size:40px;animation:pcSpin 1s linear infinite;}
+@keyframes pcSpin{to{transform:rotate(360deg);}}
+
+/* ── Résultat (overlay, plateau reste visible derrière) ── */
+#sresult{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+#resultIcon{font-size:56px;}
+#resultTitle{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);}
+.result-stats{display:flex;gap:8px;width:100%;max-width:320px;margin:8px 0;}
+.result-stat{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 6px;}
+.result-stat .rv{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c1);}
+.result-stat .rl{font-size:8px;color:var(--text2);text-transform:uppercase;}
+.result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
+.result-btns button{flex:1;min-width:130px;}

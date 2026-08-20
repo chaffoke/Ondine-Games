@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Réflexe × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/design-tokens.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">RÉFLEXE</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="reflexeHomeStats"></div>
+  <div id="reflexeLastTry"></div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startGame()">⚡ Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div id="reflexeStatus"></div>
+  <div id="targetZone"></div>
+  <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+</div>
+
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="reflexeAchList"></div>
+</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

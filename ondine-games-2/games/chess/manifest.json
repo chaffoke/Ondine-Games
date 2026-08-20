@@ -1,0 +1,10 @@
+{
+  "id": "chess",
+  "name": "Échecs",
+  "icon": "♟️",
+  "category": "reflexion",
+  "description": "Règles complètes : roque, prise en passant, promotion, mat/pat. 21 tests unitaires + 100 parties simulées.",
+  "minPlayers": 1,
+  "maxPlayers": 2,
+  "version": "1.0.0"
+}

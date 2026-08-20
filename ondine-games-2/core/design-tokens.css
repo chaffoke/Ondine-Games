@@ -1,0 +1,239 @@
+/* ═══════════════════════════════════════════════════════════════
+   design-tokens.css
+   ───────────────────────────────────────
+   Palette, typographie, rayons, ombres, glassmorphism — déjà
+   identiques (valeurs exactes) dans les 18 jeux actuels et dans les
+   composants UI.* du CoreBundle Batch 1. Un commentaire du code
+   d'origine le confirmait déjà : "Le style visuel vient TOUJOURS de
+   core/design-tokens.css via les variables --c1, --glass, etc. Ne
+   jamais coder une couleur en dur." Ce fichier formalise ce qui
+   existait déjà en pratique, sans rien réinventer.
+
+   DOIT rester spécifique par jeu (ne PAS mettre ici) : couleurs
+   d'accent de cartes de jeu (--card-c par jeu dans le Hub), thème
+   des tuiles Mahjong, couleurs rouge/noir des cartes à jouer.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Fond */
+  --bg: #06081e;
+  --bg2: #090c24;
+
+  /* Accents */
+  --c1: #38bdf8;
+  --c2: #7dd3fc;
+  --c3: #bae6fd;
+  --cp: #818cf8;
+  --cg: #34d399;
+  --co: #fbbf24;
+  --cr: #f87171;
+  --cm: #f472b6;
+
+  /* Glassmorphism */
+  --glass: rgba(255, 255, 255, .05);
+  --glass2: rgba(255, 255, 255, .09);
+  --glass3: rgba(56, 189, 248, .07);
+  --border: rgba(56, 189, 248, .12);
+  --border2: rgba(56, 189, 248, .22);
+
+  /* Texte */
+  --text: #e0f2fe;
+  --text2: #94a3b8;
+
+  /* Rayons */
+  --r: 14px;
+  --r2: 20px;
+
+  /* Ombres */
+  --sh: 0 4px 20px rgba(0, 0, 0, .5);
+  --sh2: 0 8px 32px rgba(0, 0, 0, .6);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(56, 189, 248, .12), transparent 50%),
+    radial-gradient(ellipse at 90% 10%, rgba(129, 140, 248, .10), transparent 45%),
+    var(--bg);
+}
+
+/* ── Utilitaire générique (modales statiques, etc.) ── */
+.hidden { display: none !important; }
+
+/* ── Écrans (pattern showScreen / NavigationService.go) ── */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.screen.hidden { display: none !important; }
+
+/* ── Boutons ── */
+.ondine-btn {
+  font-family: 'Fredoka One', cursive;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform .12s;
+}
+.ondine-btn:active { transform: scale(.955); }
+.ondine-btn-primary {
+  background: linear-gradient(135deg, #3730a3, #0e7490);
+  color: #fff;
+  padding: 15px 28px;
+  font-size: 17px;
+  box-shadow: 0 6px 24px rgba(14, 116, 144, .45);
+}
+.ondine-btn-primary:disabled { opacity: .35; box-shadow: none; }
+.ondine-btn-secondary {
+  background: var(--glass);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  padding: 11px 22px;
+  font-weight: 800;
+  font-size: 13px;
+  font-family: 'Nunito', sans-serif;
+}
+.ondine-icon-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Toast (UI.toastHost / NotificationService) ── */
+.ondine-toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(15, 25, 60, .92);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  opacity: 0;
+  transition: all .3s;
+  white-space: nowrap;
+  max-width: 80vw;
+  text-align: center;
+  pointer-events: none;
+}
+.ondine-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Modale (UI.modal / DialogService) ── */
+.ondine-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(6, 8, 30, .85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.ondine-modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 22px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: var(--sh2);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.ondine-modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px;
+  color: var(--c2);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.ondine-modal-body {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.ondine-modal-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Badge / statCard / achievementCard (UI.*) ── */
+.ondine-badge {
+  display: inline-block;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  background: var(--glass);
+  border: 1px solid var(--border);
+}
+.ondine-stat-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.ondine-stat-value { font-family: 'Fredoka One', cursive; font-size: 19px; color: var(--c1); }
+.ondine-stat-label { font-size: 8px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.ondine-ach-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 9px 11px;
+}
+.ondine-ach-card.unlocked { border-color: rgba(251, 191, 36, .35); background: rgba(251, 191, 36, .05); }
+.ondine-ach-icon { font-size: 22px; }
+.ondine-ach-name { font-weight: 800; font-size: 12px; }
+.ondine-ach-desc { font-size: 9px; color: var(--text2); }
+
+/* ── Logo (pattern commun d'écran d'accueil) ── */
+.ondine-logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 8vw, 40px);
+  background: linear-gradient(160deg, #e0f2fe, #7dd3fc 35%, #fff 55%, #bae6fd 80%, #e0f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ondine-logo-sub {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--c2);
+  opacity: .65;
+}

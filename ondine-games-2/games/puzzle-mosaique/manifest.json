@@ -1,0 +1,10 @@
+{
+  "id": "puzzle-mosaique",
+  "name": "Puzzle Mosaïque",
+  "icon": "🧩",
+  "category": "reflexion",
+  "description": "Sudoku irrégulier 8×8 à régions libres. Choisis ton personnage, générateur testé sur 100 puzzles, unicité de solution garantie et vérifiée indépendamment.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "2.0.0"
+}

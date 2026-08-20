@@ -1,0 +1,59 @@
+/* ═══════════════════════════════════════════════════════════════
+   games/morpion/styles.css
+   ───────────────────────────────────────
+   Uniquement ce qui est spécifique à Morpion. Boutons, toast,
+   modale, écrans (.screen), logo, statCard/achCard générique
+   viennent de core/design-tokens.css — pas dupliqués ici.
+   Exception pragmatique : .statCard/.achCard sont redéfinis
+   localement (plutôt que de restructurer ui.js pour utiliser
+   UI.statCard()/UI.achievementCard()) afin de garder cette
+   migration pilote strictement comportement-identique. Amélioration
+   possible plus tard, pas une régression aujourd'hui.
+   ═══════════════════════════════════════════════════════════════ */
+
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+#sg{align-items:center;padding:14px;gap:14px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:340px;}
+.turn-badge{font-family:'Fredoka One',cursive;font-size:13px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:6px 14px;}
+.score-row{display:flex;gap:16px;font-family:'Fredoka One',cursive;font-size:14px;}
+.score-x{color:var(--c1);} .score-o{color:var(--cm);} .score-d{color:var(--text2);}
+
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;width:100%;aspect-ratio:1;}
+.cell{background:var(--glass);border:1.5px solid var(--border);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:44px;font-family:'Fredoka One',cursive;cursor:pointer;transition:all .15s;}
+.cell:active{transform:scale(.95);}
+.cell.x{color:var(--c1);} .cell.o{color:var(--cm);}
+.cell.win{background:rgba(52,211,153,.15);border-color:var(--cg);}
+.cell.filled{cursor:default;}
+.cell .mark{animation:markIn .25s cubic-bezier(.34,1.56,.64,1);}
+@keyframes markIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:320px;}
+
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.96);backdrop-filter:blur(20px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}

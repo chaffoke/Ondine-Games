@@ -1,0 +1,10 @@
+{
+  "id": "simon",
+  "name": "Simon",
+  "icon": "🟢",
+  "category": "reflexion",
+  "description": "Reproduis la séquence de couleurs, mémoire musicale classique.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}

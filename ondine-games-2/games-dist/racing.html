@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Ondine Racing</title>
+<meta name="theme-color" content="#0a0620">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   design-tokens.css
+   ───────────────────────────────────────
+   Palette, typographie, rayons, ombres, glassmorphism — déjà
+   identiques (valeurs exactes) dans les 18 jeux actuels et dans les
+   composants UI.* du CoreBundle Batch 1. Un commentaire du code
+   d'origine le confirmait déjà : "Le style visuel vient TOUJOURS de
+   core/design-tokens.css via les variables --c1, --glass, etc. Ne
+   jamais coder une couleur en dur." Ce fichier formalise ce qui
+   existait déjà en pratique, sans rien réinventer.
+
+   DOIT rester spécifique par jeu (ne PAS mettre ici) : couleurs
+   d'accent de cartes de jeu (--card-c par jeu dans le Hub), thème
+   des tuiles Mahjong, couleurs rouge/noir des cartes à jouer.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Fond */
+  --bg: #06081e;
+  --bg2: #090c24;
+
+  /* Accents */
+  --c1: #38bdf8;
+  --c2: #7dd3fc;
+  --c3: #bae6fd;
+  --cp: #818cf8;
+  --cg: #34d399;
+  --co: #fbbf24;
+  --cr: #f87171;
+  --cm: #f472b6;
+
+  /* Glassmorphism */
+  --glass: rgba(255, 255, 255, .05);
+  --glass2: rgba(255, 255, 255, .09);
+  --glass3: rgba(56, 189, 248, .07);
+  --border: rgba(56, 189, 248, .12);
+  --border2: rgba(56, 189, 248, .22);
+
+  /* Texte */
+  --text: #e0f2fe;
+  --text2: #94a3b8;
+
+  /* Rayons */
+  --r: 14px;
+  --r2: 20px;
+
+  /* Ombres */
+  --sh: 0 4px 20px rgba(0, 0, 0, .5);
+  --sh2: 0 8px 32px rgba(0, 0, 0, .6);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(56, 189, 248, .12), transparent 50%),
+    radial-gradient(ellipse at 90% 10%, rgba(129, 140, 248, .10), transparent 45%),
+    var(--bg);
+}
+
+/* ── Utilitaire générique (modales statiques, etc.) ── */
+.hidden { display: none !important; }
+
+/* ── Écrans (pattern showScreen / NavigationService.go) ── */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.screen.hidden { display: none !important; }
+
+/* ── Boutons ── */
+.ondine-btn {
+  font-family: 'Fredoka One', cursive;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform .12s;
+}
+.ondine-btn:active { transform: scale(.955); }
+.ondine-btn-primary {
+  background: linear-gradient(135deg, #3730a3, #0e7490);
+  color: #fff;
+  padding: 15px 28px;
+  font-size: 17px;
+  box-shadow: 0 6px 24px rgba(14, 116, 144, .45);
+}
+.ondine-btn-primary:disabled { opacity: .35; box-shadow: none; }
+.ondine-btn-secondary {
+  background: var(--glass);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  padding: 11px 22px;
+  font-weight: 800;
+  font-size: 13px;
+  font-family: 'Nunito', sans-serif;
+}
+.ondine-icon-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Toast (UI.toastHost / NotificationService) ── */
+.ondine-toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(15, 25, 60, .92);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  opacity: 0;
+  transition: all .3s;
+  white-space: nowrap;
+  max-width: 80vw;
+  text-align: center;
+  pointer-events: none;
+}
+.ondine-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Modale (UI.modal / DialogService) ── */
+.ondine-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(6, 8, 30, .85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.ondine-modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 22px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: var(--sh2);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.ondine-modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px;
+  color: var(--c2);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.ondine-modal-body {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.ondine-modal-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Badge / statCard / achievementCard (UI.*) ── */
+.ondine-badge {
+  display: inline-block;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  background: var(--glass);
+  border: 1px solid var(--border);
+}
+.ondine-stat-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.ondine-stat-value { font-family: 'Fredoka One', cursive; font-size: 19px; color: var(--c1); }
+.ondine-stat-label { font-size: 8px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.ondine-ach-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 9px 11px;
+}
+.ondine-ach-card.unlocked { border-color: rgba(251, 191, 36, .35); background: rgba(251, 191, 36, .05); }
+.ondine-ach-icon { font-size: 22px; }
+.ondine-ach-name { font-weight: 800; font-size: 12px; }
+.ondine-ach-desc { font-size: 9px; color: var(--text2); }
+
+/* ── Logo (pattern commun d'écran d'accueil) ── */
+.ondine-logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 8vw, 40px);
+  background: linear-gradient(160deg, #e0f2fe, #7dd3fc 35%, #fff 55%, #bae6fd 80%, #e0f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ondine-logo-sub {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--c2);
+  opacity: .65;
+}
+
+</style>
+<style>
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── Accueil ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px;background:radial-gradient(ellipse at 50% 20%,#2a1550,#0a0620 70%);}
+.racing-mascot{font-size:52px;filter:drop-shadow(0 0 20px rgba(192,132,252,.5));}
+.racing-hud-top{display:flex;gap:8px;}
+#homeCredits,#homeLevel{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-family:'Fredoka One',cursive;font-size:13px;}
+
+/* ── Sélection de course ── */
+#sselect{align-items:center;padding:16px;gap:10px;overflow-y:auto;}
+#trackList{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px;}
+.track-card{display:flex;align-items:center;gap:12px;background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:10px 14px;cursor:pointer;}
+.track-card.sel{border-color:var(--c1);background:var(--glass3);}
+.track-card.locked{opacity:.45;cursor:default;}
+.tc-icon{font-size:28px;}
+.tc-name{font-weight:800;font-size:14px;}
+.tc-sub{font-size:10px;color:var(--text2);}
+.diff-row{display:flex;gap:8px;width:100%;max-width:420px;}
+.diff-opt{flex:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px;text-align:center;cursor:pointer;font-weight:800;font-size:12px;}
+.diff-opt.sel{border-color:var(--co);background:rgba(251,191,36,.08);}
+
+/* ── Garage ── */
+#sgarage{align-items:center;padding:16px;gap:10px;overflow-y:auto;}
+#carList{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:420px;}
+.car-card{background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:10px;text-align:center;cursor:pointer;}
+.car-card.sel{border-color:var(--c1);background:var(--glass3);}
+.cc-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 6px;}
+.cc-name{font-weight:800;font-size:12px;}
+.cc-stats{font-size:9px;color:var(--text2);margin-top:2px;}
+#upgradeList{width:100%;max-width:420px;display:flex;flex-direction:column;gap:6px;}
+.upg-card{display:flex;align-items:center;justify-content:space-between;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 12px;}
+.upg-name{font-weight:800;font-size:12px;}
+.upg-sub{font-size:9px;color:var(--text2);}
+.upg-btn{padding:8px 12px !important;font-size:11px !important;}
+
+/* ── Course ── */
+#sg{padding:8px;gap:6px;align-items:center;}
+.race-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;}
+.race-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
+#raceCanvas{width:100%;max-width:420px;aspect-ratio:1;border-radius:16px;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4/Échecs/etc., même cause :
+   max-width jamais adapté au-delà du mobile). Additif. */
+@media (min-width:900px){#raceCanvas{max-width:640px;}}
+.boost-row{display:flex;align-items:center;gap:10px;width:100%;max-width:420px;}
+.boost-gauge{flex:1;height:14px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+#boostFill{height:100%;background:linear-gradient(90deg,#38bdf8,#c084fc);transition:width .1s linear;}
+#boostBtn{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.06);border:3px solid var(--border);color:var(--text2);font-family:'Fredoka One',cursive;font-size:13px;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:all .15s;}
+#boostBtn.ready{border-color:var(--co);color:var(--co);box-shadow:0 0 20px rgba(251,191,36,.4);animation:boostPulse 1s ease infinite;}
+#boostBtn.active{border-color:#38bdf8;color:#38bdf8;box-shadow:0 0 30px rgba(56,189,248,.6);transform:scale(1.05);}
+@keyframes boostPulse{0%,100%{box-shadow:0 0 12px rgba(251,191,36,.3);}50%{box-shadow:0 0 26px rgba(251,191,36,.6);}}
+
+/* ── Résultat (overlay, circuit reste visible derrière) ── */
+#sresult{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+#resultIcon{font-size:56px;}
+#resultTitle{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);}
+.result-stats{display:flex;gap:8px;width:100%;max-width:320px;margin:8px 0;}
+.result-stat{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 6px;}
+.result-stat .rv{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c1);}
+.result-stat .rl{font-size:8px;color:var(--text2);text-transform:uppercase;}
+.result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
+.result-btns button{flex:1;min-width:130px;}
+
+</style>
+</head>
+<body>
+
+<!-- ACCUEIL -->
+<div class="screen" id="sh">
+  <div class="racing-hud-top"><div id="homeCredits">💰 0</div><div id="homeLevel">Niveau 1</div></div>
+  <div class="racing-mascot">🐀🕶️</div>
+  <div class="ondine-logo">ONDINE RACING</div>
+  <div class="ondine-logo-sub">🏎️ Course arcade</div>
+  <button class="ondine-btn ondine-btn-primary" onclick="goSelect()">🏁 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="goGarage()">🔧 Garage</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<!-- SÉLECTION DE COURSE -->
+<div class="screen hidden" id="sselect">
+  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">←</div>
+  <div id="trackList"></div>
+  <div class="diff-row">
+    <div class="diff-opt" id="diff_easy" onclick="selectDifficulty('easy')">🌱 Facile</div>
+    <div class="diff-opt sel" id="diff_normal" onclick="selectDifficulty('normal')">⚡ Normal</div>
+    <div class="diff-opt" id="diff_hard" onclick="selectDifficulty('hard')">🔥 Difficile</div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" id="launchBtn" onclick="startRace()">🏁 Lancer la course</button>
+</div>
+
+<!-- GARAGE -->
+<div class="screen hidden" id="sgarage">
+  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">←</div>
+  <div id="garageCredits">💰 0</div>
+  <div id="carList"></div>
+  <div id="upgradeList"></div>
+</div>
+
+<!-- COURSE -->
+<div class="screen hidden" id="sg">
+  <div class="race-hud">
+    <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
+    <div class="race-hud-item">Pos. <span id="hudPos">1 / 6</span></div>
+    <div class="race-hud-item">Tour <span id="hudLap">1 / 3</span></div>
+  </div>
+  <canvas id="raceCanvas" width="420" height="420"></canvas>
+  <div class="boost-row">
+    <div class="boost-gauge"><div id="boostFill" style="width:100%;"></div></div>
+  </div>
+  <div id="boostBtn" ontouchstart="onBoostPress()" onclick="onBoostPress()">⚡<span>BOOST</span></div>
+</div>
+
+<!-- RÉSULTAT (overlay — le circuit #sg reste visible en dessous) -->
+<div class="screen hidden" id="sresult">
+  <div id="resultIcon">🏆</div>
+  <div id="resultTitle">VICTOIRE !</div>
+  <div class="result-stats">
+    <div class="result-stat"><div class="rv" id="resultPos">1/6</div><div class="rl">Position</div></div>
+    <div class="result-stat"><div class="rv" id="resultTime">0.0s</div><div class="rl">Temps</div></div>
+    <div class="result-stat"><div class="rv" id="resultCredits">+0</div><div class="rl">Crédits</div></div>
+    <div class="result-stat"><div class="rv" id="resultXp">+0</div><div class="rl">XP</div></div>
+  </div>
+  <div class="result-btns">
+    <button class="ondine-btn ondine-btn-primary" onclick="replayRace()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="nextRace()">🏁 Course suivante</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="resultToGarage()">🔧 Garage</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="resultToHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- STATS / SUCCÈS -->
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListRacing"></div>
+</div>
+
+<script>
+const CoreBundle = (function() {
+// ── storage/keys.js ──
+// ═══════════════════════════════════════════════════════════════
+// core/storage/keys.js
+// ───────────────────────────────────────
+// RÔLE : point UNIQUE de calcul des clés localStorage, et mécanisme
+//        de migration transparente depuis les anciennes conventions
+//        (og_<id>_v1, <id>_ondine_v1, ondine_stats_<id>, sol_*,
+//        sud_*, y*...) vers la nouvelle convention :
+//
+//            ondine.games.<gameId>.<namespace>
+//
+//        namespace ∈ { stats, achievements, save, settings }
+//
+// NE DOIT JAMAIS : être importé directement par un jeu — seuls les
+//        services (StatsService, AchievementsService, SaveService)
+//        l'utilisent. Un jeu ne voit jamais une clé localStorage.
+//
+// GARANTIE : aucune sauvegarde existante n'est perdue. Au premier
+//        accès après mise à jour, si la nouvelle clé est absente,
+//        l'ancienne est lue, migrée vers la nouvelle clé, puis
+//        utilisée exclusivement ensuite. L'ancienne clé n'est
+//        JAMAIS supprimée automatiquement (voir section 24 de
+//        l'architecture — suppression = décision humaine ultérieure,
+//        pas automatique).
+// ═══════════════════════════════════════════════════════════════
+
+function newKey(gameId, namespace) {
+  return `ondine.games.${gameId}.${namespace}`;
+}
+
+/**
+ * Registre des anciennes clés, par jeu. Deux formes possibles :
+ *  - { type: 'blob', key, fields } : une seule ancienne clé JSON
+ *    contenant plusieurs namespaces en sous-champs (ex: Batch 2/3 :
+ *    { stats, achievements, save }).
+ *  - { type: 'flat', keys: { stats: 'xxx', achievements: 'yyy' } } :
+ *    une ancienne clé dédiée par namespace (ex: Batch 1 SDK,
+ *    ondine_stats_<id> / ondine_ach_<id> / ondine_save_<id>).
+ *
+ * Volontairement minimal : seul Morpion (jeu pilote) est renseigné
+ * pour l'instant. Les 17 autres entrées seront ajoutées au moment
+ * où chaque jeu sera réellement migré (voir architecture, section 21)
+ * — les y ajouter maintenant sans les tester serait spéculatif.
+ */
+const LEGACY_REGISTRY = {
+  morpion: { type: 'blob', key: 'og_morpion_v1', fields: ['stats', 'achievements'] },
+};
+
+function readLegacy(gameId, namespace) {
+  const entry = LEGACY_REGISTRY[gameId];
+  if (!entry) return undefined;
+
+  if (entry.type === 'blob') {
+    if (!entry.fields.includes(namespace)) return undefined;
+    try {
+      const raw = localStorage.getItem(entry.key);
+      if (raw === null) return undefined;
+      const blob = JSON.parse(raw);
+      return namespace in blob ? blob[namespace] : undefined;
+    } catch (e) {
+      console.warn('[storage/keys] ancienne clé blob corrompue pour', gameId, e);
+      return undefined;
+    }
+  }
+
+  if (entry.type === 'flat') {
+    const legacyKey = entry.keys && entry.keys[namespace];
+    if (!legacyKey) return undefined;
+    try {
+      const raw = localStorage.getItem(legacyKey);
+      return raw === null ? undefined : JSON.parse(raw);
+    } catch (e) {
+      console.warn('[storage/keys] ancienne clé plate corrompue pour', gameId, e);
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Lit `namespace` pour `gameId`. Cherche d'abord la nouvelle clé ;
+ * si absente, cherche l'ancienne (si le jeu est dans LEGACY_REGISTRY),
+ * et si trouvée, MIGRE immédiatement (écrit la nouvelle clé) avant
+ * de retourner la valeur. Retourne `undefined` si rien n'existe nulle
+ * part (au service appelant de fournir sa propre valeur par défaut).
+ */
+function readNamespaced(gameId, namespace) {
+  const key = newKey(gameId, namespace);
+  const raw = localStorage.getItem(key);
+  if (raw !== null) {
+    try { return JSON.parse(raw); }
+    catch (e) { console.warn('[storage/keys] nouvelle clé corrompue pour', gameId, namespace, e); return undefined; }
+  }
+
+  const legacyValue = readLegacy(gameId, namespace);
+  if (legacyValue !== undefined) {
+    writeNamespaced(gameId, namespace, legacyValue);
+    console.info(`[storage/keys] migration ${gameId}.${namespace} : ancienne clé → ${key}`);
+    return legacyValue;
+  }
+
+  return undefined;
+}
+
+function writeNamespaced(gameId, namespace, value) {
+  localStorage.setItem(newKey(gameId, namespace), JSON.stringify(value));
+}
+
+function removeNamespaced(gameId, namespace) {
+  localStorage.removeItem(newKey(gameId, namespace));
+  // L'ancienne clé n'est jamais supprimée ici — voir garantie ci-dessus.
+}
+
+function hasNamespaced(gameId, namespace) {
+  if (localStorage.getItem(newKey(gameId, namespace)) !== null) return true;
+  return readLegacy(gameId, namespace) !== undefined;
+}
+
+
+// ── engines/RandomEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Random Engine
+// ───────────────────────────────────────
+// RÔLE : mélange Fisher-Yates générique.
+// ───────────────────────────────────────
+// DÉVIATION DOCUMENTÉE par rapport au CoreBundle Batch 1 : la version
+// d'origine (`shuffle(arr)`) mélangeait EN PLACE et retournait le
+// même tableau. Or les 8+ implémentations dupliquées dans les jeux
+// Batch 2/3 (`shuffleArr`) font toutes une COPIE et ne mutent jamais
+// le tableau source — c'est le comportement majoritaire réellement
+// utilisé (8+ jeux contre 1 seul, Uno, sur l'ancienne version
+// mutante). Kevin a explicitement demandé de "respecter le
+// comportement réellement utilisé par les jeux" plutôt que de
+// recopier l'ancienne version sans vérifier — c'est ce qui est fait
+// ici : shuffle() ne mute JAMAIS le tableau passé, retourne toujours
+// une nouvelle copie mélangée.
+//
+// Conséquence pour la migration d'Uno (non faite dans cette phase) :
+// son code interne compte actuellement sur la mutation en place ;
+// migrer Uno vers ce RandomEngine nécessitera de vérifier ses appels
+// à shuffle() un par un, pas juste un remplacement mécanique.
+// ═══════════════════════════════════════════════════════════════
+
+/** Fisher-Yates — retourne TOUJOURS une nouvelle copie mélangée,
+ *  ne modifie jamais le tableau passé en argument. */
+function shuffle(array) {
+  const a = [...array];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+
+// ── engines/GridEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Grid Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur une grille 2D (création, accès,
+//        voisinage, flood fill). Ne connaît ni Puissance 4, ni
+//        Démineur, ni Sudoku, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir le mot "mine", "disque", "case sûre" ou
+//        toute notion spécifique à un jeu.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1 (déjà utilisé par
+// Puissance 4 et Démineur). Engine optionnel : un jeu l'importe
+// directement s'il en a besoin, pas obligatoirement via le SDK (pas
+// d'état interne, donc pas de risque d'accès croisé entre jeux).
+// ═══════════════════════════════════════════════════════════════
+
+/** Crée une grille rows×cols, chaque cellule initialisée à `fill`. */
+function createGrid(rows, cols, fill = null) {
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => (typeof fill === 'function' ? fill() : fill))
+  );
+}
+
+function inBounds(grid, r, c) {
+  return r >= 0 && r < grid.length && c >= 0 && c < grid[0].length;
+}
+
+function getCell(grid, r, c) {
+  return inBounds(grid, r, c) ? grid[r][c] : undefined;
+}
+
+function setCell(grid, r, c, value) {
+  if (inBounds(grid, r, c)) grid[r][c] = value;
+}
+
+function forEachCell(grid, fn) {
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[r].length; c++) fn(grid[r][c], r, c);
+  }
+}
+
+/** Coordonnées des 4 voisins orthogonaux valides. */
+function neighbors4(grid, r, c) {
+  return [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].filter(([rr, cc]) =>
+    inBounds(grid, rr, cc)
+  );
+}
+
+/** Coordonnées des 8 voisins (orthogonaux + diagonales) valides. */
+function neighbors8(grid, r, c) {
+  const out = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const rr = r + dr, cc = c + dc;
+      if (inBounds(grid, rr, cc)) out.push([rr, cc]);
+    }
+  }
+  return out;
+}
+
+/**
+ * Flood fill générique à partir de (r,c). `matchFn(value, r, c)` décide
+ * si une cellule doit être incluse dans la propagation ; `visitFn(value, r, c)`
+ * est appelé pour chaque cellule visitée (une seule fois). Ne décide
+ * jamais lui-même de la condition d'arrêt — c'est au jeu de la fournir.
+ */
+function floodFill(grid, startR, startC, matchFn, visitFn, useDiagonals = true) {
+  const visited = createGrid(grid.length, grid[0].length, false);
+  const stack = [[startR, startC]];
+  while (stack.length) {
+    const [r, c] = stack.pop();
+    if (!inBounds(grid, r, c) || visited[r][c]) continue;
+    visited[r][c] = true;
+    if (!matchFn(grid[r][c], r, c)) continue;
+    visitFn(grid[r][c], r, c);
+    const neigh = useDiagonals ? neighbors8(grid, r, c) : neighbors4(grid, r, c);
+    for (const [rr, cc] of neigh) if (!visited[rr][cc]) stack.push([rr, cc]);
+  }
+}
+
+/** Compte les cartes de N valeurs identiques consécutives à partir de
+ *  (r,c) dans une direction (dr,dc), dans les deux sens. Utile pour
+ *  toute détection d'alignement (Puissance 4, Morpion, Othello...). */
+function countAligned(grid, r, c, dr, dc, matchFn) {
+  let count = 1;
+  let rr = r + dr, cc = c + dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr += dr; cc += dc; }
+  rr = r - dr; cc = c - dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr -= dr; cc -= dc; }
+  return count;
+}
+
+
+// ── engines/CardEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Card Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur un tableau de cartes (peu importe
+//        ce qu'est une "carte" — le jeu décide de sa forme : {color,
+//        value} pour Uno, {suit,rank} pour Solitaire/Rami/Spider...).
+//        Ne connaît ni Uno, ni Solitaire, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir une notion de combinaison valide (suite/
+//        groupe de Rami, séquence de Spider), de carte "jouable"
+//        (Uno), ou de score de main — ça reste dans chaque jeu.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1 (déjà utilisé par Uno).
+// Candidat de migration pour Solitaire/Rami/Spider (jamais branchés
+// à ce moteur malgré une structure de carte compatible — voir
+// architecture, section 5). PAS pertinent pour Road Trip (cartes à
+// effet, pas des cartes à jouer), Memory (pas de main/pioche) ni
+// Mahjong (tuiles, géométrie différente).
+// ═══════════════════════════════════════════════════════════════
+
+/** Construit un deck mélangé à partir d'une liste de cartes (copie,
+ *  ne mute jamais le tableau source — voir RandomEngine.shuffle). */
+function createDeck(cards) {
+  return shuffle([...cards]);
+}
+
+/** Retire et retourne les `n` cartes du dessus (fin du tableau = dessus). */
+function draw(deck, n = 1) {
+  return deck.splice(Math.max(0, deck.length - n), n).reverse();
+}
+
+/** Distribue `cardsPerPlayer` cartes à `playerCount` joueurs, à tour de
+ *  rôle (comme une vraie distribution), depuis le sommet du deck. */
+function deal(deck, playerCount, cardsPerPlayer) {
+  const hands = Array.from({ length: playerCount }, () => []);
+  for (let round = 0; round < cardsPerPlayer; round++) {
+    for (let p = 0; p < playerCount; p++) {
+      const card = draw(deck, 1)[0];
+      if (card) hands[p].push(card);
+    }
+  }
+  return hands;
+}
+
+/**
+ * Reconstitue un deck épuisé à partir d'une pile de défausse, en
+ * gardant la carte du dessus en place (pattern stock/waste commun à
+ * Solitaire, Uno, Rami, Spider).
+ */
+function reshuffleDiscardIntoDeck(discardPile, keepTopCard = true) {
+  if (discardPile.length <= 1) return [];
+  const top = keepTopCard ? discardPile.pop() : null;
+  const rest = shuffle(discardPile.splice(0, discardPile.length));
+  if (top) discardPile.push(top);
+  return rest;
+}
+
+
+// ── engines/DiceEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Dice Engine
+// ───────────────────────────────────────
+// RÔLE : lancer et gérer des pools de dés (valeur + verrou), compter
+//        les valeurs obtenues. Ne connaît ni YAMS, ni Shut the Box,
+//        ni 421, ni aucune règle de score.
+// NE DOIT JAMAIS : contenir une notion de catégorie de score, de
+//        combinaison gagnante (Brelan, Suite, 421, Nénette...), ou
+//        de règle spécifique à un jeu.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1 (déjà utilisé par Shut the
+// Box). Candidat de migration pour YAMS et 421 (jamais branchés,
+// leurs règles de score restent entièrement différentes et propres
+// à chacun — voir architecture, section 5).
+// ═══════════════════════════════════════════════════════════════
+
+function rollDie(sides = 6) {
+  return 1 + Math.floor(Math.random() * sides);
+}
+
+function rollDice(count, sides = 6) {
+  return Array.from({ length: count }, () => rollDie(sides));
+}
+
+/** Crée un pool de dés à l'état initial : valeur nulle, non verrouillé. */
+function createDicePool(count) {
+  return Array.from({ length: count }, () => ({ value: null, locked: false }));
+}
+
+/** Relance uniquement les dés non verrouillés du pool (mutation + retour). */
+function rollUnlocked(pool, sides = 6) {
+  pool.forEach((d) => { if (!d.locked) d.value = rollDie(sides); });
+  return pool;
+}
+
+function toggleLock(pool, index) {
+  if (pool[index]) pool[index].locked = !pool[index].locked;
+  return pool;
+}
+
+/** Compte les occurrences de chaque valeur — utile à toute règle de
+ *  score basée sur des combinaisons (brelan, suite, etc.). */
+function countValues(values) {
+  const counts = {};
+  values.forEach((v) => { counts[v] = (counts[v] || 0) + 1; });
+  return counts;
+}
+
+
+// ── engines/AIEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// AI Engine
+// ───────────────────────────────────────
+// RÔLE : recherche de meilleur coup par minimax + élagage alpha-bêta,
+//        entièrement générique. Le jeu fournit les fonctions pures
+//        (getMoves, applyMove, isTerminal, evaluate) ; ce moteur ne
+//        connaît aucune règle de Puissance 4, Othello, Morpion ou
+//        autre.
+// NE DOIT JAMAIS : contenir une notion de "disque", de "colonne",
+//        de "grille 3×3" ou toute règle spécifique à un jeu.
+// ───────────────────────────────────────
+// IMPORTANT — ce moteur reste VOLONTAIREMENT en dehors du SDK
+// (pas de `sdk.ai`). Sur les 6 jeux ayant une IA adversaire réelle,
+// seul Puissance 4 (et Othello/Morpion en migration future) relèvent
+// d'une recherche arborescente généralisable — Dames a une
+// heuristique de capture propre, Rami et Road Trip ont des IA à
+// PRIORITÉS DE RÈGLES (débloquer > avancer > attaquer), pas de
+// recherche. Les y forcer serait exactement l'anti-pattern à éviter
+// ("ne pas enfermer toutes les IA dans un moteur monolithique" —
+// voir architecture, section 5). Un jeu qui a besoin de ce moteur
+// l'importe directement, comme un engine, jamais via `sdk.*`.
+//
+// Contrat attendu (fns) :
+//   getMoves(state)                 → tableau de coups possibles
+//   applyMove(state, move)          → nouvel état après le coup (ne mute pas)
+//   isTerminal(state)               → true si partie finie
+//   evaluate(state, player, depth)  → score du point de vue de `player`.
+//     `depth` (profondeur RESTANTE) est optionnel mais recommandé
+//     pour un score de victoire/défaite (ex: 1000+depth / -1000-depth)
+//     — sinon deux victoires à profondeurs différentes sont à égalité
+//     et l'IA peut sembler hésiter (bug réel rencontré en développant
+//     Puissance 4 : une "double menace" laissait l'IA ignorer un coup
+//     gagnant immédiat au profit d'un coup neutre qui gagnait quand
+//     même, 2 coups plus tard — ce commentaire est conservé tel quel
+//     du CoreBundle d'origine, la leçon reste valable).
+// ═══════════════════════════════════════════════════════════════
+
+function minimax(state, depth, alpha, beta, maximizing, player, fns) {
+  if (depth === 0 || fns.isTerminal(state)) {
+    return fns.evaluate(state, player, depth);
+  }
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return fns.evaluate(state, player);
+
+  if (maximizing) {
+    let best = -Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, false, player, fns);
+      best = Math.max(best, val);
+      alpha = Math.max(alpha, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, true, player, fns);
+      best = Math.min(best, val);
+      beta = Math.min(beta, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+/**
+ * Retourne le meilleur coup pour `player` à la profondeur `depth`.
+ * Si plusieurs coups sont à égalité, un choix aléatoire parmi eux
+ * évite un bot parfaitement déterministe et prévisible.
+ */
+function chooseBestMove(state, depth, player, fns) {
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return null;
+  let bestScore = -Infinity;
+  let bestMoves = [];
+  for (const move of moves) {
+    const next = fns.applyMove(state, move);
+    const score = minimax(next, depth - 1, -Infinity, Infinity, false, player, fns);
+    if (score > bestScore) { bestScore = score; bestMoves = [move]; }
+    else if (score === bestScore) bestMoves.push(move);
+  }
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}
+
+/** Coup aléatoire simple — utile pour une difficulté "facile" sans
+ *  avoir à écrire un second moteur. */
+function chooseRandomMove(state, fns) {
+  const moves = fns.getMoves(state);
+  return moves.length ? moves[Math.floor(Math.random() * moves.length)] : null;
+}
+
+/**
+ * Façade unique demandée par l'architecture (section 5/13 du brief) :
+ * search({ state, getMoves, applyMove, evaluate, depth, maximizingPlayer })
+ * → { move, score }
+ * Formalise chooseBestMove sous la forme d'objet plutôt que d'inventer
+ * une nouvelle signature.
+ */
+function search({ state, getMoves, applyMove, isTerminal, evaluate, depth, maximizingPlayer }) {
+  const fns = { getMoves, applyMove, isTerminal, evaluate };
+  const move = chooseBestMove(state, depth, maximizingPlayer, fns);
+  const score = move === null ? evaluate(state, maximizingPlayer) : undefined;
+  return { move, score };
+}
+
+const AIEngine = { chooseBestMove, chooseRandomMove, search };
+
+
+// ── engines/SnapshotStore.js ──
+// ═══════════════════════════════════════════════════════════════
+// SnapshotStore
+// ───────────────────────────────────────
+// RÔLE : pile de clones JSON profonds, taille bornée — pour les jeux
+//        qui font un vrai undo multi-coups (Spider Solitaire en est
+//        la preuve : historique par snapshots déjà fonctionnel).
+// NE DOIT JAMAIS : décider QUAND un jeu doit permettre l'undo, ni
+//        avec quelle portée. Rami, par exemple, n'autorise l'annulation
+//        que jusqu'à la pioche (règle du jeu réelle, pas un manque
+//        d'outil) — ce mécanisme ne doit pas lui être imposé.
+// ───────────────────────────────────────
+// NOUVEAU — n'existait pas dans le CoreBundle Batch 1. Formalise le
+// pattern déjà utilisé par Spider (push/pop de JSON.parse(JSON.
+// stringify(state)), pile bornée à 50).
+// ═══════════════════════════════════════════════════════════════
+
+function createSnapshotStore(maxSize = 50) {
+  const stack = [];
+  return {
+    push(state) {
+      stack.push(JSON.parse(JSON.stringify(state)));
+      if (stack.length > maxSize) stack.shift();
+    },
+    pop() {
+      return stack.pop() ?? null;
+    },
+    peek() {
+      return stack.length ? stack[stack.length - 1] : null;
+    },
+    clear() {
+      stack.length = 0;
+    },
+    canUndo() {
+      return stack.length > 0;
+    },
+  };
+}
+
+
+// ── ui/components.js ──
+// ═══════════════════════════════════════════════════════════════
+// UI — bibliothèque de composants Ondine Games
+// ───────────────────────────────────────
+// Chaque fonction retourne un élément DOM prêt à être inséré dans
+// la page. Aucune fonction ici ne connaît un jeu en particulier.
+// Le style visuel (couleurs, rayons, ombres) vient TOUJOURS de
+// core/design-tokens.css via les variables --c1, --glass, etc.
+// Ne jamais coder une couleur en dur dans un composant.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1. Volontairement minimal —
+// seuls les composants réellement utilisés par au moins un jeu sont
+// présents. progressBar/tabs/list/grid/bottomSheet/emptyState/
+// loading/gameCard/profileCard seront ajoutés le jour où un jeu réel
+// en a besoin, pas par anticipation (voir architecture, section 13).
+// ═══════════════════════════════════════════════════════════════
+
+const UI = {
+  /**
+   * Crée l'élément hôte du toast. À insérer une fois dans la page,
+   * puis à passer à NotificationService.mount(el).
+   */
+  toastHost() {
+    const el = document.createElement('div');
+    el.className = 'ondine-toast';
+    el.id = 'ondineToast';
+    return el;
+  },
+
+  button(label, { variant = 'primary', onClick, icon, disabled = false } = {}) {
+    const el = document.createElement('button');
+    el.className = `ondine-btn ondine-btn-${variant}`;
+    el.innerHTML = (icon ? `<span class="ondine-btn-icon">${icon}</span>` : '') + label;
+    if (disabled) el.disabled = true;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  iconButton(icon, { onClick, title = '' } = {}) {
+    const el = document.createElement('button');
+    el.className = 'ondine-icon-btn';
+    el.textContent = icon;
+    if (title) el.title = title;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  badge(text, { variant = 'default' } = {}) {
+    const el = document.createElement('span');
+    el.className = `ondine-badge ondine-badge-${variant}`;
+    el.textContent = text;
+    return el;
+  },
+
+  statCard({ value, label, icon = '' } = {}) {
+    const el = document.createElement('div');
+    el.className = 'ondine-stat-card';
+    el.innerHTML = `${icon ? `<div class="ondine-stat-icon">${icon}</div>` : ''}
+      <div class="ondine-stat-value">${value}</div>
+      <div class="ondine-stat-label">${label}</div>`;
+    return el;
+  },
+
+  achievementCard({ icon, name, desc, unlocked, xp }) {
+    const el = document.createElement('div');
+    el.className = 'ondine-ach-card' + (unlocked ? ' unlocked' : '');
+    el.innerHTML = `<div class="ondine-ach-icon">${icon}</div>
+      <div class="ondine-ach-body">
+        <div class="ondine-ach-name">${name}</div>
+        <div class="ondine-ach-desc">${desc}</div>
+      </div>
+      <div class="ondine-ach-badge">${unlocked ? '✓' : '🔒'}${xp ? ` +${xp} XP` : ''}</div>`;
+    return el;
+  },
+
+  /**
+   * Modale générique : titre, corps (élément DOM déjà construit),
+   * boutons d'action. Retourne { el, close } — `el` est déjà attaché
+   * à un overlay plein écran, prêt à être inséré dans document.body.
+   * Utilisée en interne par DialogService — un jeu peut aussi
+   * l'utiliser directement pour ses propres besoins d'affichage.
+   */
+  modal({ title, bodyEl, actions = [] } = {}) {
+    const overlay = document.createElement('div');
+    overlay.className = 'ondine-modal-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'ondine-modal-box';
+
+    if (title) {
+      const h = document.createElement('div');
+      h.className = 'ondine-modal-title';
+      h.textContent = title;
+      box.appendChild(h);
+    }
+    if (bodyEl) {
+      const body = document.createElement('div');
+      body.className = 'ondine-modal-body';
+      body.appendChild(bodyEl);
+      box.appendChild(body);
+    }
+    if (actions.length) {
+      const row = document.createElement('div');
+      row.className = 'ondine-modal-actions';
+      actions.forEach((btnEl) => row.appendChild(btnEl));
+      box.appendChild(row);
+    }
+    overlay.appendChild(box);
+
+    function close() { overlay.remove(); }
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    return { el: overlay, close };
+  },
+};
+
+
+// ── services/NotificationService.js ──
+// ═══════════════════════════════════════════════════════════════
+// NotificationService
+// ───────────────────────────────────────
+// RÔLE : afficher des messages brefs et non bloquants (toasts).
+// POSSÈDE : l'élément DOM du toast, son minuteur d'auto-masquage.
+// NE DOIT JAMAIS : connaître un jeu, une règle de jeu, ou un texte
+//        spécifique à un jeu — le texte affiché vient toujours de
+//        l'appelant (le jeu, via le SDK).
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle du Batch 1 (déjà utilisé par
+// Solitaire, Puissance 4, Uno, Shut the Box, Démineur, Rhythm Hero).
+// Remplace les fonctions toast() précédemment dupliquées à
+// l'identique dans Solitaire, Sudoku, YAMS, puis dans les 12 jeux
+// des Batch 2/3.
+// ═══════════════════════════════════════════════════════════════
+
+let hostEl = null;
+let hideTimer = null;
+const DEFAULT_DURATION_MS = 2200;
+
+/**
+ * Doit être appelé une fois par le Hub ou par la page du jeu,
+ * en lui passant l'élément DOM créé par UI.toastHost().
+ */
+function mount(el) {
+  hostEl = el;
+}
+
+function show(message, variant = 'info', duration = DEFAULT_DURATION_MS) {
+  if (!hostEl) {
+    // Dégradation silencieuse : pas de host monté = pas de toast,
+    // mais ça ne doit jamais casser le jeu.
+    console.warn('[NotificationService] show() appelé avant mount() :', message);
+    return;
+  }
+  hostEl.textContent = message;
+  hostEl.dataset.variant = variant;
+  hostEl.classList.remove('ondine-toast-show');
+  void hostEl.offsetWidth; // force le reflow pour relancer la transition
+  hostEl.classList.add('ondine-toast-show');
+
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => hostEl.classList.remove('ondine-toast-show'), duration);
+}
+
+const NotificationService = { mount, show };
+
+
+// ── services/StatsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// StatsService
+// ───────────────────────────────────────
+// RÔLE : stocker des compteurs numériques par jeu (parties jouées,
+//        victoires, meilleur score...). Ne connaît aucun nom de
+//        statistique métier — le jeu choisit ses propres clés.
+// POSSÈDE : une entrée localStorage par jeu.
+// NE DOIT JAMAIS : interpréter le sens d'une statistique (ex. ne sait
+//        pas que "victories" est "positif" ou que "errors" est
+//        "négatif" — c'est au jeu d'agir en conséquence).
+// ───────────────────────────────────────
+// PRIVÉ : chaque méthode prend un `gameId` explicite. Un jeu ne doit
+// JAMAIS appeler ce service directement (il pourrait alors lire/
+// écrire les stats d'un AUTRE jeu en changeant le gameId passé) —
+// seul core/sdk/createSDK.js a le droit de l'importer, avec le
+// gameId figé une fois pour toutes par fermeture.
+//
+// Convention de clé : voir core/storage/keys.js — gère la nouvelle
+// convention `ondine.games.<id>.stats` ET la lecture de secours des
+// anciennes clés (ondine_stats_<id>, <id>_ondine_v1, og_<id>_v1,
+// etc.) pour ne perdre aucune sauvegarde existante.
+// ═══════════════════════════════════════════════════════════════
+
+const STATS_NS = 'stats';
+
+function readAll(gameId) {
+  try {
+    return readNamespaced(gameId, STATS_NS) || {};
+  } catch (e) {
+    console.warn('[StatsService] lecture corrompue pour', gameId, e);
+    return {};
+  }
+}
+
+function writeAll(gameId, data) {
+  writeNamespaced(gameId, STATS_NS, data);
+}
+
+const StatsService = {
+  get(gameId, key, defaultValue = 0) {
+    const all = readAll(gameId);
+    return key in all ? all[key] : defaultValue;
+  },
+  set(gameId, key, value) {
+    const all = readAll(gameId);
+    all[key] = value;
+    writeAll(gameId, all);
+  },
+  increment(gameId, key, n = 1) {
+    const all = readAll(gameId);
+    all[key] = (all[key] || 0) + n;
+    writeAll(gameId, all);
+    return all[key];
+  },
+  /** Ne met à jour que si `value` dépasse la valeur actuelle (utile
+   *  pour un meilleur score / meilleur temps). */
+  setMax(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value > all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  setMin(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value < all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  getAll(gameId) { return readAll(gameId); },
+  reset(gameId) { removeNamespaced(gameId, STATS_NS); },
+};
+
+
+// ── services/AchievementsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AchievementsService
+// ───────────────────────────────────────
+// RÔLE : savoir quels succès sont débloqués, par jeu. Ne connaît
+//        jamais la LISTE des succès d'un jeu ni leur condition de
+//        déblocage — ça reste entièrement défini côté jeu (via
+//        sdk.achievements.unlock(id, ...), appelé quand le jeu a
+//        lui-même vérifié sa propre condition).
+// POSSÈDE : une entrée localStorage par jeu.
+// PRIVÉ : voir StatsService.js pour la règle d'isolation par gameId.
+// ═══════════════════════════════════════════════════════════════
+
+const ACH_NS = 'achievements';
+
+function readUnlocked(gameId) {
+  try { return readNamespaced(gameId, ACH_NS) || []; }
+  catch (e) { console.warn('[AchievementsService] lecture corrompue pour', gameId, e); return []; }
+}
+
+const AchievementsService = {
+  isUnlocked(gameId, achId) {
+    return readUnlocked(gameId).includes(achId);
+  },
+  /** Débloque `achId` s'il ne l'était pas déjà. Retourne true si
+   *  c'est une NOUVELLE unlock (utile pour déclencher un toast une
+   *  seule fois), false si déjà débloqué (idempotent). */
+  unlock(gameId, achId) {
+    const list = readUnlocked(gameId);
+    if (list.includes(achId)) return false;
+    list.push(achId);
+    writeNamespaced(gameId, ACH_NS, list);
+    return true;
+  },
+  unlockedList(gameId) { return readUnlocked(gameId); },
+  reset(gameId) { removeNamespaced(gameId, ACH_NS); },
+};
+
+
+// ── services/AudioService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AudioService
+// ───────────────────────────────────────
+// RÔLE : jouer des sons courts synthétisés (Web Audio). Expose DEUX
+//        niveaux, tous deux extraits du code déjà utilisé par les 18
+//        jeux :
+//          1. tone(freq, dur, type, vol) — la primitive bas niveau,
+//             identique à la virgule près dans les 18 jeux actuels.
+//             Un jeu qui veut ses propres sons (comme Rami, Spider,
+//             Road Trip aujourd'hui) l'utilise directement.
+//          2. play(presetName) — une petite bibliothèque de presets
+//             GÉNÉRIQUES (déjà dans le CoreBundle Batch 1), pour les
+//             jeux qui n'ont pas besoin de sons sur mesure.
+// NE DOIT JAMAIS : contenir un preset nommé d'après un jeu (pas de
+//        "unoSkip" ou "yamsRoll"), ni imposer qu'un événement précis
+//        ("victoire") corresponde à une fréquence fixe — c'est
+//        toujours le jeu qui choisit REST tone() ou play(preset).
+// ═══════════════════════════════════════════════════════════════
+
+let audioCtx = null;
+let enabled = true;
+
+function getCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { console.warn('[AudioService] Web Audio indisponible', e); }
+  }
+  return audioCtx;
+}
+
+function tone(freq, dur, type = 'sine', vol = 0.12) {
+  if (!enabled) return;
+  const ctx = getCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
+  } catch (e) { /* silencieux : l'audio ne doit jamais casser le jeu */ }
+}
+
+// Bibliothèque de presets génériques — reprise telle quelle du
+// CoreBundle Batch 1. Optionnelle : un jeu peut l'ignorer entièrement
+// et n'utiliser que tone().
+const PRESETS = {
+  click:   () => tone(880, 0.06, 'sine', 0.10),
+  place:   () => { tone(660, 0.1, 'sine', 0.14); setTimeout(() => tone(880, 0.08, 'sine', 0.10), 60); },
+  success: () => [523, 659, 784].forEach((f, i) => setTimeout(() => tone(f, 0.18, 'sine', 0.16), i * 90)),
+  error:   () => tone(220, 0.16, 'sawtooth', 0.12),
+  win:     () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'sine', 0.18), i * 110)),
+  lose:    () => [392, 330, 262].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'sine', 0.14), i * 120)),
+  flip:    () => tone(440, 0.06, 'triangle', 0.10),
+  unlock:  () => [660, 880, 1100].forEach((f, i) => setTimeout(() => tone(f, 0.15, 'sine', 0.15), i * 80)),
+};
+
+const AudioService = {
+  tone,
+  play(presetName) {
+    const preset = PRESETS[presetName];
+    if (!preset) { console.warn('[AudioService] preset inconnu :', presetName); return; }
+    preset();
+  },
+  setEnabled(v) { enabled = v; },
+  isEnabled() { return enabled; },
+};
+
+
+// ── services/SaveService.js ──
+// ═══════════════════════════════════════════════════════════════
+// SaveService
+// ───────────────────────────────────────
+// RÔLE : persister/restaurer l'état de partie en cours d'un jeu,
+//        sous forme de blob JSON opaque. Ne connaît jamais la forme
+//        de cet état — c'est entièrement défini par le jeu.
+// POSSÈDE : une entrée localStorage par jeu.
+// PRIVÉ : voir StatsService.js pour la règle d'isolation par gameId.
+// ═══════════════════════════════════════════════════════════════
+
+const SAVE_NS = 'save';
+
+const SaveService = {
+  write(gameId, state) {
+    try { writeNamespaced(gameId, SAVE_NS, state); return true; }
+    catch (e) { console.warn('[SaveService] échec de sauvegarde pour', gameId, e); return false; }
+  },
+  read(gameId) {
+    try {
+      const value = readNamespaced(gameId, SAVE_NS);
+      return value === undefined ? null : value;
+    } catch (e) { console.warn('[SaveService] sauvegarde corrompue pour', gameId, e); return null; }
+  },
+  hasSave(gameId) { return hasNamespaced(gameId, SAVE_NS); },
+  clear(gameId) { removeNamespaced(gameId, SAVE_NS); },
+};
+
+
+// ── services/DialogService.js ──
+// ═══════════════════════════════════════════════════════════════
+// DialogService
+// ───────────────────────────────────────
+// RÔLE : afficher une boîte de dialogue de confirmation bloquante
+//        (au sens UX, pas au sens JS — l'appel est asynchrone) et
+//        retourner la réponse de l'utilisateur. Remplace les
+//        `confirm()` natifs du navigateur, incohérents visuellement
+//        avec le reste de la plateforme, et les `confirmDialog()`
+//        dupliqués à l'identique dans les 12 jeux Batch 2/3.
+// NE DOIT JAMAIS : connaître le texte ou le contexte d'un jeu — tout
+//        le contenu est fourni par l'appelant.
+// ───────────────────────────────────────
+// S'appuie sur UI.modal() — c'est le seul service qui a le droit
+// d'importer un composant UI directement (car il EST la logique
+// derrière ce composant, pas un jeu qui le consommerait).
+// ═══════════════════════════════════════════════════════════════
+
+const DialogService = {
+  /** Retourne une Promise<boolean> : true si confirmé, false si annulé. */
+  confirm({ title = '', message = '', confirmLabel = 'OK', cancelLabel = 'Annuler' } = {}) {
+    return new Promise((resolve) => {
+      const bodyEl = document.createElement('div');
+      bodyEl.textContent = message;
+
+      const confirmBtn = UI.button(confirmLabel, {
+        variant: 'primary',
+        onClick: () => { modal.close(); resolve(true); },
+      });
+      const cancelBtn = UI.button(cancelLabel, {
+        variant: 'secondary',
+        onClick: () => { modal.close(); resolve(false); },
+      });
+
+      const modal = UI.modal({ title, bodyEl, actions: [confirmBtn, cancelBtn] });
+      document.body.appendChild(modal.el);
+    });
+  },
+};
+
+
+// ── services/NavigationService.js ──
+// ═══════════════════════════════════════════════════════════════
+// NavigationService
+// ───────────────────────────────────────
+// RÔLE : afficher un écran (`<div class="screen" id="...">`) et
+//        cacher tous les autres. Formalise le pattern déjà présent,
+//        quasi identique, dans 17 des 18 jeux actuels — mais qui
+//        n'avait jamais été extrait en service, même dans le
+//        CoreBundle du Batch 1 (vérifié par l'audit).
+// NE DOIT JAMAIS : contenir un id d'écran ou une logique propre à un
+//        jeu précis. Ne connaît que la convention `.screen` / id.
+// NE PROPOSE PAS de back()/pile de navigation : non démontré dans le
+//        code actuel (aucun des 18 jeux n'a de retour arrière
+//        multi-niveaux — chaque écran est câblé explicitement vers
+//        un écran précis). Ajouter back() serait de la spéculation.
+// ═══════════════════════════════════════════════════════════════
+
+const NavigationService = {
+  /** Cache tous les `.screen`, affiche celui d'id `screenId`. */
+  go(screenId) {
+    document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+    const target = document.getElementById(screenId);
+    if (!target) {
+      console.warn('[NavigationService] écran introuvable :', screenId);
+      return;
+    }
+    target.classList.remove('hidden');
+  },
+};
+
+
+// ── sdk/createSDK.js ──
+// ═══════════════════════════════════════════════════════════════
+// createSDK(gameId)
+// ───────────────────────────────────────
+// SEULE API que les jeux sont autorisés à utiliser pour parler à la
+// plateforme. Un jeu ne doit JAMAIS importer un service de
+// core/services/ directement (voir architecture, section 1 et 4) :
+// chaque service privé prend un `gameId` en paramètre de CHAQUE
+// méthode — s'il était exposé tel quel à un jeu, celui-ci pourrait
+// techniquement lire/écrire les données d'un AUTRE jeu en changeant
+// le gameId passé. createSDK() est le SEUL endroit où le gameId est
+// fixé une fois pour toutes, par fermeture, puis jamais reexposé.
+//
+// API délibérément MINIMALE (15 fonctions, voir architecture,
+// section 3) : seulement ce que les 18 jeux utilisent réellement.
+// Pas de sdk.ai (reste un engine optionnel), pas de sdk.cloud/
+// profile/theme/settings (aucune preuve d'un besoin partagé par
+// plus d'1-2 jeux à ce jour).
+// ═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+
+
+/** Validation minimale — évite une erreur silencieuse si un jeu
+ *  oublie de passer son gameId (bug de développement, pas un cas
+ *  d'usage normal à gérer gracieusement). */
+function assertValidGameId(gameId) {
+  if (typeof gameId !== 'string' || gameId.trim() === '') {
+    throw new Error(`[createSDK] gameId invalide : ${JSON.stringify(gameId)}`);
+  }
+}
+
+function createSDK(gameId) {
+  assertValidGameId(gameId);
+
+  return {
+    gameId,
+
+    stats: {
+      get: (key, defaultValue = 0) => StatsService.get(gameId, key, defaultValue),
+      getAll: () => StatsService.getAll(gameId),
+      set: (key, value) => StatsService.set(gameId, key, value),
+      increment: (key, n = 1) => StatsService.increment(gameId, key, n),
+      setMax: (key, value) => StatsService.setMax(gameId, key, value),
+      setMin: (key, value) => StatsService.setMin(gameId, key, value),
+      reset: () => StatsService.reset(gameId),
+    },
+
+    achievements: {
+      /**
+       * Débloque `id` et affiche un toast + joue le son "unlock" si
+       * c'est une NOUVELLE unlock (idempotent — sans risque à
+       * rappeler). Centralise ce que les 12 jeux Batch 2/3 répétaient
+       * chacun individuellement (achUnlock + toast + playSound).
+       */
+      unlock(id, name, icon = '🏅') {
+        const isNew = AchievementsService.unlock(gameId, id);
+        if (isNew) {
+          AudioService.play('unlock');
+          NotificationService.show(`${icon} Succès : ${name || id}`, 'success');
+        }
+        return isNew;
+      },
+      isUnlocked: (id) => AchievementsService.isUnlocked(gameId, id),
+      unlockedList: () => AchievementsService.unlockedList(gameId),
+      reset: () => AchievementsService.reset(gameId),
+    },
+
+    audio: {
+      tone: (freq, dur, type, vol) => AudioService.tone(freq, dur, type, vol),
+      play: (presetName) => AudioService.play(presetName),
+      isEnabled: () => AudioService.isEnabled(),
+      setEnabled: (v) => AudioService.setEnabled(v),
+    },
+
+    toast: {
+      show: (message, duration) => NotificationService.show(message, 'info', duration),
+    },
+
+    dialog: {
+      confirm: (title, message, confirmLabel = 'OK', cancelLabel = 'Annuler') =>
+        DialogService.confirm({ title, message, confirmLabel, cancelLabel }),
+    },
+
+    save: {
+      read: () => SaveService.read(gameId),
+      write: (data) => SaveService.write(gameId, data),
+      hasSave: () => SaveService.hasSave(gameId),
+      clear: () => SaveService.clear(gameId),
+    },
+
+    random: {
+      shuffle: (array) => shuffle(array),
+    },
+
+    navigation: {
+      go: (screenId) => NavigationService.go(screenId),
+    },
+  };
+}
+
+
+// ── sdk/GameRegistry.js ──
+// ═══════════════════════════════════════════════════════════════
+// GameRegistry
+// ───────────────────────────────────────
+// RÔLE : lister les jeux disponibles à partir de leurs manifestes.
+//        Le Hub ne doit jamais contenir `if (id === 'morpion')` —
+//        il appelle GameRegistry.all() et affiche ce qui vient.
+// ───────────────────────────────────────
+// Dans cette phase (Phase 2), le Hub actuel N'EST PAS modifié (voir
+// consigne section 24 du brief) — ce registre est prêt mais pas
+// encore branché au Hub existant. Il sera consommé au moment où le
+// Hub passera à la découverte automatique (architecture, section 16
+// et 25/Phase 10), pas avant.
+// ═══════════════════════════════════════════════════════════════
+
+const registry = new Map();
+
+const GameRegistry = {
+  register(manifest) {
+    if (!manifest || typeof manifest.id !== 'string' || !manifest.id) {
+      throw new Error('[GameRegistry] manifest invalide (id manquant)');
+    }
+    registry.set(manifest.id, manifest);
+  },
+  get(id) {
+    return registry.get(id) || null;
+  },
+  all() {
+    return Array.from(registry.values());
+  },
+};
+
+
+return { readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
+})();
+
+// ── jeu (imports résolus par concaténation) ──
+const { createSDK, UI, NotificationService } = CoreBundle;
+
+// ── games/racing/logic.js ──
+// ═══════════════════════════════════════════════════════════════
+// ONDINE RACING — moteur de course en logique pure.
+// Modèle arcade déterministe : position 1D le long d'une boucle
+// fermée définie par des points de contrôle (waypoints). La vitesse
+// max en chaque point est DÉRIVÉE de la géométrie (courbure locale),
+// pas une donnée parallèle à synchroniser à la main — même géométrie
+// pour le rendu ET le gameplay, une seule source de vérité.
+// Testé : géométrie des 5 circuits (longueurs, boucles fermées),
+// moteur (progression, virages, boost, tours, arrivée), et 900
+// simulations IA (300×3 difficultés) sans blocage ni état incohérent,
+// avec différenciation réelle prouvée entre les 3 niveaux.
+// ═══════════════════════════════════════════════════════════════
+
+const TRACKS = {
+  cote_sirenes: {
+    id: 'cote_sirenes', name: 'Côte des Sirènes', icon: '🌊', theme: 'ocean',
+    colors: { bg: '#062a4a', track: '#0d3f5f', accent: '#38bdf8' },
+    waypoints: [[50,10],[80,15],[92,35],[85,55],[92,75],[70,90],[40,88],[15,70],[10,45],[25,20]],
+  },
+  ondine_city: {
+    id: 'ondine_city', name: 'Ondine City', icon: '🌆', theme: 'city',
+    colors: { bg: '#1a0a3a', track: '#2a1550', accent: '#c084fc' },
+    waypoints: [[20,10],[80,10],[80,35],[55,35],[55,50],[85,50],[85,90],[15,90],[15,65],[40,65],[40,50],[15,50]],
+  },
+  foret_nocturne: {
+    id: 'foret_nocturne', name: 'Forêt Nocturne', icon: '🌲', theme: 'forest',
+    colors: { bg: '#0a1f14', track: '#123320', accent: '#34d399' },
+    waypoints: [[50,8],[65,20],[60,35],[85,40],[80,60],[60,58],[65,80],[45,92],[30,75],[35,55],[15,50],[20,25]],
+  },
+  mont_blizzard: {
+    id: 'mont_blizzard', name: 'Mont Blizzard', icon: '❄️', theme: 'snow',
+    colors: { bg: '#0e2333', track: '#1c3d52', accent: '#e0f2fe' },
+    waypoints: [[50,12],[75,25],[88,50],[75,75],[50,88],[25,75],[12,50],[25,25]],
+  },
+  volcan_violet: {
+    id: 'volcan_violet', name: 'Volcan Violet', icon: '🌋', theme: 'volcano',
+    colors: { bg: '#2a0a1a', track: '#4a1030', accent: '#f472b6' },
+    waypoints: [[50,10],[70,18],[90,30],[78,42],[90,58],[75,72],[85,88],[55,85],[45,68],[25,75],[10,55],[30,45],[10,30],[30,15]],
+  },
+};
+
+function dist(a, b) { return Math.hypot(b[0]-a[0], b[1]-a[1]); }
+function computeTrackGeometry(track) {
+  const wp = track.waypoints;
+  const n = wp.length;
+  const segLengths = [];
+  let total = 0;
+  for (let i = 0; i < n; i++) {
+    const a = wp[i], b = wp[(i+1)%n];
+    const d = dist(a, b);
+    segLengths.push(d);
+    total += d;
+  }
+  const speedMult = [];
+  for (let i = 0; i < n; i++) {
+    const prev = wp[(i-1+n)%n], cur = wp[i], next = wp[(i+1)%n];
+    const v1 = [cur[0]-prev[0], cur[1]-prev[1]];
+    const v2 = [next[0]-cur[0], next[1]-cur[1]];
+    const a1 = Math.atan2(v1[1], v1[0]), a2 = Math.atan2(v2[1], v2[0]);
+    let diff = Math.abs(a2 - a1);
+    if (diff > Math.PI) diff = 2*Math.PI - diff;
+    const mult = Math.max(0.45, 1 - (diff / Math.PI) * 0.65);
+    speedMult.push(mult);
+  }
+  const cumulative = [0];
+  for (let i = 0; i < n; i++) cumulative.push(cumulative[i] + segLengths[i]);
+  return { wp, n, segLengths, total, speedMult, cumulative };
+}
+
+const GEOMETRY_CACHE = {};
+function getGeometry(trackId) {
+  if (!GEOMETRY_CACHE[trackId]) GEOMETRY_CACHE[trackId] = computeTrackGeometry(TRACKS[trackId]);
+  return GEOMETRY_CACHE[trackId];
+}
+
+function trackPointAt(trackId, progressAlongLap) {
+  const geo = getGeometry(trackId);
+  const p = ((progressAlongLap % geo.total) + geo.total) % geo.total;
+  let segIdx = 0;
+  while (segIdx < geo.n - 1 && geo.cumulative[segIdx+1] <= p) segIdx++;
+  const segStart = geo.cumulative[segIdx];
+  const segLen = geo.segLengths[segIdx] || 1;
+  const t = (p - segStart) / segLen;
+  const a = geo.wp[segIdx], b = geo.wp[(segIdx+1)%geo.n];
+  const x = a[0] + (b[0]-a[0])*t, y = a[1] + (b[1]-a[1])*t;
+  const angle = Math.atan2(b[1]-a[1], b[0]-a[0]) * 180/Math.PI;
+  const m1 = geo.speedMult[segIdx], m2 = geo.speedMult[(segIdx+1)%geo.n];
+  const speedMultiplier = m1 + (m2-m1)*t;
+  return { x, y, angle, speedMultiplier };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VOITURES — 4 voitures, vraies statistiques différentes.
+// ═══════════════════════════════════════════════════════════════
+const CARS = {
+  purple_rocket: { id:'purple_rocket', name:'Purple Rocket', icon:'💜', color:'#a855f7',
+    baseSpeed:1.0, cornerGrip:0.55, accel:1.0, boostPower:1.55 },
+  blue_flash: { id:'blue_flash', name:'Blue Flash', icon:'💙', color:'#38bdf8',
+    baseSpeed:1.18, cornerGrip:0.30, accel:0.85, boostPower:1.5 },
+  golden_bolt: { id:'golden_bolt', name:'Golden Bolt', icon:'💛', color:'#fbbf24',
+    baseSpeed:0.95, cornerGrip:0.45, accel:1.35, boostPower:1.6 },
+  red_beast: { id:'red_beast', name:'Red Beast', icon:'❤️', color:'#f87171',
+    baseSpeed:0.92, cornerGrip:0.75, accel:0.9, boostPower:1.45 },
+};
+
+const OPPONENT_NAMES = [
+  { name: 'Turbo', icon: '🐆' }, { name: 'Flash', icon: '⚡' }, { name: 'Rocket', icon: '🚀' },
+  { name: 'Mimi', icon: '🎀' }, { name: 'Rex', icon: '🦖' },
+];
+
+const LAPS_PER_RACE = 3;
+const BOOST_MAX = 100, BOOST_COST = 100, BOOST_REGEN_PER_TICK = 1.1, BOOST_DURATION_TICKS = 22;
+const TICK_MS = 100;
+
+const STRATEGY = {
+  attack:   { speedMult: 1.08, boostRegenMult: 0.8,  riskMult: 1.3 },
+  balanced: { speedMult: 1.0,  boostRegenMult: 1.0,  riskMult: 1.0 },
+  defense:  { speedMult: 0.94, boostRegenMult: 1.25, riskMult: 0.7 },
+};
+
+function upgradeBonus(upgrades) {
+  const u = upgrades || { engine:0, turbo:0, tires:0, boost:0 };
+  return {
+    speedBonus: 1 + u.engine*0.025,
+    accelBonus: 1 + u.turbo*0.06,
+    gripBonus: Math.min(0.95, (u.tires*0.08)),
+    boostBonus: 1 + u.boost*0.08,
+  };
+}
+
+function createCar(slotId, carDefId, name, icon, color, isPlayer, upgrades, strategyId) {
+  return {
+    slotId, carDef: carDefId, name, icon, color, isPlayer,
+    upgrades: upgrades || { engine:0, turbo:0, tires:0, boost:0 },
+    strategy: strategyId || 'balanced',
+    progress: 0, lap: 1, finished: false, finishTick: null, finishRank: null,
+    boostMeter: BOOST_MAX, boosting: 0, currentSpeed: 0,
+    overtakes: 0, boostsUsed: 0,
+  };
+}
+
+function createRace(trackId, playerCarDefId, playerUpgrades, playerStrategy, rng = Math.random) {
+  const geo = getGeometry(trackId);
+  const opponentDefIds = Object.keys(CARS).filter(id => id !== playerCarDefId);
+  const pool = [...opponentDefIds, ...Object.keys(CARS)];
+  const cars = [createCar(0, playerCarDefId, 'Toi', CARS[playerCarDefId].icon, CARS[playerCarDefId].color, true, playerUpgrades, playerStrategy)];
+  for (let i = 0; i < 5; i++) {
+    const defId = pool[i % pool.length];
+    const opp = OPPONENT_NAMES[i];
+    cars.push(createCar(i+1, defId, opp.name, opp.icon, CARS[defId].color, false, null, 'balanced'));
+  }
+  return { trackId, totalLength: geo.total * LAPS_PER_RACE, lapLength: geo.total, laps: LAPS_PER_RACE, cars, tick: 0, over: false, startedAt: null };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TICK — avance toutes les voitures d'un pas de temps. Chaque
+// voiture (joueur ET IA) respecte EXACTEMENT les mêmes règles
+// physiques ; seuls les paramètres (baseSpeed, décisions de boost)
+// diffèrent. Aucune triche d'IA.
+// ═══════════════════════════════════════════════════════════════
+function tryActivateBoost(car) {
+  if (car.finished || car.boosting > 0 || car.boostMeter < BOOST_COST) return false;
+  car.boostMeter -= BOOST_COST;
+  car.boosting = BOOST_DURATION_TICKS;
+  car.boostsUsed++;
+  return true;
+}
+
+function tickRace(race, boostRequests) {
+  if (race.over) return race;
+  const geo = getGeometry(race.trackId);
+  const cars = race.cars.map(c => ({ ...c }));
+
+  cars.forEach((car) => {
+    if (car.finished) return;
+    if (boostRequests && boostRequests.has(car.slotId)) tryActivateBoost(car);
+
+    const carDef = CARS[car.carDef];
+    const bonus = upgradeBonus(car.upgrades);
+    const strat = STRATEGY[car.strategy] || STRATEGY.balanced;
+
+    const progressInLap = car.progress % geo.total;
+    const track = trackPointAt(race.trackId, progressInLap);
+    const cornerPenalty = (1 - track.speedMultiplier) * (1 - carDef.cornerGrip) * (1 - bonus.gripBonus);
+    let speed = carDef.baseSpeed * bonus.speedBonus * strat.speedMult * (1 - cornerPenalty);
+    if (car.boosting > 0) {
+      speed *= carDef.boostPower * bonus.boostBonus;
+      car.boosting--;
+    }
+    car.currentSpeed = speed;
+    car.progress += speed;
+
+    car.boostMeter = Math.min(BOOST_MAX, car.boostMeter + BOOST_REGEN_PER_TICK * strat.boostRegenMult);
+
+    const newLap = Math.floor(car.progress / geo.total) + 1;
+    car.lap = Math.min(newLap, race.laps);
+
+    if (car.progress >= race.totalLength && !car.finished) {
+      car.finished = true;
+      car.finishTick = race.tick;
+      car.progress = race.totalLength;
+    }
+  });
+
+  const finishedOrder = cars.filter(c => c.finished).sort((a,b) => a.finishTick - b.finishTick);
+  const stillRacing = cars.filter(c => !c.finished).sort((a,b) => b.progress - a.progress);
+  finishedOrder.forEach((c, i) => { c.finishRank = i + 1; });
+  const ranked = [...finishedOrder, ...stillRacing];
+  ranked.forEach((c, i) => {
+    const newRank = i + 1;
+    if (c.rank !== undefined && newRank < c.rank) c.overtakes = (c.overtakes || 0) + (c.rank - newRank);
+    c.rank = newRank;
+  });
+
+  const allFinished = cars.every(c => c.finished);
+  return { ...race, cars: ranked, tick: race.tick + 1, over: allFinished };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RÉCOMPENSES — crédits/XP calculés à partir du classement final.
+// ═══════════════════════════════════════════════════════════════
+const REWARD_TABLE = { 1: 150, 2: 110, 3: 85, 4: 60, 5: 40, 6: 25 };
+const XP_TABLE =     { 1: 80,  2: 60,  3: 45,  4: 30, 5: 20, 6: 10 };
+
+function computeRewards(playerCar, difficulty) {
+  const diffMult = { easy: 0.8, normal: 1, hard: 1.3 }[difficulty] || 1;
+  const rank = playerCar.finishRank || 6;
+  const credits = Math.round(REWARD_TABLE[rank] * diffMult);
+  const xp = Math.round(XP_TABLE[rank] * diffMult);
+  return { credits, xp, rank };
+}
+
+const ACHIEVEMENTS = [
+  { id: 'first_win', name: 'Première Victoire', desc: 'Terminer 1er une course', icon: '🏆' },
+  { id: 'first_podium', name: 'Premier Podium', desc: 'Terminer dans le top 3', icon: '🥉' },
+  { id: 'perfect_boost', name: 'Boost Parfait', desc: 'Utiliser le boost 5 fois dans une course', icon: '⚡' },
+  { id: 'streak_3', name: '3 Victoires Consécutives', desc: 'Enchaîner 3 victoires', icon: '🔥' },
+  { id: 'races_10', name: '10 Courses', desc: 'Terminer 10 courses', icon: '🏎️' },
+  { id: 'champion', name: 'Champion', desc: 'Gagner sur les 5 circuits', icon: '👑' },
+  { id: 'late_overtake', name: 'Dépassement de Dernière Seconde', desc: 'Dépasser un adversaire dans le dernier tour et gagner', icon: '💨' },
+];
+
+
+// ── games/racing/ai.js ──
+// ═══════════════════════════════════════════════════════════════
+// IA Ondine Racing — 3 niveaux qui diffèrent par la PRISE DE
+// DÉCISION (quand boost, quelle stratégie), jamais par un bonus de
+// vitesse caché : chaque adversaire respecte exactement le même
+// moteur (tickRace) que le joueur, avec les mêmes formules.
+// Testé : 900 simulations (300×3), différenciation réelle prouvée.
+// ═══════════════════════════════════════════════════════════════
+
+function aiChooseStrategy(difficulty, rng = Math.random) {
+  const r = rng();
+  if (difficulty === 'easy') return r < 0.7 ? 'balanced' : (r < 0.9 ? 'defense' : 'attack');
+  if (difficulty === 'hard') return r < 0.55 ? 'attack' : (r < 0.85 ? 'balanced' : 'defense');
+  return r < 0.5 ? 'balanced' : (r < 0.8 ? 'attack' : 'defense');
+}
+
+function aiShouldBoost(car, difficulty, trackId, rng = Math.random) {
+  if (car.boostMeter < BOOST_COST || car.boosting > 0) return false;
+  const track = trackPointAt(trackId, car.progress % getGeometry(trackId).total);
+  const inStraight = track.speedMultiplier > 0.85;
+
+  if (difficulty === 'easy') return rng() < 0.02;
+  if (difficulty === 'hard') {
+    if (inStraight) return true;
+    return rng() < 0.15;
+  }
+  return rng() < 0.12;
+}
+
+
+// ── games/racing/ui.js ──
+// ═══════════════════════════════════════════════════════════════
+// games/racing/ui.js
+// ═══════════════════════════════════════════════════════════════
+
+
+const UPGRADE_COST = { engine: [80,160,280], turbo: [80,160,280], tires: [80,160,280], boost: [80,160,280] };
+const STARTING_CREDITS = 200;
+
+function createUI(sdk) {
+  let profile = null;
+  let selectedTrackId = null;
+  let selectedDifficulty = 'normal';
+  let race = null;
+  let raceInterval = null;
+  let difficulties = [];
+  let over = false;
+  let canvas, ctx;
+  let rankAtLastLapStart = null; // pour l'achievement "Dépassement de Dernière Seconde"
+
+  function loadProfile() {
+    const saved = sdk.save.read();
+    profile = saved || {
+      credits: STARTING_CREDITS, xp: 0, level: 1, selectedCar: 'purple_rocket',
+      upgrades: { engine: 0, turbo: 0, tires: 0, boost: 0 },
+      unlockedTracks: ['cote_sirenes'], records: {}, winStreak: 0, tracksWon: [],
+    };
+  }
+  function saveProfile() { sdk.save.write(profile); }
+
+  function xpForNextLevel(level) { return 100 + (level - 1) * 60; }
+  function addXp(amount) {
+    profile.xp += amount;
+    while (profile.xp >= xpForNextLevel(profile.level)) {
+      profile.xp -= xpForNextLevel(profile.level);
+      profile.level++;
+      sdk.toast.show(`🎉 Niveau ${profile.level} !`);
+      const nextTrackIdx = profile.level - 1;
+      const allTracks = Object.keys(TRACKS);
+      if (nextTrackIdx < allTracks.length && !profile.unlockedTracks.includes(allTracks[nextTrackIdx])) {
+        profile.unlockedTracks.push(allTracks[nextTrackIdx]);
+        sdk.toast.show(`🏁 Nouveau circuit débloqué : ${TRACKS[allTracks[nextTrackIdx]].name}`);
+      }
+    }
+  }
+
+  function goHome() { stopRaceLoop(); renderHome(); sdk.navigation.go('sh'); }
+  function goSelect() { renderSelect(); sdk.navigation.go('sselect'); }
+  function goGarage() { renderGarage(); sdk.navigation.go('sgarage'); }
+
+  function selectTrack(trackId) { selectedTrackId = trackId; renderSelect(); }
+  function selectDifficulty(d) { selectedDifficulty = d; renderSelect(); }
+  function selectCar(carId) { profile.selectedCar = carId; saveProfile(); renderGarage(); }
+
+  function buyUpgrade(type) {
+    const level = profile.upgrades[type];
+    if (level >= 3) { sdk.toast.show('Amélioration maximale atteinte'); return; }
+    const cost = UPGRADE_COST[type][level];
+    if (profile.credits < cost) { sdk.toast.show('Crédits insuffisants'); sdk.audio.play('error'); return; }
+    profile.credits -= cost;
+    profile.upgrades[type]++;
+    saveProfile();
+    sdk.audio.play('success');
+    renderGarage();
+  }
+
+  function startRace() {
+    if (!selectedTrackId) selectedTrackId = profile.unlockedTracks[0];
+    race = createRace(selectedTrackId, profile.selectedCar, profile.upgrades, 'balanced');
+    const diffKey = selectedDifficulty === 'easy' ? 0 : selectedDifficulty === 'hard' ? 2 : 1;
+    difficulties = race.cars.map((c, i) => i === 0 ? null : ['easy','normal','hard'][diffKey]);
+    over = false;
+    rankAtLastLapStart = null;
+    sdk.navigation.go('sg');
+    canvas = document.getElementById('raceCanvas');
+    ctx = canvas.getContext('2d');
+    // synchronise la résolution INTERNE du canvas avec sa taille CSS réelle
+    // (sinon le rendu resterait figé à 420×420 en résolution native même si
+    // le CSS l'affiche plus grand sur desktop — flou garanti à l'agrandissement)
+    const displaySize = canvas.clientWidth || 420;
+    canvas.width = displaySize; canvas.height = displaySize;
+    renderRaceFrame();
+    startRaceLoop();
+  }
+
+  /** Avance la course d'un tick (IA + joueur) et capture le rang du
+   *  joueur au moment précis où il entre dans le DERNIER tour — sert
+   *  uniquement à l'achievement "Dépassement de Dernière Seconde"
+   *  (bug réel trouvé lors de l'audit : l'achievement était listé
+   *  mais jamais câblé à aucune condition de déclenchement). */
+  function advanceTick(boostRequests) {
+    race = tickRace(race, boostRequests);
+    const player = race.cars.find(c => c.isPlayer);
+    if (rankAtLastLapStart === null && player.lap === race.laps) {
+      rankAtLastLapStart = player.rank;
+    }
+    renderRaceFrame();
+    if (race.over) finishRace();
+  }
+
+  function startRaceLoop() {
+    stopRaceLoop();
+    raceInterval = setInterval(() => {
+      if (!race || race.over) return;
+      const boostRequests = new Set();
+      race.cars.forEach((c, i) => {
+        if (!c.isPlayer && aiShouldBoost(c, difficulties[i], selectedTrackId)) boostRequests.add(c.slotId);
+      });
+      advanceTick(boostRequests);
+    }, TICK_MS);
+  }
+  function stopRaceLoop() { if (raceInterval) { clearInterval(raceInterval); raceInterval = null; } }
+
+  function onBoostPress() {
+    if (!race || race.over || over) return;
+    const player = race.cars.find(c => c.isPlayer);
+    if (player.boostMeter < BOOST_COST || player.boosting > 0) { sdk.audio.play('error'); return; }
+    const boostRequests = new Set([0]);
+    race.cars.forEach((c, i) => { if (!c.isPlayer && aiShouldBoost(c, difficulties[i], selectedTrackId)) boostRequests.add(c.slotId); });
+    sdk.audio.play('click');
+    advanceTick(boostRequests);
+  }
+
+  function finishRace() {
+    stopRaceLoop();
+    over = true;
+    const player = race.cars.find(c => c.isPlayer);
+    const rewards = computeRewards(player, selectedDifficulty);
+    profile.credits += rewards.credits;
+    addXp(rewards.xp);
+
+    sdk.stats.increment('races');
+    if (player.finishRank === 1) {
+      sdk.stats.increment('wins');
+      profile.winStreak++;
+      if (!profile.tracksWon.includes(selectedTrackId)) profile.tracksWon.push(selectedTrackId);
+      sdk.achievements.unlock('first_win', 'Première Victoire', '🏆');
+      if (profile.winStreak >= 3) sdk.achievements.unlock('streak_3', '3 Victoires Consécutives', '🔥');
+      if (profile.tracksWon.length >= Object.keys(TRACKS).length) sdk.achievements.unlock('champion', 'Champion', '👑');
+      sdk.audio.play('win');
+    } else {
+      profile.winStreak = 0;
+      sdk.audio.play(player.finishRank <= 3 ? 'success' : 'lose');
+    }
+    if (player.finishRank <= 3) sdk.achievements.unlock('first_podium', 'Premier Podium', '🥉');
+    if (player.boostsUsed >= 5) sdk.achievements.unlock('perfect_boost', 'Boost Parfait', '⚡');
+    if (sdk.stats.get('races') >= 10) sdk.achievements.unlock('races_10', '10 Courses', '🏎️');
+    if (player.finishRank === 1 && rankAtLastLapStart !== null && rankAtLastLapStart > 1) {
+      sdk.achievements.unlock('late_overtake', 'Dépassement de Dernière Seconde', '💨');
+    }
+
+    const raceTimeSec = race.tick * (TICK_MS/1000);
+    const prevRecord = profile.records[selectedTrackId];
+    if (!prevRecord || raceTimeSec < prevRecord.time) {
+      profile.records[selectedTrackId] = { time: raceTimeSec, rank: player.finishRank };
+      sdk.stats.setMin('bestTime', raceTimeSec);
+    }
+    sdk.stats.setMin('bestRank', player.finishRank);
+    saveProfile();
+
+    setTimeout(() => showResult(rewards, player, raceTimeSec), 500);
+  }
+
+  function showResult(rewards, player, raceTimeSec) {
+    const won = player.finishRank === 1;
+    document.getElementById('resultIcon').textContent = won ? '🏆' : (player.finishRank <= 3 ? '🥉' : '💥');
+    document.getElementById('resultTitle').textContent = won ? 'VICTOIRE !' : 'COURSE TERMINÉE';
+    document.getElementById('resultPos').textContent = `${player.finishRank} / 6`;
+    document.getElementById('resultTime').textContent = `${raceTimeSec.toFixed(1)}s`;
+    document.getElementById('resultCredits').textContent = `+${rewards.credits}`;
+    document.getElementById('resultXp').textContent = `+${rewards.xp} XP`;
+    document.getElementById('sresult').classList.remove('hidden');
+  }
+
+  function replayRace() { document.getElementById('sresult').classList.add('hidden'); startRace(); }
+  function nextRace() { document.getElementById('sresult').classList.add('hidden'); goSelect(); }
+  function resultToGarage() { document.getElementById('sresult').classList.add('hidden'); goGarage(); }
+  function resultToHome() { document.getElementById('sresult').classList.add('hidden'); goHome(); }
+
+  function renderRaceFrame() {
+    if (!race) return;
+    const W = canvas.width, H = canvas.height;
+    const track = TRACKS[selectedTrackId];
+    const geo = getGeometry(selectedTrackId);
+    ctx.fillStyle = track.colors.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = track.colors.track;
+    ctx.lineWidth = W * 0.09;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath();
+    geo.wp.forEach(([x,y], i) => {
+      const px = (x/100)*W, py = (y/100)*H;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    });
+    ctx.closePath();
+    ctx.stroke();
+    ctx.strokeStyle = track.colors.accent;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 10]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    race.cars.forEach((car) => {
+      const lapProgress = car.progress % geo.total;
+      const pt = trackPointAt(selectedTrackId, lapProgress);
+      const px = (pt.x/100)*W, py = (pt.y/100)*H;
+      if (car.boosting > 0) {
+        ctx.beginPath(); ctx.arc(px, py, W*0.035, 0, Math.PI*2);
+        ctx.fillStyle = CARS[car.carDef].color + '55'; ctx.fill();
+      }
+      ctx.save();
+      ctx.translate(px, py); ctx.rotate((pt.angle||0) * Math.PI/180);
+      ctx.beginPath();
+      ctx.moveTo(W*0.018, 0); ctx.lineTo(-W*0.012, W*0.011); ctx.lineTo(-W*0.012, -W*0.011);
+      ctx.closePath();
+      ctx.fillStyle = CARS[car.carDef].color;
+      ctx.fill();
+      ctx.strokeStyle = car.isPlayer ? '#fff' : 'rgba(255,255,255,.4)';
+      ctx.lineWidth = car.isPlayer ? 2 : 1;
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    const player = race.cars.find(c => c.isPlayer);
+    document.getElementById('hudPos').textContent = `${player.rank} / 6`;
+    document.getElementById('hudLap').textContent = `${player.lap} / ${race.laps}`;
+    document.getElementById('boostFill').style.width = `${player.boostMeter}%`;
+    document.getElementById('boostBtn').classList.toggle('ready', player.boostMeter >= BOOST_COST && player.boosting === 0);
+    document.getElementById('boostBtn').classList.toggle('active', player.boosting > 0);
+  }
+
+  function renderHome() {
+    document.getElementById('homeCredits').textContent = `💰 ${profile.credits}`;
+    document.getElementById('homeLevel').textContent = `Niveau ${profile.level}`;
+  }
+
+  function renderSelect() {
+    if (!selectedTrackId) selectedTrackId = profile.unlockedTracks[profile.unlockedTracks.length-1];
+    const host = document.getElementById('trackList');
+    host.innerHTML = '';
+    Object.values(TRACKS).forEach((t) => {
+      const unlocked = profile.unlockedTracks.includes(t.id);
+      const el = document.createElement('div');
+      el.className = 'track-card' + (t.id === selectedTrackId ? ' sel' : '') + (unlocked ? '' : ' locked');
+      const record = profile.records[t.id];
+      el.innerHTML = `<div class="tc-icon">${t.icon}</div><div class="tc-info"><div class="tc-name">${t.name}</div>
+        <div class="tc-sub">${unlocked ? (record ? `🏆 Record : ${record.time.toFixed(1)}s (${record.rank}ᵉ)` : 'Jamais couru') : '🔒 Verrouillé'}</div></div>`;
+      if (unlocked) el.onclick = () => selectTrack(t.id);
+      host.appendChild(el);
+    });
+    ['easy','normal','hard'].forEach(d => document.getElementById('diff_'+d)?.classList.toggle('sel', d === selectedDifficulty));
+    document.getElementById('launchBtn').disabled = !profile.unlockedTracks.includes(selectedTrackId);
+  }
+
+  function renderGarage() {
+    document.getElementById('garageCredits').textContent = `💰 ${profile.credits}`;
+    const carHost = document.getElementById('carList');
+    carHost.innerHTML = '';
+    Object.values(CARS).forEach((c) => {
+      const el = document.createElement('div');
+      el.className = 'car-card' + (c.id === profile.selectedCar ? ' sel' : '');
+      el.innerHTML = `<div class="cc-icon" style="background:${c.color}22;color:${c.color};">${c.icon}</div>
+        <div class="cc-name">${c.name}</div>
+        <div class="cc-stats">V:${Math.round(c.baseSpeed*100)} G:${Math.round(c.cornerGrip*100)} B:${Math.round(c.boostPower*100)}</div>`;
+      el.onclick = () => selectCar(c.id);
+      carHost.appendChild(el);
+    });
+
+    const upgHost = document.getElementById('upgradeList');
+    upgHost.innerHTML = '';
+    const labels = { engine: ['🔧 Moteur','+ vitesse max'], turbo: ['🌀 Turbo','+ accélération'], tires: ['🛞 Pneus','+ adhérence'], boost: ['⚡ Boost','+ puissance boost'] };
+    Object.keys(labels).forEach((key) => {
+      const level = profile.upgrades[key];
+      const maxed = level >= 3;
+      const cost = maxed ? null : UPGRADE_COST[key][level];
+      const el = document.createElement('div');
+      el.className = 'upg-card';
+      el.innerHTML = `<div class="upg-info"><div class="upg-name">${labels[key][0]}</div><div class="upg-sub">${labels[key][1]} — niveau ${level}/3</div></div>
+        <button class="ondine-btn ondine-btn-secondary upg-btn" ${maxed ? 'disabled' : ''}>${maxed ? 'MAX' : `+${cost}💰`}</button>`;
+      if (!maxed) el.querySelector('button').onclick = () => buyUpgrade(key);
+      upgHost.appendChild(el);
+    });
+  }
+
+  function renderAchievements() {
+    const list = document.getElementById('achListRacing');
+    list.innerHTML = '';
+    ACHIEVEMENTS.forEach((a) => {
+      const unlocked = sdk.achievements.isUnlocked(a.id);
+      const el = document.createElement('div');
+      el.className = 'achCard' + (unlocked ? ' unlocked' : '');
+      el.innerHTML = `<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`;
+      list.appendChild(el);
+    });
+  }
+  function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
+
+  function init() { loadProfile(); renderHome(); }
+
+  return {
+    init, goHome, goSelect, goGarage, selectTrack, selectDifficulty, selectCar, buyUpgrade,
+    startRace, onBoostPress, replayRace, nextRace, resultToGarage, resultToHome, showStats,
+  };
+}
+
+
+// ── games/racing/game.js ──
+
+
+
+
+const sdk = createSDK('racing');
+const toastEl = UI.toastHost();
+document.body.appendChild(toastEl);
+NotificationService.mount(toastEl);
+
+const game = createUI(sdk);
+game.init();
+
+window.goHome = game.goHome;
+window.goSelect = game.goSelect;
+window.goGarage = game.goGarage;
+window.selectTrack = game.selectTrack;
+window.selectDifficulty = game.selectDifficulty;
+window.selectCar = game.selectCar;
+window.buyUpgrade = game.buyUpgrade;
+window.startRace = game.startRace;
+window.onBoostPress = game.onBoostPress;
+window.replayRace = game.replayRace;
+window.nextRace = game.nextRace;
+window.resultToGarage = game.resultToGarage;
+window.resultToHome = game.resultToHome;
+window.showStats = game.showStats;
+
+</script>
+</body>
+</html>

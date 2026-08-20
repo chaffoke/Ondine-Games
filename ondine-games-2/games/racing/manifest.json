@@ -1,0 +1,10 @@
+{
+  "id": "racing",
+  "name": "Ondine Racing",
+  "icon": "🏎️",
+  "category": "action",
+  "description": "Course arcade vue du dessus. Boost, stratégie, 5 circuits, garage. Moteur testé sur 900 simulations IA.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Morpion × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/design-tokens.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<!-- Le toast est créé dynamiquement par game.js via UI.toastHost() +
+     NotificationService.mount() — pas besoin de le déclarer ici. -->
+
+<!-- ═══════ HOME ═══════ -->
+<div class="screen" id="sh">
+  <div class="ondine-logo">MORPION</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+
+  <div class="section-title">Mode</div>
+  <div class="opt-grid">
+    <div class="opt-card sel" id="modeSolo" onclick="setMode('solo')"><div class="opt-icon">🤖</div><div class="opt-name">Solo vs IA</div></div>
+    <div class="opt-card" id="mode2p" onclick="setMode('2p')"><div class="opt-icon">👥</div><div class="opt-name">2 Joueurs</div></div>
+  </div>
+
+  <div class="section-title" id="diffTitle">Difficulté</div>
+  <div class="opt-grid" id="diffGrid">
+    <div class="opt-card sel" id="diffEasy" onclick="setDiff('easy')"><div class="opt-icon">🌊</div><div class="opt-name">Facile</div></div>
+    <div class="opt-card" id="diffNormal" onclick="setDiff('normal')"><div class="opt-icon">⚡</div><div class="opt-name">Normal</div></div>
+    <div class="opt-card" id="diffImpossible" onclick="setDiff('impossible')"><div class="opt-icon">💀</div><div class="opt-name">Impossible</div></div>
+  </div>
+
+  <div class="hbtns" style="margin-top:8px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">❌ Jouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showRules()">ⓘ Règles du jeu</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
+  </div>
+
+  <div class="hstats" id="homeStats"></div>
+</div>
+
+<!-- ═══════ GAME ═══════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div class="ondine-icon-btn" onclick="confirmLeaveGame()">🏠</div>
+    <div class="turn-badge" id="turnBadge"></div>
+    <div class="ondine-icon-btn" onclick="showRules()">ⓘ</div>
+  </div>
+  <div class="score-row" id="scoreRow"></div>
+  <div class="board" id="board"></div>
+  <div class="game-footer">
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="confirmLeaveGame()">🏠 Accueil</button>
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="nextRound()">🔄 Revanche</button>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="ondine-icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;">Succès</div>
+    <div class="ach-list" id="achList"></div>
+  </div>
+</div>
+
+<div class="ondine-modal-overlay hidden" id="modalOverlay"></div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "id": "morpion",
+  "name": "Morpion",
+  "icon": "❌⭕",
+  "category": "reflexion",
+  "description": "Aligne 3 symboles avant ton adversaire. IA Impossible prouvée imbattable.",
+  "minPlayers": 1,
+  "maxPlayers": 2,
+  "version": "2.0.0"
+}

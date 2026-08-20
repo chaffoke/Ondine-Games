@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Simon × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/design-tokens.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">SIMON</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStatsSimon"></div>
+  <div class="opt-grid">
+    <div class="opt-card sel" id="modeClassic" onclick="setMode('classic')">🎵 Classique</div>
+    <div class="opt-card" id="modeSpeed" onclick="setMode('speed')">⚡ Vitesse</div>
+    <div class="opt-card" id="modeHard" onclick="setMode('hard')">🔥 Difficile</div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🟢 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">🏠</div>
+  <div id="simonLevel"></div>
+  <div id="simonOverBanner" style="display:none;">💀 Mauvaise couleur !</div>
+  <div class="simon-pad">
+    <div class="simon-btn green" id="simonBtn_green" onclick="onPress('green')"></div>
+    <div class="simon-btn red" id="simonBtn_red" onclick="onPress('red')"></div>
+    <div class="simon-btn yellow" id="simonBtn_yellow" onclick="onPress('yellow')"></div>
+    <div class="simon-btn blue" id="simonBtn_blue" onclick="onPress('blue')"></div>
+  </div>
+  <button class="ondine-btn ondine-btn-secondary" onclick="startGame()">🔄 Nouvelle partie</button>
+</div>
+
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListSimon"></div>
+</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

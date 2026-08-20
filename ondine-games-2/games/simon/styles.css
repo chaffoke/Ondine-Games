@@ -1,0 +1,26 @@
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;}
+#homeStatsSimon{display:flex;gap:7px;width:100%;max-width:280px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:300px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:10px 6px;cursor:pointer;text-align:center;font-size:11px;font-weight:800;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+
+#sg{align-items:center;padding:14px;gap:14px;}
+#simonLevel{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);}
+#simonOverBanner{font-family:'Fredoka One',cursive;color:var(--cr);font-size:16px;}
+
+.simon-pad{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:280px;aspect-ratio:1;}
+.simon-btn{border-radius:20px;cursor:pointer;opacity:.55;transition:opacity .1s,transform .1s;}
+.simon-btn.lit{opacity:1;transform:scale(.97);}
+.simon-btn.green{background:#22c55e;}
+.simon-btn.red{background:#ef4444;}
+.simon-btn.yellow{background:#eab308;}
+.simon-btn.blue{background:#3b82f6;}

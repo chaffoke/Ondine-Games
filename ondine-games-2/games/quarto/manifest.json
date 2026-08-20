@@ -1,0 +1,10 @@
+{
+  "id": "quarto",
+  "name": "Quarto",
+  "icon": "♟️",
+  "category": "reflexion",
+  "description": "Choisis la pièce que ton adversaire doit jouer. IA qui comprend le piège du jeu — testée sur 500 parties.",
+  "minPlayers": 1,
+  "maxPlayers": 2,
+  "version": "1.0.0"
+}

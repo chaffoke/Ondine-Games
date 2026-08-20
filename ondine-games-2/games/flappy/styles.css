@@ -1,0 +1,28 @@
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;}
+#homeStatsFlappy{display:flex;gap:7px;width:100%;max-width:280px;}
+
+#sg{padding:0;overflow:hidden;background:linear-gradient(180deg,#0c1a3a,#0a3050 70%,#0d4d6b);}
+/* bug réel trouvé par capture réelle (invisible en test DOM pur) : 'position:relative'
+   ici écrasait le 'position:fixed;inset:0' de .screen (spécificité #id > .classe),
+   effondrant #sg à hauteur 0 (ses enfants oiseau/tuyaux sont tous en position:absolute,
+   ne contribuant rien à la hauteur naturelle). position:fixed est déjà un contexte de
+   positionnement valide pour des enfants absolute — position:relative était redondant
+   ET cassait le remplissage du viewport. */
+#flappyScore{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-family:'Fredoka One',cursive;font-size:32px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5);z-index:5;}
+#flappyOverBanner{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);font-family:'Fredoka One',cursive;font-size:20px;color:var(--co);background:rgba(6,8,30,.8);padding:14px 22px;border-radius:16px;z-index:6;}
+.flappy-home-icon{position:absolute;top:12px;left:12px;z-index:6;}
+
+#flappyBird{position:absolute;width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#bae6fd,#38bdf8 60%,#0ea5e9);box-shadow:0 0 16px rgba(56,189,248,.7);z-index:4;transition:transform .05s linear;}
+#flappyPipes{position:absolute;inset:0;}
+.fpipe{position:absolute;background:linear-gradient(90deg,#0f766e,#14b8a6,#0f766e);border-radius:6px;box-shadow:inset 0 0 12px rgba(0,0,0,.3);}
+
+.flappy-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.6);font-size:11px;z-index:5;}

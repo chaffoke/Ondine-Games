@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Mastermind × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;--c1:#38bdf8;--c2:#7dd3fc;--cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);--text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;--sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:20px;cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:22px;max-width:340px;width:100%;box-shadow:var(--sh2);max-height:80vh;overflow-y:auto;}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;line-height:1.6;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(28px,8vw,40px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-grid.cols4{grid-template-columns:repeat(4,1fr);}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:10px 6px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:18px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:11px;}
+.opt-desc{font-size:8px;color:var(--text2);}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+.custom-panel{width:100%;max-width:320px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px;display:none;flex-direction:column;gap:8px;}
+.custom-panel.show{display:flex;}
+.stepper-row{display:flex;align-items:center;justify-content:space-between;}
+.stepper-label{font-size:12px;font-weight:800;color:var(--text2);}
+.stepper{display:flex;align-items:center;gap:10px;}
+.stepper button{width:26px;height:26px;border-radius:8px;background:var(--glass2);border:1px solid var(--border2);color:var(--text);font-size:15px;cursor:pointer;}
+.stepper-val{font-family:'Fredoka One',cursive;font-size:14px;min-width:24px;text-align:center;}
+
+#sg{align-items:center;padding:12px;gap:10px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:380px;}
+.attempts-badge{font-family:'Fredoka One',cursive;font-size:13px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:6px 12px;}
+
+.board-scroll{flex:1;width:100%;max-width:380px;overflow-y:auto;display:flex;flex-direction:column-reverse;gap:6px;padding:4px;}
+.guess-row{display:flex;align-items:center;gap:8px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:8px 10px;}
+.guess-row.current{border-color:var(--c1);background:var(--glass3);}
+.guess-pegs{display:flex;gap:6px;flex:1;}
+.peg-slot{width:34px;height:34px;border-radius:50%;border:2px dashed var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.peg-slot.filled{border-style:solid;}
+.feedback-pegs{display:grid;grid-template-columns:repeat(2,7px);grid-template-rows:repeat(2,7px);gap:3px;width:20px;}
+.fb-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.1);}
+.fb-dot.black{background:#0a0a0a;box-shadow:0 0 0 1px rgba(255,255,255,.3);}
+.fb-dot.white{background:#fff;}
+
+.color-palette{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%;max-width:340px;padding:4px;}
+.color-swatch{width:40px;height:40px;border-radius:50%;cursor:pointer;box-shadow:var(--sh);border:2.5px solid transparent;transition:transform .1s;}
+.color-swatch:active{transform:scale(.9);}
+.color-swatch.sel{border-color:#fff;}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:340px;}
+
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+.secret-reveal{display:flex;gap:8px;margin:10px 0;}
+.secret-peg{width:36px;height:36px;border-radius:50%;box-shadow:var(--sh);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+</style>
+</head>
+<body>
+
+<div id="toastHost" class="ondine-toast"></div>
+
+<!-- ═══════ HOME ═══════ -->
+<div class="screen" id="sh">
+  <div class="logo">MASTERMIND</div>
+  <div class="logo-sub">× Ondine</div>
+
+  <div class="section-title">Difficulté</div>
+  <div class="opt-grid" id="diffGrid"></div>
+
+  <div class="custom-panel" id="customPanel">
+    <div class="stepper-row"><span class="stepper-label">Positions</span>
+      <div class="stepper"><button onclick="adjustCustom('positions',-1)">−</button><span class="stepper-val" id="valPositions">4</span><button onclick="adjustCustom('positions',1)">+</button></div></div>
+    <div class="stepper-row"><span class="stepper-label">Couleurs</span>
+      <div class="stepper"><button onclick="adjustCustom('colors',-1)">−</button><span class="stepper-val" id="valColors">6</span><button onclick="adjustCustom('colors',1)">+</button></div></div>
+    <div class="stepper-row"><span class="stepper-label">Tentatives max</span>
+      <div class="stepper"><button onclick="adjustCustom('attempts',-1)">−</button><span class="stepper-val" id="valAttempts">10</span><button onclick="adjustCustom('attempts',1)">+</button></div></div>
+    <div class="stepper-row"><span class="stepper-label">Répétitions autorisées</span>
+      <div class="stepper"><button onclick="toggleRepeats()" id="btnRepeats">Oui</button></div></div>
+  </div>
+
+  <div class="hbtns" style="margin-top:8px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🧠 Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
+  </div>
+
+  <div class="hstats" id="homeStats"></div>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════ GAME ═══════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div class="icon-btn" onclick="confirmLeaveGame()">🏠</div>
+    <div class="attempts-badge" id="attemptsBadge"></div>
+    <div class="icon-btn" onclick="showHelp()">ⓘ</div>
+  </div>
+  <div class="board-scroll" id="boardScroll"></div>
+  <div class="color-palette" id="colorPalette"></div>
+  <div class="game-footer">
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="clearCurrentGuess()">✕ Effacer</button>
+    <button class="ondine-btn ondine-btn-primary" style="flex:1;" onclick="submitGuess()">✓ Valider</button>
+  </div>
+</div>
+
+<!-- ═══════ RESULT ═══════ -->
+<div class="screen hidden" id="sres">
+  <div class="res-icon" id="resIcon">🏆</div>
+  <div class="res-title" id="resTitle"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="secret-reveal" id="secretReveal"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;">Succès</div>
+    <div class="ach-list" id="achList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// LOGIQUE — algorithme de comptage validé en isolation pour les cas
+// de couleurs dupliquées avant intégration (voir historique de dev)
+// ═══════════════════════════════════════════════════════════════
+function scoreGuess(secret, guess) {
+  const n = secret.length;
+  let black = 0;
+  const secretRest = [], guessRest = [];
+  for (let i = 0; i < n; i++) {
+    if (secret[i] === guess[i]) black++;
+    else { secretRest.push(secret[i]); guessRest.push(guess[i]); }
+  }
+  const counts = {};
+  secretRest.forEach(c => { counts[c] = (counts[c]||0) + 1; });
+  let white = 0;
+  guessRest.forEach(c => { if (counts[c] > 0) { white++; counts[c]--; } });
+  return { black, white };
+}
+
+const ALL_COLORS = [
+  { id:'R', hex:'#f87171' }, { id:'V', hex:'#34d399' }, { id:'B', hex:'#38bdf8' },
+  { id:'J', hex:'#fbbf24' }, { id:'O', hex:'#fb923c' }, { id:'M', hex:'#c084fc' },
+  { id:'T', hex:'#22d3ee' }, { id:'P', hex:'#f472b6' },
+];
+const DIFFICULTIES = {
+  easy:   { label:'Facile',    positions:4, colors:4, attempts:12, repeats:true },
+  normal: { label:'Normal',    positions:4, colors:6, attempts:10, repeats:true },
+  hard:   { label:'Difficile', positions:5, colors:7, attempts:10, repeats:true },
+  expert: { label:'Expert',    positions:6, colors:8, attempts:12, repeats:true },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'mastermind_ondine_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats: {}, achievements: [] }, loadStore());
+function statGet(k, d=0) { return k in STORE.stats ? STORE.stats[k] : d; }
+function statInc(k, n=1) { STORE.stats[k] = (STORE.stats[k]||0)+n; saveStore(STORE); return STORE.stats[k]; }
+function statSetMin(k, v) { if (!(k in STORE.stats) || v < STORE.stats[k]) { STORE.stats[k] = v; saveStore(STORE); } }
+function achUnlock(id, name, icon) {
+  if (STORE.achievements.includes(id)) return;
+  STORE.achievements.push(id); saveStore(STORE);
+  playSound('unlock'); toast(`${icon} Succès : ${name}`);
+}
+const ACHIEVEMENTS = [
+  { id:'first_win', name:'Premier Succès', desc:'Trouver sa première combinaison', icon:'🎯' },
+  { id:'perfect', name:'Coup de Maître', desc:'Trouver en moins de 5 tentatives', icon:'⚡' },
+  { id:'expert_win', name:'Cerveau Expert', desc:'Gagner en difficulté Expert', icon:'🧠' },
+  { id:'wins_10', name:'10 victoires', desc:'Gagner 10 parties', icon:'🏅' },
+  { id:'no_hints', name:'Premier essai', desc:'Trouver dès la première tentative', icon:'🍀' },
+];
+
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toastHost');
+  t.textContent = msg; t.classList.remove('ondine-toast-show'); void t.offsetWidth; t.classList.add('ondine-toast-show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('ondine-toast-show'), 2000);
+}
+let audioCtx = null;
+function tone(freq, dur, type='sine', vol=.12) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+dur);
+    osc.start(); osc.stop(audioCtx.currentTime+dur);
+  } catch(e) {}
+}
+function playSound(name) {
+  const P = {
+    place: () => tone(500,.06,'sine',.12),
+    submit: () => tone(600,.1,'triangle',.12),
+    win: () => [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.16),i*100)),
+    lose: () => [392,330,262].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.12),i*120)),
+    error: () => tone(220,.15,'sawtooth',.1),
+    unlock: () => [660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,.14,'sine',.14),i*80)),
+  };
+  (P[name]||(()=>{}))();
+}
+function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let CONFIG = { difficulty: 'normal', custom: { positions:4, colors:6, attempts:10, repeats:true } };
+let G = null;
+
+function renderDiffGrid() {
+  const grid = document.getElementById('diffGrid'); grid.innerHTML = '';
+  Object.entries(DIFFICULTIES).forEach(([key, d]) => {
+    const el = document.createElement('div');
+    el.className = 'opt-card' + (key===CONFIG.difficulty ? ' sel' : '');
+    el.innerHTML = `<div class="opt-icon">${{easy:'🌱',normal:'⚡',hard:'🔥',expert:'💎'}[key]}</div><div class="opt-name">${d.label}</div><div class="opt-desc">${d.positions}pos·${d.colors}coul.</div>`;
+    el.onclick = () => { CONFIG.difficulty = key; document.getElementById('customPanel').classList.remove('show'); renderDiffGrid(); };
+    grid.appendChild(el);
+  });
+  const customEl = document.createElement('div');
+  customEl.className = 'opt-card' + (CONFIG.difficulty==='custom' ? ' sel' : '');
+  customEl.innerHTML = `<div class="opt-icon">🛠️</div><div class="opt-name">Personnalisé</div>`;
+  customEl.onclick = () => { CONFIG.difficulty = 'custom'; document.getElementById('customPanel').classList.add('show'); renderDiffGrid(); };
+  grid.appendChild(customEl);
+}
+function adjustCustom(field, delta) {
+  const c = CONFIG.custom;
+  if (field==='positions') c.positions = Math.max(3, Math.min(6, c.positions+delta));
+  if (field==='colors') c.colors = Math.max(3, Math.min(8, c.colors+delta));
+  if (field==='attempts') c.attempts = Math.max(4, Math.min(15, c.attempts+delta));
+  document.getElementById('valPositions').textContent = c.positions;
+  document.getElementById('valColors').textContent = c.colors;
+  document.getElementById('valAttempts').textContent = c.attempts;
+}
+function toggleRepeats() { CONFIG.custom.repeats = !CONFIG.custom.repeats; document.getElementById('btnRepeats').textContent = CONFIG.custom.repeats ? 'Oui' : 'Non'; }
+
+function currentSettings() { return CONFIG.difficulty === 'custom' ? CONFIG.custom : DIFFICULTIES[CONFIG.difficulty]; }
+
+function generateSecret(settings) {
+  const palette = ALL_COLORS.slice(0, settings.colors).map(c => c.id);
+  const secret = [];
+  if (settings.repeats) {
+    for (let i = 0; i < settings.positions; i++) secret.push(palette[Math.floor(Math.random()*palette.length)]);
+  } else {
+    const pool = [...palette];
+    for (let i = 0; i < settings.positions && pool.length; i++) {
+      const idx = Math.floor(Math.random()*pool.length);
+      secret.push(pool.splice(idx,1)[0]);
+    }
+  }
+  return secret;
+}
+
+function startGame() {
+  const settings = currentSettings();
+  G = {
+    settings, secret: generateSecret(settings),
+    guesses: [], currentGuess: Array(settings.positions).fill(null),
+    over: false, won: false, selectedColorIdx: 0,
+  };
+  showScreen('sg');
+  renderAll();
+}
+function goHome() { updateHomeStats(); showScreen('sh'); }
+async function confirmLeaveGame() {
+  if (G && !G.over) {
+    const ok = await confirmDialog('Quitter la partie ?', 'La partie en cours sera perdue.', 'Quitter', 'Continuer');
+    if (!ok) return;
+  }
+  goHome();
+}
+
+function pickColor(idx) {
+  G.selectedColorIdx = idx;
+  renderPalette();
+}
+function placeAt(slotIdx) {
+  if (!G || G.over) return;
+  const palette = ALL_COLORS.slice(0, G.settings.colors);
+  G.currentGuess[slotIdx] = palette[G.selectedColorIdx].id;
+  playSound('place'); vibrate(10);
+  renderBoard();
+}
+function clearCurrentGuess() {
+  if (!G || G.over) return;
+  G.currentGuess = Array(G.settings.positions).fill(null);
+  renderBoard();
+}
+function submitGuess() {
+  if (!G || G.over) return;
+  if (G.currentGuess.some(v => v === null)) { toast('Remplis toutes les positions'); playSound('error'); return; }
+  const result = scoreGuess(G.secret, G.currentGuess);
+  G.guesses.push({ guess: [...G.currentGuess], result });
+  playSound('submit'); vibrate(15);
+
+  if (result.black === G.settings.positions) { endGame(true); return; }
+  if (G.guesses.length >= G.settings.attempts) { endGame(false); return; }
+
+  G.currentGuess = Array(G.settings.positions).fill(null);
+  renderAll();
+}
+
+function endGame(won) {
+  G.over = true; G.won = won;
+  statInc('games');
+  if (won) {
+    statInc('wins');
+    statSetMin('bestAttempts', G.guesses.length);
+    playSound('win'); vibrate([20,40,20]);
+    achUnlock('first_win','Premier Succès','🎯');
+    if (G.guesses.length <= 5) achUnlock('perfect','Coup de Maître','⚡');
+    if (G.guesses.length === 1) achUnlock('no_hints','Premier essai','🍀');
+    if (CONFIG.difficulty === 'expert') achUnlock('expert_win','Cerveau Expert','🧠');
+    if (statGet('wins') >= 10) achUnlock('wins_10','10 victoires','🏅');
+  } else {
+    statInc('losses');
+    playSound('lose');
+  }
+  setTimeout(showResult, 400);
+}
+function showResult() {
+  const icon = document.getElementById('resIcon'), title = document.getElementById('resTitle'), sub = document.getElementById('resSub');
+  icon.textContent = G.won ? '🏆' : '😔';
+  title.textContent = G.won ? 'Trouvé !' : 'Perdu...';
+  sub.textContent = G.won ? `En ${G.guesses.length} tentative${G.guesses.length>1?'s':''}` : 'Voici la combinaison secrète :';
+  const reveal = document.getElementById('secretReveal'); reveal.innerHTML = '';
+  const paletteMap = Object.fromEntries(ALL_COLORS.map(c => [c.id, c.hex]));
+  G.secret.forEach(id => { const el = document.createElement('div'); el.className='secret-peg'; el.style.background = paletteMap[id]; reveal.appendChild(el); });
+  document.getElementById('sres').classList.remove('hidden'); /* audit UX fin de partie : overlay sans masquer le plateau/la grille en dessous */
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderAll() { renderBoard(); renderPalette(); }
+function renderBoard() {
+  document.getElementById('attemptsBadge').textContent = `Tentative ${G.guesses.length+1}/${G.settings.attempts}`;
+  const scroll = document.getElementById('boardScroll'); scroll.innerHTML = '';
+  const paletteMap = Object.fromEntries(ALL_COLORS.map(c => [c.id, c.hex]));
+
+  // ligne courante (en édition) — affichée en premier grâce à column-reverse
+  const curRow = document.createElement('div'); curRow.className = 'guess-row current';
+  const curPegs = document.createElement('div'); curPegs.className = 'guess-pegs';
+  G.currentGuess.forEach((v,i) => {
+    const slot = document.createElement('div'); slot.className = 'peg-slot' + (v?' filled':'');
+    if (v) slot.style.background = paletteMap[v];
+    slot.onclick = () => placeAt(i);
+    curPegs.appendChild(slot);
+  });
+  curRow.appendChild(curPegs);
+  scroll.appendChild(curRow);
+
+  G.guesses.slice().reverse().forEach(g => {
+    const row = document.createElement('div'); row.className = 'guess-row';
+    const pegs = document.createElement('div'); pegs.className = 'guess-pegs';
+    g.guess.forEach(id => { const p = document.createElement('div'); p.className='peg-slot filled'; p.style.background = paletteMap[id]; pegs.appendChild(p); });
+    row.appendChild(pegs);
+    const fb = document.createElement('div'); fb.className = 'feedback-pegs';
+    const dots = [...Array(g.result.black).fill('black'), ...Array(g.result.white).fill('white'), ...Array(G.settings.positions - g.result.black - g.result.white).fill('')];
+    dots.forEach(d => { const dot = document.createElement('div'); dot.className = 'fb-dot' + (d?(' '+d):''); fb.appendChild(dot); });
+    row.appendChild(fb);
+    scroll.appendChild(row);
+  });
+}
+function renderPalette() {
+  const host = document.getElementById('colorPalette'); host.innerHTML = '';
+  const palette = ALL_COLORS.slice(0, G.settings.colors);
+  palette.forEach((c,i) => {
+    const el = document.createElement('div'); el.className = 'color-swatch' + (i===G.selectedColorIdx?' sel':'');
+    el.style.background = c.hex;
+    el.onclick = () => pickColor(i);
+    host.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION / STATS / HELP
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id==='sstats') renderStatsScreen();
+  if (id==='sh') renderDiffGrid();
+}
+function updateHomeStats() {
+  const host = document.getElementById('homeStats'); host.innerHTML = '';
+  [{v:statGet('games'),l:'🎮 Parties'},{v:statGet('wins'),l:'🏆 Victoires'},{v:statGet('bestAttempts','—'),l:'⚡ Record'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.style.flex='1';
+      el.innerHTML = `<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
+}
+function renderStatsScreen() {
+  const grid = document.getElementById('statsGrid'); grid.innerHTML = '';
+  [{v:statGet('games'),l:'Parties'},{v:statGet('wins'),l:'Victoires'},{v:statGet('losses'),l:'Défaites'},{v:statGet('bestAttempts','—'),l:'Meilleur score'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; grid.appendChild(el); });
+  const list = document.getElementById('achList'); list.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = STORE.achievements.includes(a.id);
+    const el = document.createElement('div'); el.className='achCard'+(unlocked?' unlocked':'');
+    el.innerHTML = `<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`;
+    list.appendChild(el);
+  });
+}
+function showHelp() {
+  const overlay = document.getElementById('modalOverlay');
+  overlay.innerHTML = `<div class="modal-box"><div class="modal-title">🧠 Comment jouer</div>
+    <div class="modal-body">Devine la combinaison secrète de couleurs.<br><br>
+    Après chaque tentative :<br>⚫ pion noir = bonne couleur, bonne position<br>⚪ pion blanc = bonne couleur, mauvaise position<br><br>
+    Les couleurs peuvent se répéter selon la configuration choisie.</div>
+    <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdClose">Compris !</button></div></div>`;
+  overlay.classList.remove('hidden');
+  document.getElementById('mdClose').onclick = () => overlay.classList.add('hidden');
+}
+function confirmDialog(title, message, confirmLabel, cancelLabel) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.innerHTML = `<div class="modal-box"><div class="modal-title">${title}</div><div class="modal-body">${message}</div>
+      <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdConfirm">${confirmLabel}</button>
+      <button class="ondine-btn ondine-btn-secondary" id="mdCancel">${cancelLabel}</button></div></div>`;
+    overlay.classList.remove('hidden');
+    document.getElementById('mdConfirm').onclick = () => { overlay.classList.add('hidden'); resolve(true); };
+    document.getElementById('mdCancel').onclick = () => { overlay.classList.add('hidden'); resolve(false); };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+renderDiffGrid();
+updateHomeStats();
+window.adjustCustom=adjustCustom; window.toggleRepeats=toggleRepeats; window.startGame=startGame;
+window.goHome=goHome; window.showScreen=showScreen; window.confirmLeaveGame=confirmLeaveGame;
+window.clearCurrentGuess=clearCurrentGuess; window.submitGuess=submitGuess; window.showHelp=showHelp;
+window.pickColor=pickColor; window.placeAt=placeAt;
+</script>
+</body>
+</html>

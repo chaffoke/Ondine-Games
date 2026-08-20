@@ -1,0 +1,10 @@
+{
+  "id": "belote",
+  "name": "Belote",
+  "icon": "🃏",
+  "category": "cartes",
+  "description": "Variante française classique à 4 joueurs, 2 équipes. Règles documentées en jeu (ⓘ). Testée sur 1000 manches simulées.",
+  "minPlayers": 4,
+  "maxPlayers": 4,
+  "version": "1.0.0"
+}

@@ -1,0 +1,2694 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Solitaire × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Solitaire Ondine">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest-solitaire.json">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<!-- Ondine Games — design system commun. Les tokens et le reset de
+     base (:root, *, html/body) vivent désormais ici, plus dans ce
+     fichier — voir /core/CLAUDE.md -->
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ONDINE GAMES — Design Tokens
+   Source unique de vérité pour les couleurs, rayons, ombres.
+   Ces variables étaient dupliquées à l'identique (ou presque) dans
+   Solitaire, Sudoku et YAMS. Toute évolution de la DA se fait ICI,
+   et se répercute automatiquement sur tous les jeux qui l'importent.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#06081e;
+  --bg2:#090c24;
+  --c1:#38bdf8;   /* aqua principal */
+  --c2:#7dd3fc;   /* aqua clair */
+  --c3:#bae6fd;   /* aqua très clair */
+  --cp:#818cf8;   /* indigo */
+  --cp2:#a5b4fc;
+  --cg:#34d399;   /* succès / vert */
+  --co:#fbbf24;   /* or / avertissement */
+  --co2:#fde68a;
+  --cr:#f87171;   /* erreur / rouge */
+  --cm:#f472b6;   /* magenta / accent rare */
+
+  --glass:rgba(255,255,255,.05);
+  --glass2:rgba(255,255,255,.09);
+  --glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);
+  --border2:rgba(56,189,248,.22);
+
+  --text:#e0f2fe;
+  --text2:#94a3b8;
+
+  --r:14px;
+  --r2:20px;
+
+  --sh:0 4px 20px rgba(0,0,0,.5);
+  --sh2:0 8px 32px rgba(0,0,0,.6);
+}
+
+/* Reset commun — identique dans les 3 jeux, factorisé ici */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+</style>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   UI SDK — styles des composants
+   Un composant = un bloc ici, préfixé .ondine-*. Les couleurs et
+   rayons viennent des variables de design-tokens.css — jamais de
+   valeur en dur.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Toast ── */
+.ondine-toast{
+  position:fixed;bottom:90px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:rgba(15,25,60,.92);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:10px 18px;
+  font-size:13px;font-weight:700;color:var(--text);
+  backdrop-filter:blur(12px);
+  z-index:9999;opacity:0;
+  transition:all .3s;
+  white-space:nowrap;max-width:80vw;text-align:center;
+  pointer-events:none;
+}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.ondine-toast[data-variant="error"]{border-color:rgba(248,113,113,.4);}
+.ondine-toast[data-variant="success"]{border-color:rgba(52,211,153,.4);}
+
+/* ── Button ── */
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:var(--r2);cursor:pointer;transition:transform .12s,box-shadow .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:18px;box-shadow:0 6px 24px rgba(14,116,144,.45),inset 0 1px 0 rgba(255,255,255,.12);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;backdrop-filter:blur(8px);}
+.ondine-btn-danger{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.35);color:var(--cr);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-btn:disabled{opacity:.4;cursor:default;}
+.ondine-btn-icon{margin-right:6px;}
+
+.ondine-icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:transform .14s;}
+.ondine-icon-btn:active{transform:scale(.88);}
+
+/* ── Badge ── */
+.ondine-badge{display:inline-block;padding:2px 9px;border-radius:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;}
+.ondine-badge-default{background:var(--glass);color:var(--text2);border:1px solid var(--border);}
+.ondine-badge-success{background:rgba(52,211,153,.12);color:var(--cg);border:1px solid rgba(52,211,153,.3);}
+.ondine-badge-warning{background:rgba(251,191,36,.12);color:var(--co);border:1px solid rgba(251,191,36,.3);}
+
+/* ── Stat Card ── */
+.ondine-stat-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;text-align:center;}
+.ondine-stat-icon{font-size:18px;margin-bottom:4px;}
+.ondine-stat-value{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c1);}
+.ondine-stat-label{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+
+/* ── Achievement Card ── */
+.ondine-ach-card{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;}
+.ondine-ach-card.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.ondine-ach-icon{font-size:24px;flex-shrink:0;}
+.ondine-ach-body{flex:1;}
+.ondine-ach-name{font-weight:800;font-size:12px;}
+.ondine-ach-desc{font-size:10px;color:var(--text2);margin-top:1px;}
+.ondine-ach-badge{font-size:10px;font-weight:800;flex-shrink:0;color:var(--text2);}
+.ondine-ach-card.unlocked .ondine-ach-badge{color:var(--co);}
+
+/* ── Modal ── */
+.ondine-modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.ondine-modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;max-width:340px;width:100%;box-shadow:var(--sh2);}
+.ondine-modal-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.ondine-modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.ondine-modal-actions{display:flex;flex-direction:column;gap:8px;}
+
+</style>
+<style>
+/* Tokens propres à ce jeu uniquement (tailles de carte, rayon de
+   carte) — tout ce qui est partagé est dans design-tokens.css */
+:root{
+  --card-w:52px;--card-h:72px;
+  --card-radius:8px;
+}
+
+/* ── BG ── */
+.bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);animation:obf 12s ease-in-out infinite;}
+.o1{width:400px;height:400px;background:radial-gradient(circle,#1e3a8a88,transparent);top:-160px;left:-120px;}
+.o2{width:320px;height:320px;background:radial-gradient(circle,#0e749088,transparent);bottom:-100px;right:-80px;animation-delay:-5s;}
+.o3{width:260px;height:260px;background:radial-gradient(circle,#4338ca55,transparent);top:40%;left:35%;animation-delay:-7s;}
+@keyframes obf{0%,100%{transform:translate(0,0)scale(1);}50%{transform:translate(20px,26px)scale(1.09);}}
+.particles{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden;}
+.par{position:absolute;border-radius:50%;animation:pfloat linear infinite;}
+@keyframes pfloat{0%{transform:translateY(102vh)scale(0);opacity:0;}8%{opacity:.55;}92%{opacity:.15;}100%{transform:translateY(-8vh)scale(1.1);opacity:0;}}
+
+/* ── SCREENS ── */
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+
+/* ── HOME ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px 20px 40px;gap:0;overflow-y:auto;}
+.logo-wrap{margin-bottom:6px;position:relative;display:inline-block;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(52px,14vw,78px);letter-spacing:2px;line-height:1;
+  background:linear-gradient(160deg,#e0f2fe 0%,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 18px rgba(56,189,248,.45));animation:logo-glow 4s ease-in-out infinite;}
+@keyframes logo-glow{0%,100%{filter:drop-shadow(0 0 16px rgba(56,189,248,.4)) drop-shadow(0 0 32px rgba(56,189,248,.15));}50%{filter:drop-shadow(0 0 28px rgba(125,211,252,.65)) drop-shadow(0 0 48px rgba(56,189,248,.25));}}
+.logo-sub{font-family:'Fredoka One',cursive;font-size:12px;letter-spacing:5px;text-transform:uppercase;color:var(--c2);opacity:.65;margin-top:1px;}
+.logo-hint{font-size:11px;color:var(--c2);margin-top:2px;font-style:italic;opacity:.5;}
+.home-cards-preview{display:flex;gap:6px;justify-content:center;margin:18px 0 22px;perspective:400px;}
+.preview-card{width:46px;height:64px;background:linear-gradient(145deg,#0d1633,#152348);border:1.5px solid rgba(56,189,248,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;animation:card-float 2.5s ease-in-out infinite;box-shadow:0 4px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08);}
+.preview-card:nth-child(2){animation-delay:.3s;}.preview-card:nth-child(3){animation-delay:.6s;}.preview-card:nth-child(4){animation-delay:.9s;}.preview-card:nth-child(5){animation-delay:1.2s;}
+@keyframes card-float{0%,100%{transform:translateY(0) rotateY(0deg);}50%{transform:translateY(-8px) rotateY(8deg);}}
+.hbtns{display:flex;flex-direction:column;gap:9px;align-items:center;width:100%;max-width:320px;}
+.btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);border:none;border-radius:var(--r2);padding:15px 28px;font-family:'Fredoka One',cursive;font-size:19px;color:#fff;cursor:pointer;width:100%;box-shadow:0 6px 24px rgba(14,116,144,.45),inset 0 1px 0 rgba(255,255,255,.12);transition:transform .12s,box-shadow .12s;position:relative;overflow:hidden;}
+.btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.12),transparent);pointer-events:none;}
+.btn-primary:active{transform:scale(.955) translateY(2px);box-shadow:0 2px 12px rgba(14,116,144,.35);}
+.btn-secondary{background:var(--glass);border:1.5px solid var(--border);border-radius:var(--r2);padding:11px 22px;font-weight:800;font-size:13px;color:var(--text);cursor:pointer;width:100%;transition:all .14s;backdrop-filter:blur(8px);}
+.btn-secondary:active{transform:scale(.955);background:var(--glass2);}
+.btn-back{width:34px;height:34px;background:var(--glass);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:all .14s;}
+.btn-back:active{transform:scale(.88);}
+.hstats{display:flex;gap:7px;margin-top:16px;width:100%;max-width:320px;}
+.stbadge{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:10px 4px;text-align:center;}
+.stbadge .v{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c1);}
+.stbadge .l{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+/* ── GAME SCREEN ── */
+#sg{background:transparent;overflow:hidden;}
+.game-header{display:flex;align-items:center;justify-content:space-between;padding:8px 10px 6px;flex-shrink:0;z-index:20;position:relative;}
+.gh-left{display:flex;align-items:center;gap:8px;}
+.gh-right{display:flex;align-items:center;gap:6px;}
+.gh-timer{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c2);background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;min-width:64px;text-align:center;}
+.gh-score{font-family:'Fredoka One',cursive;font-size:16px;color:var(--co);background:var(--glass);border:1px solid rgba(251,191,36,.2);border-radius:10px;padding:5px 10px;min-width:64px;text-align:center;}
+.gh-btn{width:32px;height:32px;background:var(--glass);border:1px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;flex-shrink:0;transition:all .14s;}
+.gh-btn:active{transform:scale(.88);}
+
+/* ── GAME AREA ── */
+.game-area{flex:1;overflow:hidden;position:relative;padding:0 6px;}
+
+/* ── TOP ROW (stock + waste + foundations) ── */
+.top-row{display:flex;align-items:flex-start;justify-content:space-between;padding:4px 2px;gap:4px;}
+.top-left{display:flex;gap:5px;flex-shrink:0;}
+.top-right{display:flex;gap:5px;flex-shrink:0;}
+
+/* ── TABLEAU ── */
+.tableau{display:flex;gap:4px;padding:4px 2px 0;height:calc(100% - 110px);overflow:visible;}
+.col{flex:1;position:relative;min-height:80px;}
+
+/* ── CARD SLOT (empty placeholder) ── */
+.card-slot{width:var(--card-w);height:var(--card-h);border:2px dashed rgba(56,189,248,.2);border-radius:var(--card-radius);background:rgba(56,189,248,.03);display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.6;flex-shrink:0;}
+.foundation-slot{border-color:rgba(251,191,36,.25);background:rgba(251,191,36,.03);}
+.foundation-slot.foundation-complete{border-color:rgba(52,211,153,.4);box-shadow:0 0 14px rgba(52,211,153,.3);animation:found-complete-pulse 2s ease-in-out infinite;}
+@keyframes found-complete-pulse{0%,100%{box-shadow:0 0 14px rgba(52,211,153,.25);}50%{box-shadow:0 0 28px rgba(52,211,153,.5),0 0 48px rgba(52,211,153,.2);}}
+
+/* ── CARDS ── */
+.card{position:absolute;width:var(--card-w);height:var(--card-h);border-radius:var(--card-radius);cursor:pointer;transition:transform .08s;will-change:transform;touch-action:none;z-index:1;}
+.card.face-down{background:linear-gradient(145deg,#0d1633,#152348);border:1.5px solid rgba(56,189,248,.25);box-shadow:var(--sh);}
+.card.face-up{background:linear-gradient(160deg,#0f1d3d 0%,#0d1a38 50%,#0e1f40 100%);border:1.5px solid rgba(56,189,248,.2);box-shadow:var(--sh);}
+.card.face-up.red-suit{background:linear-gradient(160deg,#1a0d1e 0%,#1c0f22 50%,#1a0d20 100%);border-color:rgba(244,114,182,.25);}
+.card-inner{position:relative;width:100%;height:100%;border-radius:calc(var(--card-radius) - 2px);overflow:hidden;}
+.card-inner::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 50%,rgba(0,0,0,.1) 100%);border-radius:calc(var(--card-radius) - 2px);pointer-events:none;}
+.card-back-pattern{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.card-back-pattern::before{content:'';position:absolute;inset:3px;border:1px solid rgba(56,189,248,.15);border-radius:6px;}
+.card-back-pattern .back-icon{font-size:22px;opacity:.4;animation:back-shimmer 3s ease-in-out infinite;}
+@keyframes back-shimmer{0%,100%{opacity:.35;}50%{opacity:.55;}}
+.card-face{padding:3px 4px;display:flex;flex-direction:column;justify-content:space-between;height:100%;}
+.card-corner-top{display:flex;flex-direction:column;align-items:flex-start;line-height:1;}
+.card-corner-bot{display:flex;flex-direction:column;align-items:flex-end;line-height:1;transform:rotate(180deg);}
+.card-rank{font-family:'Fredoka One',cursive;font-size:13px;line-height:1;}
+.card-suit-small{font-size:10px;line-height:1;}
+.card-center-suit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px;opacity:.35;}
+.card.red-suit .card-rank,.card.red-suit .card-suit-small{color:#f9a8d4;}
+.card:not(.red-suit) .card-rank,.card:not(.red-suit) .card-suit-small{color:#bae6fd;}
+.card.red-suit .card-center-suit{filter:hue-rotate(280deg);}
+
+.card.dragging{z-index:1000!important;transform:scale(1.05) rotate(2deg);box-shadow:0 16px 48px rgba(56,189,248,.4),0 8px 24px rgba(0,0,0,.6);transition:none!important;}
+.card.valid-drop-target{box-shadow:0 0 16px rgba(52,211,153,.5),0 0 32px rgba(52,211,153,.25)!important;}
+.card.invalid-drop-target{box-shadow:0 0 16px rgba(248,113,113,.4)!important;}
+.card.animating{transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+.card.auto-move{transition:all .4s cubic-bezier(.25,.46,.45,.94);}
+
+/* HOLO EFFECT */
+.card.face-up::before{content:'';position:absolute;inset:0;border-radius:var(--card-radius);background:linear-gradient(105deg,transparent 20%,rgba(56,189,248,.04) 40%,rgba(129,140,248,.06) 60%,transparent 80%);pointer-events:none;transition:opacity .3s;}
+
+/* ── WASTE (visible cards) ── */
+.waste-pile{position:relative;width:var(--card-w);height:var(--card-h);}
+
+/* ── SCORE FLOAT ── */
+.score-float{position:fixed;z-index:9999;pointer-events:none;font-family:'Fredoka One',cursive;font-size:18px;color:var(--co2);text-shadow:0 0 12px rgba(251,191,36,.7);animation:score-rise 1.2s ease-out forwards;}
+@keyframes score-rise{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-60px);}}
+.combo-text{position:fixed;z-index:9999;pointer-events:none;font-family:'Fredoka One',cursive;font-size:22px;color:var(--c1);text-shadow:0 0 20px rgba(56,189,248,.9);animation:combo-pop 1.5s ease-out forwards;text-align:center;}
+@keyframes combo-pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.5);}15%{opacity:1;transform:translate(-50%,-50%) scale(1.2);}30%{transform:translate(-50%,-50%) scale(1);}80%{opacity:1;}100%{opacity:0;transform:translate(-50%,-70%) scale(.9);}}
+
+/* ── VICTORY SCREEN ── */
+#svic{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;}
+.vic-trophy{font-size:72px;animation:trophy-bounce 1s cubic-bezier(.34,1.56,.64,1) both;filter:drop-shadow(0 0 24px rgba(251,191,36,.8));}
+@keyframes trophy-bounce{0%{transform:scale(0) rotate(-20deg);}100%{transform:scale(1) rotate(0deg);}}
+.vic-title{font-family:'Fredoka One',cursive;font-size:32px;margin:12px 0 6px;background:linear-gradient(135deg,#fde68a,#fbbf24,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 12px rgba(251,191,36,.5));}
+.vic-sub{font-size:14px;color:var(--c2);margin-bottom:20px;opacity:.8;}
+.vic-stats{display:flex;gap:10px;margin:16px 0;width:100%;max-width:300px;}
+.vic-stat{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 6px;}
+.vic-stat .sv{font-family:'Fredoka One',cursive;font-size:20px;color:var(--c1);}
+.vic-stat .sl{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.vic-cards-rain{position:fixed;inset:0;pointer-events:none;z-index:99;overflow:hidden;}
+
+/* ── MENU SCREEN ── */
+#smenu{align-items:center;justify-content:flex-start;padding:16px;overflow-y:auto;gap:10px;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:20px;color:var(--c2);}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;}
+.mode-card{background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:14px 10px;cursor:pointer;text-align:center;transition:all .18s;position:relative;overflow:hidden;}
+.mode-card.sel{border-color:var(--c1);background:var(--glass3);box-shadow:0 0 16px rgba(56,189,248,.2);}
+.mode-card.sel::after{content:'✓';position:absolute;top:6px;right:8px;color:var(--c1);font-size:11px;font-weight:900;}
+.mode-card:active{transform:scale(.97);}
+.mode-icon{font-size:28px;margin-bottom:6px;}
+.mode-name{font-family:'Fredoka One',cursive;font-size:14px;color:var(--text);}
+.mode-desc{font-size:10px;color:var(--text2);margin-top:2px;}
+
+/* ── OPTIONS ── */
+#sopt{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.opt-section{width:100%;margin-bottom:16px;}
+.opt-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;margin-bottom:8px;padding-left:2px;}
+.opt-row{display:flex;align-items:center;justify-content:space-between;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:6px;}
+.opt-label{font-weight:700;font-size:13px;color:var(--text);}
+.opt-desc{font-size:10px;color:var(--text2);margin-top:1px;}
+.toggle{width:44px;height:24px;background:rgba(255,255,255,.1);border-radius:12px;position:relative;cursor:pointer;transition:background .25s;flex-shrink:0;}
+.toggle.on{background:linear-gradient(135deg,var(--c1),var(--cp));}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.toggle.on::after{transform:translateX(20px);}
+.slider-wrap{display:flex;align-items:center;gap:8px;}
+.opt-slider{-webkit-appearance:none;width:90px;height:4px;border-radius:2px;background:rgba(255,255,255,.1);outline:none;cursor:pointer;}
+.opt-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--c1);border-radius:50%;cursor:pointer;box-shadow:0 0 8px rgba(56,189,248,.5);}
+.opt-val{font-size:11px;color:var(--c2);min-width:20px;text-align:right;}
+
+/* ── STATS SCREEN ── */
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:12px;}
+.stat-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;text-align:center;}
+.stat-card .sv{font-family:'Fredoka One',cursive;font-size:24px;color:var(--c1);}
+.stat-card .sl{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+.achieve-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.achieve-item{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;}
+.achieve-item.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.ach-icon{font-size:24px;flex-shrink:0;}
+.ach-name{font-weight:800;font-size:12px;}
+.ach-desc{font-size:10px;color:var(--text2);margin-top:1px;}
+.ach-badge{margin-left:auto;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;flex-shrink:0;}
+.ach-badge.done{background:rgba(251,191,36,.15);color:var(--co);border:1px solid rgba(251,191,36,.3);}
+.ach-badge.todo{background:var(--glass);color:var(--text2);border:1px solid var(--border);}
+
+/* ── COLLECTION SCREEN ── */
+#scol{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.themes-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;margin-bottom:16px;}
+.theme-card{border-radius:var(--r);padding:14px 10px;cursor:pointer;text-align:center;border:2px solid var(--border);transition:all .2s;position:relative;overflow:hidden;}
+.theme-card.locked{opacity:.5;cursor:default;}
+.theme-card.active{box-shadow:0 0 20px rgba(56,189,248,.35);}
+.theme-card:active:not(.locked){transform:scale(.97);}
+.theme-icon{font-size:30px;margin-bottom:6px;}
+.theme-name{font-family:'Fredoka One',cursive;font-size:13px;}
+.theme-rarity{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;margin-top:2px;}
+.rarity-commun{color:var(--text2);}
+.rarity-rare{color:var(--c1);}
+.rarity-epique{color:var(--cp);}
+.rarity-legendaire{color:var(--co);text-shadow:0 0 8px rgba(251,191,36,.5);}
+.theme-lock{position:absolute;top:6px;right:8px;font-size:12px;opacity:.6;}
+
+/* ── CHEST OVERLAY ── */
+#schest{align-items:center;justify-content:center;background:rgba(6,8,30,.9);backdrop-filter:blur(20px);z-index:200;}
+.chest-wrap{text-align:center;padding:30px 20px;}
+.chest-icon{font-size:80px;animation:chest-pulse 1.5s ease-in-out infinite;filter:drop-shadow(0 0 24px rgba(251,191,36,.7));cursor:pointer;transition:transform .15s;}
+.chest-icon:active{transform:scale(.95);}
+@keyframes chest-pulse{0%,100%{transform:scale(1) rotate(-3deg);}50%{transform:scale(1.08) rotate(3deg);}}
+.chest-title{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);margin:12px 0 6px;filter:drop-shadow(0 0 8px rgba(251,191,36,.5));}
+.chest-hint{font-size:12px;color:var(--text2);}
+.chest-reward{text-align:center;animation:reward-appear .5s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes reward-appear{0%{transform:scale(0);opacity:0;}100%{transform:scale(1);opacity:1;}}
+.reward-icon{font-size:56px;margin-bottom:10px;filter:drop-shadow(0 0 20px rgba(129,140,248,.8));}
+.reward-name{font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:4px;}
+.reward-rarity-badge{display:inline-block;padding:3px 12px;border-radius:10px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;}
+.rb-commun{background:rgba(148,163,184,.1);color:var(--text2);border:1px solid var(--border);}
+.rb-rare{background:rgba(56,189,248,.1);color:var(--c1);border:1px solid rgba(56,189,248,.3);}
+.rb-epique{background:rgba(129,140,248,.1);color:var(--cp);border:1px solid rgba(129,140,248,.3);}
+.rb-legendaire{background:rgba(251,191,36,.1);color:var(--co);border:1px solid rgba(251,191,36,.4);box-shadow:0 0 12px rgba(251,191,36,.2);}
+
+/* ── HINT HIGHLIGHT ── */
+.card.hint-highlight{animation:hint-flash .6s ease-in-out 3;box-shadow:0 0 20px rgba(52,211,153,.8)!important;}
+@keyframes hint-flash{0%,100%{box-shadow:0 0 8px rgba(52,211,153,.3);}50%{box-shadow:0 0 24px rgba(52,211,153,.9),0 0 48px rgba(52,211,153,.4);}}
+
+/* ── UNDO BOUNCE ── */
+.card.undo-bounce{animation:undo-b .3s ease;}
+@keyframes undo-b{0%{transform:scale(1);}50%{transform:scale(.92);}100%{transform:scale(1);}}
+
+/* ── LEVEL BAR ── */
+.level-bar-wrap{width:100%;max-width:320px;margin:10px 0;}
+.level-row{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:4px;}
+.level-bar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;}
+.level-fill{height:100%;background:linear-gradient(90deg,var(--c1),var(--cp));border-radius:3px;transition:width .5s ease;}
+
+/* CONFETTI */
+.cfp{position:absolute;top:-10px;animation:cf-fall linear forwards;}
+@keyframes cf-fall{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+
+/* SPARKLE */
+.sparkle{position:fixed;pointer-events:none;z-index:9998;animation:spark-anim .8s ease-out forwards;}
+@keyframes spark-anim{0%{transform:scale(0);opacity:1;}100%{transform:scale(2);opacity:0;}}
+
+/* ── IN-GAME OVERLAY (pause/hint menu) ── */
+#sgpause{position:fixed;inset:0;z-index:50;background:rgba(6,8,30,.85);backdrop-filter:blur(16px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:30px 20px;}
+#sgpause.hidden{display:none!important;}
+.pause-title{font-family:'Fredoka One',cursive;font-size:26px;color:var(--c2);margin-bottom:10px;}
+
+/* DRAW MODE BADGE */
+.draw-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;background:rgba(56,189,248,.12);color:var(--c2);border:1px solid var(--border2);text-transform:uppercase;letter-spacing:1px;}
+
+/* PROGRESS BADGE */
+.progress-badge{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;}
+.progress-badge span{color:var(--c2);font-weight:800;}
+
+/* WASTE OFFSET DISPLAY */
+.waste-stack{position:relative;width:var(--card-w);height:var(--card-h);}
+</style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-layer">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+</div>
+<div class="particles" id="particles"></div>
+
+<!-- CONFETTI -->
+<div id="cfc" style="position:fixed;inset:0;pointer-events:none;z-index:9990;overflow:hidden;"></div>
+
+<!-- ═══════════════════════════ HOME ═══════════════════════════ -->
+<div class="screen" id="sh">
+  <div class="logo-wrap"><div class="logo">SOLITAIRE</div></div>
+  <div class="logo-sub">× Ondine</div>
+  <div class="logo-hint">✦ L'élégance de l'océan ✦</div>
+  <div class="home-cards-preview">
+    <div class="preview-card">🂡</div>
+    <div class="preview-card">🂮</div>
+    <div class="preview-card">🃁</div>
+    <div class="preview-card">🂾</div>
+    <div class="preview-card">🃎</div>
+  </div>
+  <div class="hbtns">
+    <button class="btn-primary" onclick="showMenu()">✦ Nouvelle Partie</button>
+    <button class="btn-secondary" onclick="showScreen('scol')">🎨 Collection</button>
+    <button class="btn-secondary" onclick="showScreen('sstats')">📊 Statistiques</button>
+    <button class="btn-secondary" onclick="showScreen('sopt')">⚙️ Options</button>
+  </div>
+  <div class="level-bar-wrap" id="homeLevelBar">
+    <div class="level-row"><span id="homeLevelLabel">Niveau 1 — Apprenti</span><span id="homeXPLabel">0 / 100 XP</span></div>
+    <div class="level-bar"><div class="level-fill" id="homeLevelFill" style="width:0%"></div></div>
+  </div>
+  <div class="hstats">
+    <div class="stbadge"><div class="v" id="stGames">0</div><div class="l">Parties</div></div>
+    <div class="stbadge"><div class="v" id="stWins">0</div><div class="l">Victoires</div></div>
+    <div class="stbadge"><div class="v" id="stBest">—</div><div class="l">Meilleur</div></div>
+  </div>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════════════════════════ MENU SETUP ═══════════════════════════ -->
+<div class="screen hidden" id="smenu">
+  <div class="shead">
+    <div class="btn-back" onclick="showScreen('sh')">←</div>
+    <div class="stitle">Configuration</div>
+  </div>
+  <div style="font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;margin-bottom:8px;padding-left:2px;width:100%;">Mode de tirage</div>
+  <div class="mode-grid" style="width:100%;">
+    <div class="mode-card sel" id="mode1c" onclick="setDrawMode(1)">
+      <div class="mode-icon">1️⃣</div>
+      <div class="mode-name">1 Carte</div>
+      <div class="mode-desc">Facile & relaxant</div>
+    </div>
+    <div class="mode-card" id="mode3c" onclick="setDrawMode(3)">
+      <div class="mode-icon">3️⃣</div>
+      <div class="mode-name">3 Cartes</div>
+      <div class="mode-desc">Expert & intense</div>
+    </div>
+  </div>
+  <div style="font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;margin:14px 0 8px;padding-left:2px;width:100%;">Difficulté</div>
+  <div class="mode-grid" style="width:100%;">
+    <div class="mode-card sel" id="diffEasy" onclick="setDiff('easy')">
+      <div class="mode-icon">🌊</div>
+      <div class="mode-name">Facile</div>
+      <div class="mode-desc">Pioche illimitée</div>
+    </div>
+    <div class="mode-card" id="diffExpert" onclick="setDiff('expert')">
+      <div class="mode-icon">⚡</div>
+      <div class="mode-name">Expert</div>
+      <div class="mode-desc">Pioche limitée</div>
+    </div>
+  </div>
+  <div style="margin-top:16px;width:100%;">
+    <button class="btn-primary" onclick="startGame()">🎴 Commencer</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ GAME ═══════════════════════════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div class="gh-left">
+      <div class="btn-back gh-btn" onclick="pauseGame()">⏸</div>
+      <div class="gh-timer" id="ghTimer">0:00</div>
+      <div class="draw-badge" id="ghDrawBadge">1 carte</div>
+    </div>
+    <div class="gh-right">
+      <div class="gh-score" id="ghScore">0</div>
+      <div class="gh-btn" onclick="undoMove()" title="Annuler">↩</div>
+      <div class="gh-btn" onclick="showHint()" title="Indice">💡</div>
+    </div>
+  </div>
+  <div class="game-area" id="gameArea">
+    <div class="top-row" id="topRow">
+      <div class="top-left" id="stockWasteArea">
+        <div id="stockSlot"></div>
+        <div id="wasteSlot"></div>
+      </div>
+      <div class="top-right" id="foundationsArea"></div>
+    </div>
+    <div class="tableau" id="tableau"></div>
+  </div>
+</div>
+
+<!-- PAUSE OVERLAY -->
+<div id="sgpause" class="hidden">
+  <div class="pause-title">⏸ Pause</div>
+  <button class="btn-primary" onclick="resumeGame()">▶ Reprendre</button>
+  <button class="btn-secondary" onclick="undoMove()">↩ Annuler le coup</button>
+  <button class="btn-secondary" onclick="showHint()">💡 Indice</button>
+  <button class="btn-secondary" onclick="autoComplete()">✨ Auto-compléter</button>
+  <button class="btn-secondary" onclick="confirmNewGame()">🔄 Nouvelle partie</button>
+  <button class="btn-secondary" onclick="goHome()">🏠 Accueil</button>
+</div>
+
+<!-- ═══════════════════════════ VICTORY ═══════════════════════════ -->
+<div class="screen hidden" id="svic">
+  <div class="vic-cards-rain" id="vicRain"></div>
+  <div class="vic-trophy">🏆</div>
+  <div class="vic-title">Victoire !</div>
+  <div class="vic-sub" id="vicSub">Magnifique partie !</div>
+  <div class="vic-stats" id="vicStats"></div>
+  <div style="display:flex;flex-direction:column;gap:8px;align-items:center;width:100%;max-width:300px;margin-top:10px;">
+    <button class="btn-primary" onclick="startGame()">🎴 Rejouer</button>
+    <button class="btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ OPTIONS ═══════════════════════════ -->
+<div class="screen hidden" id="sopt">
+  <div class="shead">
+    <div class="btn-back" onclick="showScreen('sh')">←</div>
+    <div class="stitle">Options</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+  <div class="opt-section">
+    <div class="opt-title">Audio</div>
+    <div class="opt-row"><div><div class="opt-label">🔊 Sons</div><div class="opt-desc">Clics et effets</div></div><div class="toggle on" id="togSound" onclick="toggleOpt('sound')"></div></div>
+    <div class="opt-row"><div><div class="opt-label">🎵 Musique</div><div class="opt-desc">Ambiance zen</div></div><div class="toggle on" id="togMusic" onclick="toggleOpt('music')"></div></div>
+  </div>
+  <div class="opt-section">
+    <div class="opt-title">Retour haptique</div>
+    <div class="opt-row"><div><div class="opt-label">📳 Vibrations</div><div class="opt-desc">Retour tactile premium</div></div><div class="toggle on" id="togHaptic" onclick="toggleOpt('haptic')"></div></div>
+  </div>
+  <div class="opt-section">
+    <div class="opt-title">Effets visuels</div>
+    <div class="opt-row"><div><div class="opt-label">✨ Particules</div><div class="opt-desc">Effets flottants</div></div><div class="toggle on" id="togParticles" onclick="toggleOpt('particles')"></div></div>
+    <div class="opt-row"><div><div class="opt-label">🌊 Intensité effets</div><div class="opt-desc">Glow & animations</div></div>
+      <div class="slider-wrap"><input type="range" class="opt-slider" id="slFx" min="0" max="100" value="80" oninput="setFxLevel(this.value)"><div class="opt-val" id="slFxVal">80</div></div>
+    </div>
+  </div>
+  <div class="opt-section">
+    <div class="opt-title">Jeu</div>
+    <div class="opt-row"><div><div class="opt-label">⚡ Mode rapide</div><div class="opt-desc">Animations accélérées</div></div><div class="toggle" id="togFast" onclick="toggleOpt('fast')"></div></div>
+    <div class="opt-row"><div><div class="opt-label">🔋 Économie batterie</div><div class="opt-desc">Réduit les effets</div></div><div class="toggle" id="togBattery" onclick="toggleOpt('battery')"></div></div>
+  </div>
+  <div class="opt-section">
+    <div class="opt-title">Danger zone</div>
+    <div class="opt-row" style="cursor:pointer;" onclick="resetStats()"><div><div class="opt-label" style="color:var(--cr);">🗑 Réinitialiser les stats</div><div class="opt-desc">Remet tout à zéro</div></div><div style="color:var(--cr);font-size:18px;">›</div></div>
+  </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ STATS ═══════════════════════════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="btn-back" onclick="showScreen('sh')">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;margin-bottom:8px;padding-left:2px;">Succès</div>
+    <div class="achieve-list" id="achieveList"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ COLLECTION ═══════════════════════════ -->
+<div class="screen hidden" id="scol">
+  <div class="shead">
+    <div class="btn-back" onclick="showScreen('sh')">←</div>
+    <div class="stitle">Collection</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;margin-bottom:8px;padding-left:2px;">Thèmes de cartes</div>
+    <div class="themes-grid" id="themesGrid"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ CHEST ═══════════════════════════ -->
+<div class="screen hidden" id="schest">
+  <div class="chest-wrap" id="chestContent">
+    <div class="chest-icon" id="chestIcon" onclick="openChest()">🎁</div>
+    <div class="chest-title">Coffre Mystère !</div>
+    <div class="chest-hint">Appuie pour ouvrir...</div>
+  </div>
+</div>
+
+<script>
+const CoreBundle = (function() {
+// ── engines/grid-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Grid Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur une grille 2D (création, accès,
+//        voisinage, flood fill). Ne connaît ni Puissance 4, ni
+//        Démineur, ni Sudoku, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir le mot "mine", "disque", "case sûre" ou
+//        toute notion spécifique à un jeu.
+// ═══════════════════════════════════════════════════════════════
+
+/** Crée une grille rows×cols, chaque cellule initialisée à `fill`. */
+function createGrid(rows, cols, fill = null) {
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => (typeof fill === 'function' ? fill() : fill))
+  );
+}
+
+function inBounds(grid, r, c) {
+  return r >= 0 && r < grid.length && c >= 0 && c < grid[0].length;
+}
+
+function getCell(grid, r, c) {
+  return inBounds(grid, r, c) ? grid[r][c] : undefined;
+}
+
+function setCell(grid, r, c, value) {
+  if (inBounds(grid, r, c)) grid[r][c] = value;
+}
+
+function forEachCell(grid, fn) {
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[r].length; c++) fn(grid[r][c], r, c);
+  }
+}
+
+/** Coordonnées des 4 voisins orthogonaux valides. */
+function neighbors4(grid, r, c) {
+  return [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].filter(([rr, cc]) =>
+    inBounds(grid, rr, cc)
+  );
+}
+
+/** Coordonnées des 8 voisins (orthogonaux + diagonales) valides. */
+function neighbors8(grid, r, c) {
+  const out = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const rr = r + dr, cc = c + dc;
+      if (inBounds(grid, rr, cc)) out.push([rr, cc]);
+    }
+  }
+  return out;
+}
+
+/**
+ * Flood fill générique à partir de (r,c). `matchFn(value, r, c)` décide
+ * si une cellule doit être incluse dans la propagation ; `visitFn(value, r, c)`
+ * est appelé pour chaque cellule visitée (une seule fois). Ne décide
+ * jamais lui-même de la condition d'arrêt — c'est au jeu de la fournir.
+ */
+function floodFill(grid, startR, startC, matchFn, visitFn, useDiagonals = true) {
+  const visited = createGrid(grid.length, grid[0].length, false);
+  const stack = [[startR, startC]];
+  while (stack.length) {
+    const [r, c] = stack.pop();
+    if (!inBounds(grid, r, c) || visited[r][c]) continue;
+    visited[r][c] = true;
+    if (!matchFn(grid[r][c], r, c)) continue;
+    visitFn(grid[r][c], r, c);
+    const neigh = useDiagonals ? neighbors8(grid, r, c) : neighbors4(grid, r, c);
+    for (const [rr, cc] of neigh) if (!visited[rr][cc]) stack.push([rr, cc]);
+  }
+}
+
+/** Compte les lignes de N valeurs identiques consécutives à partir de
+ *  (r,c) dans une direction (dr,dc), dans les deux sens. Utile pour
+ *  toute détection d'alignement (Puissance 4, Morpion, Othello...). */
+function countAligned(grid, r, c, dr, dc, matchFn) {
+  let count = 1;
+  let rr = r + dr, cc = c + dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr += dr; cc += dc; }
+  rr = r - dr; cc = c - dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr -= dr; cc -= dc; }
+  return count;
+}
+
+
+// ── engines/card-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Card Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur un tableau de cartes (peu importe
+//        ce qu'est une "carte" — le jeu décide de sa forme : {color,
+//        value} pour Uno, {suit,rank} pour Solitaire...). Ne connaît
+//        ni Uno, ni Solitaire, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir une notion de couleur/valeur/famille
+//        spécifique à un jeu de cartes précis.
+// ═══════════════════════════════════════════════════════════════
+
+/** Fisher-Yates — mélange en place et retourne le même tableau. */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/** Construit un deck mélangé à partir d'une liste de cartes (copie). */
+function createDeck(cards) {
+  return shuffle([...cards]);
+}
+
+/** Retire et retourne les `n` cartes du dessus (fin du tableau = dessus). */
+function draw(deck, n = 1) {
+  return deck.splice(Math.max(0, deck.length - n), n).reverse();
+}
+
+/** Distribue `cardsPerPlayer` cartes à `playerCount` joueurs, à tour de
+ *  rôle (comme une vraie distribution), depuis le sommet du deck. */
+function deal(deck, playerCount, cardsPerPlayer) {
+  const hands = Array.from({ length: playerCount }, () => []);
+  for (let round = 0; round < cardsPerPlayer; round++) {
+    for (let p = 0; p < playerCount; p++) {
+      const card = draw(deck, 1)[0];
+      if (card) hands[p].push(card);
+    }
+  }
+  return hands;
+}
+
+/**
+ * Reconstitue un deck épuisé à partir d'une pile de défausse, en
+ * gardant la carte du dessus en place (pattern stock/waste commun à
+ * Solitaire, Uno, et beaucoup de jeux de cartes à pioche).
+ */
+function reshuffleDiscardIntoDeck(discardPile, keepTopCard = true) {
+  if (discardPile.length <= 1) return [];
+  const top = keepTopCard ? discardPile.pop() : null;
+  const rest = shuffle(discardPile.splice(0, discardPile.length));
+  if (top) discardPile.push(top);
+  return rest;
+}
+
+
+// ── engines/dice-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Dice Engine
+// ───────────────────────────────────────
+// RÔLE : lancer et gérer des pools de dés (valeur + verrou), compter
+//        les valeurs obtenues. Ne connaît ni YAMS, ni Shut the Box,
+//        ni aucune règle de score.
+// NE DOIT JAMAIS : contenir une notion de catégorie de score, de
+//        combinaison gagnante, ou de règle spécifique à un jeu.
+// ═══════════════════════════════════════════════════════════════
+
+function rollDie(sides = 6) {
+  return 1 + Math.floor(Math.random() * sides);
+}
+
+function rollDice(count, sides = 6) {
+  return Array.from({ length: count }, () => rollDie(sides));
+}
+
+/** Crée un pool de dés à l'état initial : valeur nulle, non verrouillé. */
+function createDicePool(count) {
+  return Array.from({ length: count }, () => ({ value: null, locked: false }));
+}
+
+/** Relance uniquement les dés non verrouillés du pool (mutation + retour). */
+function rollUnlocked(pool, sides = 6) {
+  pool.forEach((d) => { if (!d.locked) d.value = rollDie(sides); });
+  return pool;
+}
+
+function toggleLock(pool, index) {
+  if (pool[index]) pool[index].locked = !pool[index].locked;
+  return pool;
+}
+
+/** Compte les occurrences de chaque valeur — utile à toute règle de
+ *  score basée sur des combinaisons (brelan, suite, etc.). */
+function countValues(values) {
+  const counts = {};
+  values.forEach((v) => { counts[v] = (counts[v] || 0) + 1; });
+  return counts;
+}
+
+
+// ── engines/ai-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// AI Engine
+// ───────────────────────────────────────
+// RÔLE : recherche de meilleur coup par minimax + élagage alpha-bêta,
+//        entièrement générique. Le jeu fournit 4 fonctions pures
+//        (getMoves, applyMove, isTerminal, evaluate) ; ce moteur ne
+//        connaît aucune règle de Puissance 4, Othello ou autre.
+// NE DOIT JAMAIS : contenir une notion de "disque", de "colonne",
+//        de "plateau 8×8" ou toute règle spécifique à un jeu.
+// ───────────────────────────────────────
+// Contrat attendu (fns) :
+//   getMoves(state)                    → tableau de coups possibles
+//   applyMove(state, move)             → nouvel état après le coup (ne mute pas)
+//   isTerminal(state)                  → true si partie finie
+//   evaluate(state, player, depth)     → score du point de vue de `player`.
+//     `depth` (profondeur RESTANTE au moment où le terminal est
+//     détecté) est optionnel — un jeu peut l'ignorer, mais il est
+//     fortement recommandé de l'ajouter à un score de victoire/défaite
+//     (ex: `1000 + depth` / `-1000 - depth`) pour que l'IA préfère la
+//     victoire la plus rapide et retarde la défaite la plus longtemps
+//     possible. Sans ça, deux victoires à profondeurs différentes sont
+//     à égalité et l'IA peut sembler hésiter (bug réel découvert en
+//     développant Puissance 4 : une "double menace" laissait l'IA
+//     ignorer un coup gagnant immédiat au profit d'un coup neutre qui
+//     gagnait quand même, 2 coups plus tard).
+//   currentPlayer(state)               → identifiant du joueur au trait
+// ═══════════════════════════════════════════════════════════════
+
+function minimax(state, depth, alpha, beta, maximizing, player, fns) {
+  if (depth === 0 || fns.isTerminal(state)) {
+    return fns.evaluate(state, player, depth);
+  }
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return fns.evaluate(state, player);
+
+  if (maximizing) {
+    let best = -Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, false, player, fns);
+      best = Math.max(best, val);
+      alpha = Math.max(alpha, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, true, player, fns);
+      best = Math.min(best, val);
+      beta = Math.min(beta, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+/**
+ * Retourne le meilleur coup pour `player` à la profondeur `depth`.
+ * Si plusieurs coups sont à égalité, un choix aléatoire parmi eux
+ * évite un bot parfaitement déterministe et prévisible.
+ */
+function chooseBestMove(state, depth, player, fns) {
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return null;
+  let bestScore = -Infinity;
+  let bestMoves = [];
+  for (const move of moves) {
+    const next = fns.applyMove(state, move);
+    const score = minimax(next, depth - 1, -Infinity, Infinity, false, player, fns);
+    if (score > bestScore) { bestScore = score; bestMoves = [move]; }
+    else if (score === bestScore) bestMoves.push(move);
+  }
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}
+
+/** Coup aléatoire simple — utile pour une difficulté "facile" sans
+ *  avoir à écrire un second moteur. */
+function chooseRandomMove(state, fns) {
+  const moves = fns.getMoves(state);
+  return moves.length ? moves[Math.floor(Math.random() * moves.length)] : null;
+}
+
+
+// ── engines/rhythm-engine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Rhythm Engine
+// ───────────────────────────────────────
+// RÔLE : logique générique d'un jeu de rythme — horloge précise basée
+//        sur AudioContext, chargement de morceau depuis une donnée
+//        JSON, jugement des appuis (perfect/good/ok/miss), combo,
+//        multiplicateur, score, précision. Ne connaît ni guitare, ni
+//        piano, ni tambour, ni "Rhythm Hero" — un jeu de rythme
+//        FUTUR (Piano Tiles, Taiko, Beat Saber 2D...) doit pouvoir
+//        utiliser ce moteur SANS AUCUNE modification.
+// NE DOIT JAMAIS : contenir un nom de touche, une image de note, un
+//        rendu visuel, ou une notion de "corde de guitare"/"tambour".
+//        Le rendu (lanes verticales, cercles Taiko, dalles Piano
+//        Tiles...) reste entièrement l'affaire du jeu.
+// ───────────────────────────────────────
+// Format de chart (donnée JSON, chargeable indépendamment du moteur) :
+//   {
+//     title: string,
+//     bpm: number,
+//     offsetMs: number,        // décalage audio/notes, optionnel
+//     lanes: number,           // nombre de pistes (3, 4, 5...)
+//     audioUrl: string|null,   // piste audio réelle, optionnelle
+//     notes: [{ time: ms, lane: index, duration?: ms }]
+//     // `duration` absente ou 0 = note simple (tap). `duration` > 0
+//     // = note longue (hold) : le jeu doit maintenir l'appui jusqu'à
+//     // time + duration pour obtenir le bonus de maintien.
+//   }
+// ═══════════════════════════════════════════════════════════════
+
+/** Valide et normalise une donnée de chart brute (déjà parsée depuis
+ *  du JSON, ou un objet construit dynamiquement par un jeu). */
+function parseChart(data) {
+  if (!data || typeof data.bpm !== 'number' || !Array.isArray(data.notes)) {
+    throw new Error('[rhythm-engine] chart invalide : bpm et notes[] requis');
+  }
+  const notes = data.notes
+    .map((n, i) => ({
+      id: i, time: n.time, lane: n.lane, duration: n.duration || 0,
+      judged: false, judgement: null,
+      holdActive: false, holdSuccess: null,
+    }))
+    .sort((a, b) => a.time - b.time);
+  return {
+    title: data.title || 'Sans titre',
+    bpm: data.bpm,
+    offsetMs: data.offsetMs || 0,
+    lanes: data.lanes || 4,
+    audioUrl: data.audioUrl || null,
+    notes,
+  };
+}
+
+/** Charge un chart depuis une URL JSON (nécessite un serveur HTTP —
+ *  échoue en protocole file://, comme tout fetch/import de ce
+ *  projet). Fonction utilitaire, jamais appelée par le moteur
+ *  lui-même — c'est au jeu de décider s'il charge depuis une URL ou
+ *  depuis une donnée déjà en mémoire. */
+async function loadChartFromUrl(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`[rhythm-engine] impossible de charger ${url} (${res.status})`);
+  return parseChart(await res.json());
+}
+
+// ── Réglages par défaut — un jeu peut les remplacer intégralement ──
+const DEFAULT_WINDOWS = {
+  easy: { perfect: 120, good: 200, ok: 280 },
+  normal: { perfect: 80, good: 150, ok: 220 },
+  hard: { perfect: 50, good: 100, ok: 160 },
+  expert: { perfect: 35, good: 70, ok: 120 },
+};
+const DEFAULT_POINTS = { perfect: 100, good: 60, ok: 25, miss: 0, holdBonus: 100 };
+const DEFAULT_MULTIPLIER_TIERS = [
+  { combo: 0, mult: 1 }, { combo: 10, mult: 2 }, { combo: 25, mult: 3 }, { combo: 50, mult: 4 },
+];
+
+/**
+ * Horloge de jeu basée sur AudioContext.currentTime — jamais sur
+ * setTimeout/Date.now(), qui dérivent et désynchronisent visuel et
+ * audio sur une session de plusieurs dizaines de secondes. C'est la
+ * pièce la plus importante pour une "synchronisation parfaite".
+ */
+function createClock(audioCtx) {
+  let startAt = null;
+  let pausedAt = null;
+  return {
+    /** `atTime`, optionnel, permet de démarrer l'horloge à un instant
+     *  précis de l'AudioContext plutôt que "maintenant" — utile pour
+     *  s'aligner exactement sur un événement audio déjà planifié à
+     *  l'avance (ex : le premier clic d'un métronome programmé via
+     *  `osc.start(t)`). Sans ça, le clock et l'audio démarreraient à
+     *  deux instants légèrement différents et dériveraient. */
+    start(atTime = audioCtx.currentTime) { startAt = atTime; pausedAt = null; },
+    pause() { if (startAt !== null && pausedAt === null) pausedAt = audioCtx.currentTime; },
+    resume() { if (pausedAt !== null) { startAt += audioCtx.currentTime - pausedAt; pausedAt = null; } },
+    nowMs() {
+      if (startAt === null) return 0;
+      const t = pausedAt !== null ? pausedAt : audioCtx.currentTime;
+      return (t - startAt) * 1000;
+    },
+    isRunning() { return startAt !== null && pausedAt === null; },
+  };
+}
+
+/**
+ * Crée une session de jeu à partir d'un chart déjà parsé. Toute la
+ * logique de jugement/score/combo vit ici, indépendamment du rendu.
+ */
+function createSession(chart, opts = {}) {
+  const windows = opts.windows || DEFAULT_WINDOWS.normal;
+  const points = opts.points || DEFAULT_POINTS;
+  const multiplierTiers = opts.multiplierTiers || DEFAULT_MULTIPLIER_TIERS;
+
+  const state = {
+    score: 0,
+    combo: 0,
+    maxCombo: 0,
+    multiplier: 1,
+    counts: { perfect: 0, good: 0, ok: 0, miss: 0 },
+    notes: chart.notes.map((n) => ({ ...n })),
+  };
+
+  function currentMultiplier() {
+    let m = 1;
+    for (const tier of multiplierTiers) if (state.combo >= tier.combo) m = tier.mult;
+    return m;
+  }
+
+  function judgeDelta(absDelta) {
+    if (absDelta <= windows.perfect) return 'perfect';
+    if (absDelta <= windows.good) return 'good';
+    if (absDelta <= windows.ok) return 'ok';
+    return null;
+  }
+
+  function applyJudgement(judgement) {
+    if (judgement === 'miss') {
+      state.combo = 0;
+      state.counts.miss++;
+    } else {
+      state.combo++;
+      state.maxCombo = Math.max(state.maxCombo, state.combo);
+      state.counts[judgement]++;
+      state.score += points[judgement] * currentMultiplier();
+    }
+    state.multiplier = currentMultiplier();
+  }
+
+  /** Tente de "taper" la lane `lane` à l'instant `timeMs`. Retourne
+   *  { note, judgement, delta } si une note a été jugée, sinon null
+   *  (aucune note assez proche — le jeu décide s'il pénalise un "hit
+   *  à vide" ou l'ignore, le moteur reste neutre là-dessus). */
+  function hitLane(lane, timeMs) {
+    let best = null, bestDelta = Infinity;
+    for (const n of state.notes) {
+      if (n.lane !== lane || n.judged) continue;
+      const delta = Math.abs(n.time - timeMs);
+      if (delta < bestDelta) { bestDelta = delta; best = n; }
+    }
+    if (!best) return null;
+    const judgement = judgeDelta(bestDelta);
+    if (!judgement) return null;
+    best.judged = true; best.judgement = judgement;
+    applyJudgement(judgement);
+    return { note: best, judgement, delta: timeMs - best.time };
+  }
+
+  /**
+   * Point d'entrée pour une PRESSION (appui) — identique à `hitLane`
+   * pour le jugement du départ, mais initialise en plus le suivi de
+   * maintien si la note visée est une note longue (`duration > 0`).
+   * Un jeu qui n'a pas de notes longues peut ignorer cette fonction
+   * et utiliser `hitLane` directement — les deux restent équivalentes
+   * pour une note simple.
+   */
+  function pressLane(lane, timeMs) {
+    const result = hitLane(lane, timeMs);
+    if (result && result.note.duration > 0) {
+      result.note.holdActive = true;
+      result.note.holdEndTime = result.note.time + result.note.duration;
+    }
+    return result ? { ...result, isHold: result.note.duration > 0 } : null;
+  }
+
+  /**
+   * Point d'entrée pour un RELÂCHEMENT — à appeler quand le jeu
+   * détecte que le joueur relâche la lane (pointerup/pointercancel).
+   * Retourne { note, success } si une note était en cours de maintien
+   * dans cette lane, sinon null (rien à relâcher — ne jamais pénaliser
+   * un relâchement "à vide", le moteur reste neutre là-dessus comme
+   * pour `hitLane`).
+   */
+  function releaseLane(lane, timeMs) {
+    const note = state.notes.find((n) => n.lane === lane && n.holdActive);
+    if (!note) return null;
+    note.holdActive = false;
+    const success = timeMs >= note.holdEndTime - windows.ok;
+    note.holdSuccess = success;
+    if (success) state.score += points.holdBonus * currentMultiplier();
+    return { note, success };
+  }
+
+  /** À appeler à chaque frame : marque "miss" toute note dont la
+   *  fenêtre est expirée sans avoir été jugée, ET complète
+   *  automatiquement tout maintien dont le temps de fin est dépassé
+   *  (au cas où le jeu n'appelle pas explicitement `releaseLane`
+   *  avant, par exemple si le joueur maintient au-delà de la fin de
+   *  la note). Retourne les notes fraîchement ratées. */
+  function tick(timeMs) {
+    const newlyMissed = [];
+    for (const n of state.notes) {
+      if (n.holdActive && timeMs >= n.holdEndTime) {
+        n.holdActive = false;
+        n.holdSuccess = true;
+        state.score += points.holdBonus * currentMultiplier();
+      }
+      if (n.judged) continue;
+      if (timeMs - n.time > windows.ok) {
+        n.judged = true; n.judgement = 'miss';
+        applyJudgement('miss');
+        newlyMissed.push(n);
+      }
+    }
+    return newlyMissed;
+  }
+
+  /** Notes à afficher pour la fenêtre de rendu courante — ne dit RIEN
+   *  sur la position à l'écran, juste le sous-ensemble temporel
+   *  pertinent. Le jeu calcule sa propre position pixel. */
+  function visibleNotes(timeMs, lookAheadMs) {
+    return state.notes.filter((n) => {
+      const endTime = n.time + (n.duration || 0);
+      return endTime >= timeMs - 300 && n.time <= timeMs + lookAheadMs;
+    });
+  }
+
+  function accuracy() {
+    const c = state.counts;
+    const total = c.perfect + c.good + c.ok + c.miss;
+    if (total === 0) return 100;
+    const weighted = c.perfect * 1 + c.good * 0.7 + c.ok * 0.4;
+    return Math.round((weighted / total) * 1000) / 10;
+  }
+
+  function isFullCombo() {
+    return state.counts.miss === 0 && (state.counts.perfect + state.counts.good + state.counts.ok) === chart.notes.length;
+  }
+
+  function isComplete(timeMs) {
+    const lastEndTime = chart.notes.reduce((max, n) => Math.max(max, n.time + (n.duration || 0)), 0);
+    const allResolved = state.notes.every((n) => n.judged && !n.holdActive);
+    return allResolved || timeMs > lastEndTime + windows.ok + 400;
+  }
+
+  return { state, hitLane, pressLane, releaseLane, tick, visibleNotes, accuracy, isFullCombo, isComplete };
+}
+
+
+// ── ui/components.js ──
+// ═══════════════════════════════════════════════════════════════
+// UI SDK — bibliothèque de composants Ondine Games
+// ───────────────────────────────────────
+// Chaque fonction retourne un élément DOM prêt à être inséré dans
+// la page. Aucune fonction ici ne connaît un jeu en particulier.
+// Le style visuel (couleurs, rayons, ombres) vient TOUJOURS de
+// core/design-tokens.css via les variables --c1, --glass, etc.
+// Ne jamais coder une couleur en dur dans un composant.
+// ═══════════════════════════════════════════════════════════════
+const UI = {
+  /**
+   * Crée l'élément hôte du toast. À insérer une fois dans la page,
+   * puis à passer à NotificationService.mount(el).
+   */
+  toastHost() {
+    const el = document.createElement('div');
+    el.className = 'ondine-toast';
+    el.id = 'ondineToast';
+    return el;
+  },
+
+  button(label, { variant = 'primary', onClick, icon, disabled = false } = {}) {
+    const el = document.createElement('button');
+    el.className = `ondine-btn ondine-btn-${variant}`;
+    el.innerHTML = (icon ? `<span class="ondine-btn-icon">${icon}</span>` : '') + label;
+    if (disabled) el.disabled = true;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  iconButton(icon, { onClick, title = '' } = {}) {
+    const el = document.createElement('button');
+    el.className = 'ondine-icon-btn';
+    el.textContent = icon;
+    if (title) el.title = title;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  badge(text, { variant = 'default' } = {}) {
+    const el = document.createElement('span');
+    el.className = `ondine-badge ondine-badge-${variant}`;
+    el.textContent = text;
+    return el;
+  },
+
+  statCard({ value, label, icon = '' } = {}) {
+    const el = document.createElement('div');
+    el.className = 'ondine-stat-card';
+    el.innerHTML = `${icon ? `<div class="ondine-stat-icon">${icon}</div>` : ''}
+      <div class="ondine-stat-value">${value}</div>
+      <div class="ondine-stat-label">${label}</div>`;
+    return el;
+  },
+
+  achievementCard({ icon, name, desc, unlocked, xp }) {
+    const el = document.createElement('div');
+    el.className = 'ondine-ach-card' + (unlocked ? ' unlocked' : '');
+    el.innerHTML = `<div class="ondine-ach-icon">${icon}</div>
+      <div class="ondine-ach-body">
+        <div class="ondine-ach-name">${name}</div>
+        <div class="ondine-ach-desc">${desc}</div>
+      </div>
+      <div class="ondine-ach-badge">${unlocked ? '✓' : '🔒'}${xp ? ` +${xp} XP` : ''}</div>`;
+    return el;
+  },
+
+  /**
+   * Modale générique : titre, corps (élément DOM déjà construit),
+   * boutons d'action. Retourne { el, close } — `el` est déjà attaché
+   * à un overlay plein écran, prêt à être inséré dans document.body.
+   * Utilisée en interne par DialogService — un jeu peut aussi
+   * l'utiliser directement pour ses propres besoins d'affichage.
+   */
+  modal({ title, bodyEl, actions = [] } = {}) {
+    const overlay = document.createElement('div');
+    overlay.className = 'ondine-modal-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'ondine-modal-box';
+
+    if (title) {
+      const h = document.createElement('div');
+      h.className = 'ondine-modal-title';
+      h.textContent = title;
+      box.appendChild(h);
+    }
+    if (bodyEl) {
+      const body = document.createElement('div');
+      body.className = 'ondine-modal-body';
+      body.appendChild(bodyEl);
+      box.appendChild(body);
+    }
+    if (actions.length) {
+      const row = document.createElement('div');
+      row.className = 'ondine-modal-actions';
+      actions.forEach((btnEl) => row.appendChild(btnEl));
+      box.appendChild(row);
+    }
+    overlay.appendChild(box);
+
+    function close() { overlay.remove(); }
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    return { el: overlay, close };
+  },
+
+  // Les composants suivants (progressBar, tabs, list, grid,
+  // bottomSheet, emptyState, loading, gameCard, profileCard...)
+  // seront ajoutés au moment où un jeu en a réellement besoin.
+};
+
+
+// ── services/NotificationService.js ──
+// ═══════════════════════════════════════════════════════════════
+// NotificationService
+// ───────────────────────────────────────
+// RÔLE : afficher des messages brefs et non bloquants (toasts).
+// POSSÈDE : l'élément DOM du toast, son minuteur d'auto-masquage.
+// NE DOIT JAMAIS : connaître un jeu, une règle de jeu, ou un texte
+//        spécifique à un jeu — le texte affiché vient toujours de
+//        l'appelant (le jeu, via le SDK).
+// ───────────────────────────────────────
+// Remplace les fonctions toast() précédemment dupliquées à
+// l'identique dans Solitaire, Sudoku et YAMS.
+// ═══════════════════════════════════════════════════════════════
+const NotificationService = (function () {
+  let hostEl = null;
+  let hideTimer = null;
+  const DEFAULT_DURATION_MS = 2200;
+
+  /**
+   * Doit être appelé une fois par le Hub ou par la page du jeu,
+   * en lui passant l'élément DOM créé par UI.toastHost().
+   */
+  function mount(el) {
+    hostEl = el;
+  }
+
+  function show(message, variant = 'info', duration = DEFAULT_DURATION_MS) {
+    if (!hostEl) {
+      // Dégradation silencieuse : pas de host monté = pas de toast,
+      // mais ça ne doit jamais casser le jeu.
+      console.warn('[NotificationService] show() appelé avant mount() :', message);
+      return;
+    }
+    hostEl.textContent = message;
+    hostEl.dataset.variant = variant;
+    hostEl.classList.remove('ondine-toast-show');
+    void hostEl.offsetWidth; // force le reflow pour relancer la transition
+    hostEl.classList.add('ondine-toast-show');
+
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => hostEl.classList.remove('ondine-toast-show'), duration);
+  }
+
+  return { mount, show };
+})();
+
+
+// ── services/StatsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// StatsService
+// ───────────────────────────────────────
+// RÔLE : stocker des compteurs numériques par jeu (parties jouées,
+//        victoires, meilleur score...). Ne connaît aucun nom de
+//        statistique métier — le jeu choisit ses propres clés.
+// POSSÈDE : une entrée localStorage par jeu (`ondine_stats_<gameId>`).
+// NE DOIT JAMAIS : interpréter le sens d'une statistique (ex. ne sait
+//        pas que "victories" est "positif" ou que "errors" est
+//        "négatif" — c'est au jeu d'agir en conséquence).
+// ═══════════════════════════════════════════════════════════════
+function keyFor(gameId) { return `ondine_stats_${gameId}`; }
+
+function readAll(gameId) {
+  try {
+    return JSON.parse(localStorage.getItem(keyFor(gameId)) || '{}');
+  } catch (e) {
+    console.warn('[StatsService] lecture corrompue pour', gameId, e);
+    return {};
+  }
+}
+
+function writeAll(gameId, data) {
+  localStorage.setItem(keyFor(gameId), JSON.stringify(data));
+}
+
+const StatsService = {
+  get(gameId, key, defaultValue = 0) {
+    const all = readAll(gameId);
+    return key in all ? all[key] : defaultValue;
+  },
+  set(gameId, key, value) {
+    const all = readAll(gameId);
+    all[key] = value;
+    writeAll(gameId, all);
+  },
+  increment(gameId, key, n = 1) {
+    const all = readAll(gameId);
+    all[key] = (all[key] || 0) + n;
+    writeAll(gameId, all);
+    return all[key];
+  },
+  /** Ne met à jour que si `value` dépasse la valeur actuelle (utile
+   *  pour un meilleur score / meilleur temps). */
+  setMax(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value > all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  setMin(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value < all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  getAll(gameId) { return readAll(gameId); },
+  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+};
+
+
+// ── services/AchievementsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AchievementsService
+// ───────────────────────────────────────
+// RÔLE : savoir quels succès sont débloqués, par jeu. Ne connaît
+//        jamais la LISTE des succès d'un jeu ni leur condition de
+//        déblocage — ça reste entièrement défini côté jeu (via
+//        sdk.achievement.unlock(id), appelé quand le jeu a lui-même
+//        vérifié sa propre condition).
+// POSSÈDE : une entrée localStorage par jeu (`ondine_ach_<gameId>`).
+// ═══════════════════════════════════════════════════════════════
+function keyFor(gameId) { return `ondine_ach_${gameId}`; }
+
+function readUnlocked(gameId) {
+  try { return JSON.parse(localStorage.getItem(keyFor(gameId)) || '[]'); }
+  catch (e) { console.warn('[AchievementsService] lecture corrompue pour', gameId, e); return []; }
+}
+
+const AchievementsService = {
+  isUnlocked(gameId, achId) {
+    return readUnlocked(gameId).includes(achId);
+  },
+  /** Débloque `achId` s'il ne l'était pas déjà. Retourne true si
+   *  c'est une NOUVELLE unlock (utile pour déclencher un toast une
+   *  seule fois), false si déjà débloqué. */
+  unlock(gameId, achId) {
+    const list = readUnlocked(gameId);
+    if (list.includes(achId)) return false;
+    list.push(achId);
+    localStorage.setItem(keyFor(gameId), JSON.stringify(list));
+    return true;
+  },
+  unlockedList(gameId) { return readUnlocked(gameId); },
+  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+};
+
+
+// ── services/AudioService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AudioService
+// ───────────────────────────────────────
+// RÔLE : jouer des sons courts synthétisés (Web Audio), via une
+//        petite bibliothèque de presets génériques partagés par
+//        tous les jeux (click, place, success, error...). Ne connaît
+//        aucun jeu — les presets décrivent une SENSATION sonore
+//        générique, jamais un événement de jeu précis.
+// NE DOIT JAMAIS : contenir un preset nommé d'après un jeu (pas de
+//        "unoSkip" ou "yamsRoll" — le jeu choisit lui-même quel
+//        preset générique correspond le mieux à son événement).
+// ───────────────────────────────────────
+// Remplace les fonctions playTone()/tone() dupliquées à l'identique
+// dans Solitaire, Sudoku et YAMS.
+// ═══════════════════════════════════════════════════════════════
+let audioCtx = null;
+let enabled = true;
+
+function getCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { console.warn('[AudioService] Web Audio indisponible', e); }
+  }
+  return audioCtx;
+}
+
+function playTone(freq, dur, type = 'sine', vol = 0.15) {
+  if (!enabled) return;
+  const ctx = getCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
+  } catch (e) { /* silencieux : l'audio ne doit jamais casser le jeu */ }
+}
+
+// Bibliothèque de presets — génériques, réutilisables par n'importe
+// quel jeu. Chaque preset est une petite séquence de tons.
+const PRESETS = {
+  click:   () => playTone(880, 0.06, 'sine', 0.10),
+  place:   () => { playTone(660, 0.1, 'sine', 0.14); setTimeout(() => playTone(880, 0.08, 'sine', 0.10), 60); },
+  success: () => [523, 659, 784].forEach((f, i) => setTimeout(() => playTone(f, 0.18, 'sine', 0.16), i * 90)),
+  error:   () => playTone(220, 0.16, 'sawtooth', 0.12),
+  win:     () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.22, 'sine', 0.18), i * 110)),
+  lose:    () => [392, 330, 262].forEach((f, i) => setTimeout(() => playTone(f, 0.22, 'sine', 0.14), i * 120)),
+  flip:    () => playTone(440, 0.06, 'triangle', 0.10),
+  unlock:  () => [660, 880, 1100].forEach((f, i) => setTimeout(() => playTone(f, 0.15, 'sine', 0.15), i * 80)),
+};
+
+const AudioService = {
+  play(presetName) {
+    const preset = PRESETS[presetName];
+    if (!preset) { console.warn('[AudioService] preset inconnu :', presetName); return; }
+    preset();
+  },
+  setEnabled(v) { enabled = v; },
+  isEnabled() { return enabled; },
+};
+
+
+// ── services/SaveService.js ──
+// ═══════════════════════════════════════════════════════════════
+// SaveService
+// ───────────────────────────────────────
+// RÔLE : persister/restaurer l'état de partie en cours d'un jeu,
+//        sous forme de blob JSON opaque. Ne connaît jamais la forme
+//        de cet état — c'est entièrement défini par le jeu.
+// POSSÈDE : une entrée localStorage par jeu (`ondine_save_<gameId>`).
+// ═══════════════════════════════════════════════════════════════
+function keyFor(gameId) { return `ondine_save_${gameId}`; }
+
+const SaveService = {
+  write(gameId, state) {
+    try { localStorage.setItem(keyFor(gameId), JSON.stringify(state)); return true; }
+    catch (e) { console.warn('[SaveService] échec de sauvegarde pour', gameId, e); return false; }
+  },
+  read(gameId) {
+    try {
+      const raw = localStorage.getItem(keyFor(gameId));
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { console.warn('[SaveService] sauvegarde corrompue pour', gameId, e); return null; }
+  },
+  hasSave(gameId) { return localStorage.getItem(keyFor(gameId)) !== null; },
+  clear(gameId) { localStorage.removeItem(keyFor(gameId)); },
+};
+
+
+// ── services/DialogService.js ──
+// ═══════════════════════════════════════════════════════════════
+// DialogService
+// ───────────────────────────────────────
+// RÔLE : afficher une boîte de dialogue de confirmation bloquante
+//        (au sens UX, pas au sens JS — l'appel est asynchrone) et
+//        retourner la réponse de l'utilisateur. Remplace les
+//        `confirm()` natifs du navigateur, incohérents visuellement
+//        avec le reste de la plateforme.
+// NE DOIT JAMAIS : connaître le texte ou le contexte d'un jeu — tout
+//        le contenu est fourni par l'appelant.
+// ───────────────────────────────────────
+// S'appuie sur UI.modal() — c'est le seul service qui a le droit
+// d'importer un composant UI directement (car il EST la logique
+// derrière ce composant, pas un jeu qui le consommerait).
+// ═══════════════════════════════════════════════════════════════
+
+const DialogService = {
+  /**
+   * Retourne une Promise<boolean> : true si confirmé, false si annulé.
+   */
+  confirm({ title = '', message = '', confirmLabel = 'OK', cancelLabel = 'Annuler' } = {}) {
+    return new Promise((resolve) => {
+      const bodyEl = document.createElement('div');
+      bodyEl.textContent = message;
+
+      const confirmBtn = UI.button(confirmLabel, {
+        variant: 'primary',
+        onClick: () => { modal.close(); resolve(true); },
+      });
+      const cancelBtn = UI.button(cancelLabel, {
+        variant: 'secondary',
+        onClick: () => { modal.close(); resolve(false); },
+      });
+
+      const modal = UI.modal({ title, bodyEl, actions: [confirmBtn, cancelBtn] });
+      document.body.appendChild(modal.el);
+    });
+  },
+};
+
+
+// ── sdk/createSDK.js ──
+// ═══════════════════════════════════════════════════════════════
+// Game SDK
+// ───────────────────────────────────────
+// SEULE API que les jeux sont autorisés à utiliser pour parler à la
+// plateforme. Un jeu ne doit jamais importer un service de
+// core/services/ directement.
+//
+// Un jeu appelle createSDK(gameId) une fois au chargement et garde
+// l'objet retourné. gameId sert à namespacer les données du jeu
+// dans les services qui en ont besoin (stats, save, etc.) — ce
+// n'est pas encore utilisé par sdk.toast (qui est global à la
+// plateforme, pas par jeu), mais la signature est prête pour les
+// prochains namespaces.
+// ═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+function createSDK(gameId) {
+  return {
+    gameId,
+
+    toast: {
+      success: (msg) => NotificationService.show(msg, 'success'),
+      error: (msg) => NotificationService.show(msg, 'error'),
+      info: (msg) => NotificationService.show(msg, 'info'),
+    },
+
+    stats: {
+      get: (key, defaultValue = 0) => StatsService.get(gameId, key, defaultValue),
+      set: (key, value) => StatsService.set(gameId, key, value),
+      increment: (key, n = 1) => StatsService.increment(gameId, key, n),
+      setMax: (key, value) => StatsService.setMax(gameId, key, value),
+      setMin: (key, value) => StatsService.setMin(gameId, key, value),
+      getAll: () => StatsService.getAll(gameId),
+      reset: () => StatsService.reset(gameId),
+    },
+
+    achievement: {
+      isUnlocked: (id) => AchievementsService.isUnlocked(gameId, id),
+      /** Débloque `id` et affiche un toast de succès si c'est une
+       *  NOUVELLE unlock (idempotent — sans risque à rappeler). */
+      unlock(id, { name, icon = '🏅' } = {}) {
+        const isNew = AchievementsService.unlock(gameId, id);
+        if (isNew) {
+          AudioService.play('unlock');
+          NotificationService.show(`${icon} Succès : ${name || id}`, 'success');
+        }
+        return isNew;
+      },
+      unlockedList: () => AchievementsService.unlockedList(gameId),
+      reset: () => AchievementsService.reset(gameId),
+    },
+
+    audio: {
+      play: (presetName) => AudioService.play(presetName),
+      setEnabled: (v) => AudioService.setEnabled(v),
+      isEnabled: () => AudioService.isEnabled(),
+    },
+
+    save: (state) => SaveService.write(gameId, state),
+    load: () => SaveService.read(gameId),
+    hasSave: () => SaveService.hasSave(gameId),
+    clearSave: () => SaveService.clear(gameId),
+
+    dialog: {
+      confirm: (opts) => DialogService.confirm(opts),
+    },
+
+    // Prochains namespaces (profile, reward, challenge, cloud) —
+    // ajoutés au moment où un jeu concret en aura réellement besoin.
+  };
+}
+
+
+return { createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, shuffle, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, parseChart, loadChartFromUrl, createClock, createSession, DEFAULT_WINDOWS, DEFAULT_POINTS, DEFAULT_MULTIPLIER_TIERS, UI, NotificationService, StatsService, AchievementsService, AudioService, SaveService, DialogService, createSDK };
+})();
+
+// ── bootstrap SDK (imports convertis en déstructuration) ──
+
+// ═══════════════════════════════════════════════════════════════
+// ONDINE GAMES SDK — bootstrap
+// Séparé du script de jeu ci-dessous exprès : un <script type="module">
+// n'expose pas ses fonctions sur `window`, ce qui casserait tous les
+// onclick="..." inline du jeu si on mettait tout ici. Ce petit module
+// ne fait qu'exposer `window.sdk` — le script de jeu reste classique.
+// Voir /core/CLAUDE.md.
+// ═══════════════════════════════════════════════════════════════
+const { createSDK } = CoreBundle;
+const { UI } = CoreBundle;
+const { NotificationService } = CoreBundle;
+
+window.sdk = createSDK('solitaire');
+const toastEl = UI.toastHost();
+document.body.appendChild(toastEl);
+NotificationService.mount(toastEl);
+
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS & STATE
+// ═══════════════════════════════════════════════════════════════
+const SUITS = ['♠','♥','♦','♣'];
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const RED_SUITS = new Set(['♥','♦']);
+
+const THEMES = [
+  {id:'ocean',name:'Océan Ondine',icon:'🌊',bg:'linear-gradient(145deg,#0d1633,#152348)',accent:'#38bdf8',border:'rgba(56,189,248,.3)',rarity:'rare',back:'🌊'},
+  {id:'crystal',name:'Cristal',icon:'💎',bg:'linear-gradient(145deg,#0d1a2e,#091420)',accent:'#bae6fd',border:'rgba(186,230,253,.3)',rarity:'commun',back:'💎'},
+  {id:'cosmos',name:'Cosmos',icon:'🌌',bg:'linear-gradient(145deg,#0a0818,#150c28)',accent:'#818cf8',border:'rgba(129,140,248,.3)',rarity:'epique',back:'🌌'},
+  {id:'royal',name:'Royal',icon:'👑',bg:'linear-gradient(145deg,#1a1000,#2a1a00)',accent:'#fbbf24',border:'rgba(251,191,36,.3)',rarity:'rare',back:'👑'},
+  {id:'neon',name:'Néon',icon:'⚡',bg:'linear-gradient(145deg,#0a180a,#0a1a0f)',accent:'#34d399',border:'rgba(52,211,153,.3)',rarity:'rare',back:'⚡'},
+  {id:'ice',name:'Glace',icon:'❄️',bg:'linear-gradient(145deg,#0a1620,#081218)',accent:'#e0f2fe',border:'rgba(224,242,254,.25)',rarity:'commun',back:'❄️'},
+  {id:'tempest',name:'Tempête',icon:'⛈️',bg:'linear-gradient(145deg,#100a1a,#180e28)',accent:'#a5b4fc',border:'rgba(165,180,252,.3)',rarity:'epique',back:'⛈️'},
+  {id:'legend',name:'Légendaire',icon:'🔮',bg:'linear-gradient(145deg,#1a0818,#220c20)',accent:'#f472b6',border:'rgba(244,114,182,.4)',rarity:'legendaire',back:'🔮'},
+];
+
+const ACHIEVEMENTS = [
+  {id:'first_win',name:'Première Victoire',desc:'Gagner sa première partie',icon:'🎯',xp:50},
+  {id:'cards_100',name:'100 Cartes',desc:'Déplacer 100 cartes',icon:'🃏',xp:30},
+  {id:'cards_1000',name:'Maître du Solitaire',desc:'Déplacer 1000 cartes',icon:'🏆',xp:100},
+  {id:'cascade',name:'Cascade Parfaite',desc:'5 coups rapides en 3 secondes',icon:'🌊',xp:40},
+  {id:'speed_win',name:'Victoire Express',desc:'Gagner en moins de 5 minutes',icon:'⚡',xp:80},
+  {id:'ondine_royale',name:'Ondine Royale',desc:'Compléter les 4 fondations',icon:'👑',xp:100},
+  {id:'tempete',name:'Tempête de Cartes',desc:'50 parties jouées',icon:'⛈️',xp:60},
+  {id:'perfectionist',name:'Perfectionniste',desc:'Gagner sans annulation',icon:'💎',xp:120},
+];
+
+const CHEST_REWARDS = [
+  {id:'dos_cosmos',name:'Dos Cosmos',icon:'🌌',rarity:'epique',themeId:'cosmos'},
+  {id:'dos_legend',name:'Dos Légendaire',icon:'🔮',rarity:'legendaire',themeId:'legend'},
+  {id:'dos_neon',name:'Dos Néon',icon:'⚡',rarity:'rare',themeId:'neon'},
+  {id:'dos_tempest',name:'Dos Tempête',icon:'⛈️',rarity:'epique',themeId:'tempest'},
+  {id:'dos_royal',name:'Dos Royal',icon:'👑',rarity:'rare',themeId:'royal'},
+  {id:'xp_bonus',name:'+50 XP',icon:'✨',rarity:'commun'},
+  {id:'xp_big',name:'+150 XP',icon:'💫',rarity:'rare'},
+];
+
+let PREFS = {sound:true,music:true,haptic:true,particles:true,fx:80,fast:false,battery:false};
+let GAME_CONFIG = {drawMode:1,difficulty:'easy'};
+let ACTIVE_THEME = 'ocean';
+
+// ── GAME STATE ──
+let G = {
+  deck:[],stock:[],waste:[],foundations:[[],[],[],[]],tableau:[[],[],[],[],[],[],[]],
+  score:0,moves:0,startTime:0,timerInterval:null,
+  undoStack:[],drawPasses:0,drawMode:1,difficulty:'easy',
+  cardsMovedTotal:0,quickMoves:[],undoUsed:false,
+  over:false,started:false
+};
+
+// ── DRAG STATE ──
+let DRAG = {active:false,cards:[],srcType:'',srcIdx:0,srcCardIdx:0,startX:0,startY:0,origEls:[],ghost:null};
+
+// ── STATS ──
+function loadStats(){return JSON.parse(localStorage.getItem('sol_stats')||'{"games":0,"wins":0,"bestScore":0,"bestTime":0,"totalMoves":0,"totalCards":0,"chestsOpened":0,"xp":0,"level":1,"achievements":[]}');}
+function saveStats(s){localStorage.setItem('sol_stats',JSON.stringify(s));}
+function loadPrefs(){return JSON.parse(localStorage.getItem('sol_prefs')||'null');}
+function savePrefs(){localStorage.setItem('sol_prefs',JSON.stringify(PREFS));}
+function loadCollection(){return JSON.parse(localStorage.getItem('sol_collection')||'["ocean","crystal"]');}
+function saveCollection(c){localStorage.setItem('sol_collection',JSON.stringify(c));}
+
+function init(){
+  let p=loadPrefs();if(p)Object.assign(PREFS,p);
+  let saved=localStorage.getItem('sol_theme');if(saved)ACTIVE_THEME=saved;
+  spawnParticles();
+  updateHomeStats();
+  updateHomeLevelBar();
+  renderOptions();
+  renderThemes();
+  renderStats();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if(id==='sstats')renderStats();
+  if(id==='scol')renderThemes();
+  if(id==='sh'){updateHomeStats();updateHomeLevelBar();}
+}
+function showMenu(){showScreen('smenu');}
+function goHome(){
+  clearInterval(G.timerInterval);
+  document.getElementById('sgpause').classList.add('hidden');
+  showScreen('sh');
+}
+function pauseGame(){document.getElementById('sgpause').classList.remove('hidden');vibrate(30);}
+function resumeGame(){document.getElementById('sgpause').classList.add('hidden');vibrate(15);}
+function confirmNewGame(){
+  document.getElementById('sgpause').classList.add('hidden');
+  startGame();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PARTICLES
+// ═══════════════════════════════════════════════════════════════
+function spawnParticles(){
+  if(!PREFS.particles)return;
+  const cont=document.getElementById('particles');
+  cont.innerHTML='';
+  const cols=['#38bdf8','#818cf8','#7dd3fc','#a5b4fc','#bae6fd'];
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div');p.className='par';
+    const sz=2+Math.random()*4;
+    const dur=8+Math.random()*12;
+    const del=Math.random()*12;
+    p.style.cssText=`left:${Math.random()*100}%;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${dur}s;animation-delay:-${del}s;opacity:.4;`;
+    cont.appendChild(p);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HAPTICS & SOUND
+// ═══════════════════════════════════════════════════════════════
+function vibrate(ms){
+  if(!PREFS.haptic)return;
+  try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}
+}
+let audioCtx=null;
+function getAudioCtx(){
+  if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  return audioCtx;
+}
+function playTone(freq,dur,type='sine',vol=.15){
+  if(!PREFS.sound)return;
+  try{
+    const ctx=getAudioCtx();if(!ctx)return;
+    const osc=ctx.createOscillator();const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type=type;osc.frequency.value=freq;
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function soundCard(){playTone(880,.08,'sine',.12);}
+function soundPlace(){playTone(660,.12,'sine',.15);playTone(880,.08,'sine',.08);}
+function soundFoundation(){playTone(1046,.15,'sine',.2);setTimeout(()=>playTone(1318,.1,'sine',.15),80);setTimeout(()=>playTone(1568,.2,'sine',.18),160);}
+function soundCombo(){playTone(440,.06,'triangle',.2);playTone(660,.12,'triangle',.18);}
+function soundVictory(){
+  const notes=[523,659,784,1047];
+  notes.forEach((n,i)=>setTimeout(()=>playTone(n,.25,'sine',.2),i*120));
+}
+function soundFlip(){playTone(440,.06,'triangle',.1);}
+function soundError(){playTone(220,.15,'sawtooth',.1);}
+function soundDraw(){playTone(330,.07,'sine',.12);}
+
+// ═══════════════════════════════════════════════════════════════
+// GAME SETUP
+// ═══════════════════════════════════════════════════════════════
+function setDrawMode(n){
+  GAME_CONFIG.drawMode=n;
+  document.getElementById('mode1c').classList.toggle('sel',n===1);
+  document.getElementById('mode3c').classList.toggle('sel',n===3);
+}
+function setDiff(d){
+  GAME_CONFIG.difficulty=d;
+  document.getElementById('diffEasy').classList.toggle('sel',d==='easy');
+  document.getElementById('diffExpert').classList.toggle('sel',d==='expert');
+}
+
+function createDeck(){
+  const deck=[];
+  for(const s of SUITS)for(const r of RANKS)deck.push({suit:s,rank:r,faceUp:false,id:`${r}${s}`});
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  return deck;
+}
+
+function startGame(){
+  clearInterval(G.timerInterval);
+  document.getElementById('sgpause').classList.add('hidden');
+  const deck=createDeck();
+  G={
+    deck,stock:[],waste:[],
+    foundations:[[],[],[],[]],
+    tableau:[[],[],[],[],[],[],[]],
+    score:0,moves:0,startTime:Date.now(),timerInterval:null,
+    undoStack:[],drawPasses:0,
+    drawMode:GAME_CONFIG.drawMode,
+    difficulty:GAME_CONFIG.difficulty,
+    cardsMovedTotal:0,quickMoves:[],undoUsed:false,
+    over:false,started:true
+  };
+  // Deal tableau
+  for(let c=0;c<7;c++){
+    for(let r=0;r<=c;r++){
+      const card=deck.pop();
+      if(r===c)card.faceUp=true;
+      G.tableau[c].push(card);
+    }
+  }
+  // Rest to stock
+  G.stock=[...deck];
+  
+  document.getElementById('ghDrawBadge').textContent=G.drawMode===1?'1 carte':'3 cartes';
+  showScreen('sg');
+  requestAnimationFrame(renderGame);
+  
+  G.timerInterval=setInterval(updateTimer,1000);
+  vibrate(40);
+  soundCard();
+  
+  // Update stats
+  const st=loadStats();st.games++;saveStats(st);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+const theme=()=>THEMES.find(t=>t.id===ACTIVE_THEME)||THEMES[0];
+
+function renderGame(){
+  renderStock();
+  renderWaste();
+  renderFoundations();
+  renderTableau();
+  document.getElementById('ghScore').textContent=G.score;
+}
+
+function makeCardEl(card,extra={}){
+  const el=document.createElement('div');
+  el.className='card'+(card.faceUp?' face-up':' face-down')+(RED_SUITS.has(card.suit)&&card.faceUp?' red-suit':'');
+  el.dataset.id=card.id;
+  const th=theme();
+  const inner=document.createElement('div');inner.className='card-inner';
+  if(!card.faceUp){
+    const pat=document.createElement('div');pat.className='card-back-pattern';
+    const ico=document.createElement('div');ico.className='back-icon';ico.textContent=th.back;
+    pat.appendChild(ico);inner.appendChild(pat);
+    el.style.background=th.bg;el.style.borderColor=th.border;
+  } else {
+    const face=document.createElement('div');face.className='card-face';
+    const topCorner=document.createElement('div');topCorner.className='card-corner-top';
+    const rank1=document.createElement('div');rank1.className='card-rank';rank1.textContent=card.rank;
+    const suit1=document.createElement('div');suit1.className='card-suit-small';suit1.textContent=card.suit;
+    topCorner.appendChild(rank1);topCorner.appendChild(suit1);
+    const center=document.createElement('div');center.className='card-center-suit';center.textContent=card.suit;
+    const botCorner=document.createElement('div');botCorner.className='card-corner-bot';
+    const rank2=document.createElement('div');rank2.className='card-rank';rank2.textContent=card.rank;
+    const suit2=document.createElement('div');suit2.className='card-suit-small';suit2.textContent=card.suit;
+    botCorner.appendChild(rank2);botCorner.appendChild(suit2);
+    face.appendChild(topCorner);face.appendChild(center);face.appendChild(botCorner);
+    inner.appendChild(face);
+  }
+  el.appendChild(inner);
+  return el;
+}
+
+let STOCK_EL=null,WASTE_EL=null,FOUNDATION_ELS=[],COL_ELS=[];
+let CARD_EL_MAP={};
+
+function renderStock(){
+  const slot=document.getElementById('stockSlot');
+  slot.innerHTML='';
+  if(G.stock.length>0){
+    const el=document.createElement('div');el.className='card face-down';
+    const th=theme();el.style.background=th.bg;el.style.borderColor=th.border;
+    const inner=document.createElement('div');inner.className='card-inner';
+    const pat=document.createElement('div');pat.className='card-back-pattern';
+    const ico=document.createElement('div');ico.className='back-icon';ico.textContent=th.back;
+    pat.appendChild(ico);inner.appendChild(pat);el.appendChild(inner);
+    el.style.position='relative';
+    el.onclick=()=>drawFromStock();
+    slot.appendChild(el);
+  } else {
+    const sl=document.createElement('div');sl.className='card-slot';
+    sl.textContent='🔄';sl.style.fontSize='22px';
+    sl.onclick=()=>resetStock();
+    slot.appendChild(sl);
+  }
+}
+
+function renderWaste(){
+  const slot=document.getElementById('wasteSlot');
+  slot.innerHTML='';
+  if(G.waste.length===0){
+    const sl=document.createElement('div');sl.className='card-slot';sl.textContent='';
+    slot.appendChild(sl);return;
+  }
+  const wrap=document.createElement('div');wrap.className='waste-stack';wrap.style.position='relative';
+  wrap.style.width='var(--card-w)';wrap.style.height='var(--card-h)';
+  // Show up to 3 cards in draw-3 mode
+  const showCount=G.drawMode===3?Math.min(3,G.waste.length):1;
+  const startIdx=G.waste.length-showCount;
+  for(let i=0;i<showCount;i++){
+    const card=G.waste[startIdx+i];
+    const el=makeCardEl(card);
+    el.style.position='absolute';
+    const offset=G.drawMode===3?(i*(12)):0;
+    el.style.left=offset+'px';el.style.top='0px';el.style.zIndex=i+1;
+    if(i===showCount-1){
+      // Top card is interactive
+      el.addEventListener('touchstart',e=>onDragStart(e,'waste',0,G.waste.length-1),{passive:false});
+      el.addEventListener('mousedown',e=>onDragStart(e,'waste',0,G.waste.length-1));
+      el.addEventListener('click',()=>handleWasteClick());
+    }
+    wrap.appendChild(el);
+  }
+  slot.appendChild(wrap);
+}
+
+function renderFoundations(){
+  const area=document.getElementById('foundationsArea');
+  area.innerHTML='';
+  FOUNDATION_ELS=[];
+  for(let i=0;i<4;i++){
+    const fnd=G.foundations[i];
+    const wrap=document.createElement('div');wrap.style.position='relative';wrap.style.width='var(--card-w)';wrap.style.height='var(--card-h)';
+    if(fnd.length===0){
+      const sl=document.createElement('div');sl.className='card-slot foundation-slot';
+      sl.textContent=SUITS[i];sl.style.fontSize='18px';
+      if(fnd.length===13)sl.classList.add('foundation-complete');
+      wrap.appendChild(sl);
+    } else {
+      const card=fnd[fnd.length-1];
+      const el=makeCardEl(card);
+      el.style.position='absolute';el.style.top='0';el.style.left='0';
+      if(fnd.length===13)el.classList.add('foundation-complete');
+      wrap.appendChild(el);
+    }
+    wrap.dataset.fndIdx=i;
+    wrap.onclick=()=>handleFoundationClick(i);
+    area.appendChild(wrap);
+    FOUNDATION_ELS.push(wrap);
+  }
+}
+
+const CARD_OVERLAP=18;// px each card overlaps
+
+function renderTableau(){
+  const tab=document.getElementById('tableau');
+  tab.innerHTML='';
+  COL_ELS=[];
+  for(let c=0;c<7;c++){
+    const col=G.tableau[c];
+    const colEl=document.createElement('div');colEl.className='col';colEl.dataset.colIdx=c;
+    // Drop zone always present
+    colEl.onclick=(e)=>{if(e.target===colEl)handleColClick(c,-1);};
+    
+    if(col.length===0){
+      const sl=document.createElement('div');sl.className='card-slot';sl.textContent='K';sl.style.fontSize='18px';sl.style.color='rgba(56,189,248,.4)';
+      sl.onclick=()=>handleColClick(c,-1);
+      colEl.appendChild(sl);
+    } else {
+      for(let r=0;r<col.length;r++){
+        const card=col[r];
+        const el=makeCardEl(card);
+        el.style.position='absolute';
+        el.style.top=(r*CARD_OVERLAP)+'px';
+        el.style.left='0';
+        el.style.zIndex=r+1;
+        el.onclick=(e)=>{e.stopPropagation();handleColClick(c,r);};
+        el.addEventListener('touchstart',(e)=>{e.stopPropagation();onDragStart(e,'tableau',c,r);},{passive:false});
+        el.addEventListener('mousedown',(e)=>{e.stopPropagation();onDragStart(e,'tableau',c,r);});
+        colEl.appendChild(el);
+        CARD_EL_MAP[card.id]=el;
+      }
+    }
+    // Dynamic height
+    const h=col.length===0?72:(col.length*CARD_OVERLAP+72);
+    colEl.style.height=h+'px';
+    colEl.style.minHeight='72px';
+    tab.appendChild(colEl);
+    COL_ELS.push(colEl);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GAME LOGIC
+// ═══════════════════════════════════════════════════════════════
+function drawFromStock(){
+  if(G.over)return;
+  saveUndo();
+  soundDraw();vibrate(15);
+  if(G.drawMode===1){
+    const card=G.stock.pop();
+    card.faceUp=true;
+    G.waste.push(card);
+  } else {
+    const count=Math.min(3,G.stock.length);
+    for(let i=0;i<count;i++){
+      const card=G.stock.pop();card.faceUp=true;G.waste.push(card);
+    }
+  }
+  renderGame();
+  addScore(5);
+  trackQuickMove();
+}
+
+function resetStock(){
+  if(G.over)return;
+  if(G.difficulty==='expert'&&G.drawPasses>=1){sdk.toast.error('⛔ Pioche épuisée !');soundError();return;}
+  saveUndo();
+  G.stock=[...G.waste].reverse();
+  G.waste=[];
+  G.drawPasses++;
+  soundDraw();vibrate(20);
+  renderGame();
+}
+
+function handleWasteClick(){
+  if(G.over||G.waste.length===0)return;
+  const card=G.waste[G.waste.length-1];
+  // Try auto-place to foundation
+  if(tryMoveToFoundation('waste',0,G.waste.length-1))return;
+}
+
+function handleFoundationClick(fi){
+  // If we have a selected card in hand... not used in pure drag mode
+}
+
+function handleColClick(ci,ri){
+  if(G.over)return;
+  const col=G.tableau[ci];
+  if(ri===-1){return;} // empty column — handled via drag
+  const card=col[ri];
+  if(!card)return;
+  // Face down → flip
+  if(!card.faceUp&&ri===col.length-1){
+    saveUndo();card.faceUp=true;soundFlip();vibrate(20);
+    addScore(10);renderGame();return;
+  }
+  // Double-tap to foundation
+  if(card.faceUp&&ri===col.length-1){
+    tryMoveToFoundation('tableau',ci,ri);
+  }
+}
+
+function canPlaceOnFoundation(card,fi){
+  const f=G.foundations[fi];
+  if(f.length===0)return card.rank==='A';
+  const top=f[f.length-1];
+  return top.suit===card.suit&&RANKS.indexOf(card.rank)===RANKS.indexOf(top.rank)+1;
+}
+
+function canPlaceOnTableau(card,ci){
+  const col=G.tableau[ci];
+  if(col.length===0)return card.rank==='K';
+  const top=col[col.length-1];
+  if(!top.faceUp)return false;
+  const redTop=RED_SUITS.has(top.suit);const redCard=RED_SUITS.has(card.suit);
+  return redTop!==redCard&&RANKS.indexOf(card.rank)===RANKS.indexOf(top.rank)-1;
+}
+
+function tryMoveToFoundation(srcType,srcIdx,cardIdx){
+  let card,cards;
+  if(srcType==='waste'){card=G.waste[G.waste.length-1];if(!card)return false;}
+  else if(srcType==='tableau'){
+    const col=G.tableau[srcIdx];card=col[cardIdx];
+    if(!card||!card.faceUp)return false;
+    cards=col.slice(cardIdx);if(cards.length>1)return false; // only single card to foundation
+  }
+  for(let fi=0;fi<4;fi++){
+    if(canPlaceOnFoundation(card,fi)){
+      saveUndo();
+      if(srcType==='waste')G.waste.pop();
+      else G.tableau[srcIdx].splice(cardIdx);
+      G.foundations[fi].push(card);
+      // Flip last tableau card
+      if(srcType==='tableau'&&G.tableau[srcIdx].length>0){
+        const last=G.tableau[srcIdx][G.tableau[srcIdx].length-1];
+        if(!last.faceUp){last.faceUp=true;addScore(10);}
+      }
+      addScore(15);addMove();
+      soundFoundation();vibrate([20,30,20]);
+      spawnFoundationEffect();
+      renderGame();
+      checkWin();
+      return true;
+    }
+  }
+  return false;
+}
+
+function moveCards(srcType,srcIdx,cardIdx,dstType,dstIdx){
+  let cards;
+  if(srcType==='waste'){
+    if(G.waste.length===0)return false;
+    cards=[G.waste[G.waste.length-1]];
+  } else if(srcType==='tableau'){
+    const col=G.tableau[srcIdx];
+    cards=col.slice(cardIdx);
+  }
+  if(!cards||cards.length===0)return false;
+  
+  if(dstType==='foundation'){
+    if(cards.length>1)return false;
+    if(!canPlaceOnFoundation(cards[0],dstIdx))return false;
+    saveUndo();
+    if(srcType==='waste')G.waste.pop();
+    else G.tableau[srcIdx].splice(cardIdx);
+    G.foundations[dstIdx].push(cards[0]);
+    if(srcType==='tableau'&&G.tableau[srcIdx].length>0){
+      const l=G.tableau[srcIdx][G.tableau[srcIdx].length-1];
+      if(!l.faceUp){l.faceUp=true;addScore(10);}
+    }
+    addScore(15);addMove();
+    soundFoundation();vibrate([20,30,20]);spawnFoundationEffect();renderGame();checkWin();return true;
+  }
+  if(dstType==='tableau'){
+    if(!canPlaceOnTableau(cards[0],dstIdx))return false;
+    saveUndo();
+    if(srcType==='waste')G.waste.pop();
+    else G.tableau[srcIdx].splice(cardIdx);
+    G.tableau[dstIdx].push(...cards);
+    if(srcType==='tableau'&&G.tableau[srcIdx].length>0){
+      const l=G.tableau[srcIdx][G.tableau[srcIdx].length-1];
+      if(!l.faceUp){l.faceUp=true;addScore(10);}
+    }
+    addScore(5*cards.length);addMove();
+    soundPlace();vibrate(25);
+    trackQuickMove();
+    renderGame();return true;
+  }
+  return false;
+}
+
+function addScore(n){
+  G.score+=n;
+  document.getElementById('ghScore').textContent=G.score;
+  spawnScoreFloat('+'+n);
+}
+function addMove(){
+  G.moves++;
+  G.cardsMovedTotal++;
+  // Check achievement
+  const st=loadStats();
+  st.totalMoves++;st.totalCards++;
+  if(st.totalCards>=100&&!st.achievements.includes('cards_100')){st.achievements.push('cards_100');showAchievementToast('cards_100');addXP(30);}
+  if(st.totalCards>=1000&&!st.achievements.includes('cards_1000')){st.achievements.push('cards_1000');showAchievementToast('cards_1000');addXP(100);}
+  saveStats(st);
+}
+function trackQuickMove(){
+  const now=Date.now();
+  G.quickMoves.push(now);
+  G.quickMoves=G.quickMoves.filter(t=>now-t<3000);
+  if(G.quickMoves.length>=5){
+    showComboText('Cascade Parfaite !');
+    soundCombo();vibrate([20,40,20]);
+    const st=loadStats();
+    if(!st.achievements.includes('cascade')){st.achievements.push('cascade');saveStats(st);showAchievementToast('cascade');}
+    G.quickMoves=[];
+  }
+}
+
+function saveUndo(){
+  G.undoStack.push({
+    stock:JSON.parse(JSON.stringify(G.stock)),
+    waste:JSON.parse(JSON.stringify(G.waste)),
+    foundations:JSON.parse(JSON.stringify(G.foundations)),
+    tableau:JSON.parse(JSON.stringify(G.tableau)),
+    score:G.score,moves:G.moves
+  });
+  if(G.undoStack.length>30)G.undoStack.shift();
+}
+function undoMove(){
+  if(G.undoStack.length===0){sdk.toast.error('🚫 Aucun coup à annuler');soundError();return;}
+  const prev=G.undoStack.pop();
+  G.stock=prev.stock;G.waste=prev.waste;G.foundations=prev.foundations;G.tableau=prev.tableau;
+  G.score=prev.score;G.moves=prev.moves;
+  G.undoUsed=true;
+  document.getElementById('ghScore').textContent=G.score;
+  soundCard();vibrate(30);
+  renderGame();
+  document.getElementById('sgpause').classList.add('hidden');
+  sdk.toast.info('↩ Coup annulé');
+}
+
+function showHint(){
+  document.getElementById('sgpause').classList.add('hidden');
+  const hint=findHint();
+  if(!hint){sdk.toast.error('💡 Aucun coup évident…');soundError();return;}
+  vibrate(30);
+  // Flash the card
+  let el=null;
+  if(hint.srcType==='waste'){
+    const slot=document.getElementById('wasteSlot');
+    el=slot.querySelector('.card');
+  } else if(hint.srcType==='tableau'){
+    const cols=document.querySelectorAll('.col');
+    const col=cols[hint.srcIdx];
+    const cards=col.querySelectorAll('.card');
+    el=cards[hint.cardIdx];
+  }
+  if(el){el.classList.add('hint-highlight');setTimeout(()=>el.classList.remove('hint-highlight'),2000);}
+  sdk.toast.info('💡 Essaie ce coup !');
+}
+
+function findHint(){
+  // Check waste top card
+  if(G.waste.length>0){
+    const card=G.waste[G.waste.length-1];
+    for(let fi=0;fi<4;fi++)if(canPlaceOnFoundation(card,fi))return{srcType:'waste',srcIdx:0,cardIdx:G.waste.length-1};
+    for(let ci=0;ci<7;ci++)if(canPlaceOnTableau(card,ci))return{srcType:'waste',srcIdx:0,cardIdx:G.waste.length-1};
+  }
+  // Check tableau
+  for(let c=0;c<7;c++){
+    const col=G.tableau[c];
+    if(col.length===0)continue;
+    for(let r=0;r<col.length;r++){
+      const card=col[r];if(!card.faceUp)continue;
+      for(let fi=0;fi<4;fi++)if(canPlaceOnFoundation(card,fi)&&r===col.length-1)return{srcType:'tableau',srcIdx:c,cardIdx:r};
+      for(let ci=0;ci<7;ci++){
+        if(ci===c)continue;
+        if(canPlaceOnTableau(card,ci))return{srcType:'tableau',srcIdx:c,cardIdx:r};
+      }
+    }
+  }
+  return null;
+}
+
+function autoComplete(){
+  document.getElementById('sgpause').classList.add('hidden');
+  // Check if all cards are face up
+  let allFaceUp=G.stock.length===0&&G.waste.length===0;
+  if(allFaceUp)for(const col of G.tableau)for(const c of col)if(!c.faceUp){allFaceUp=false;break;}
+  if(!allFaceUp){sdk.toast.error('🤔 Pas encore possible !');soundError();return;}
+  
+  function doAutoStep(){
+    let moved=false;
+    for(let c=0;c<7;c++){
+      const col=G.tableau[c];if(col.length===0)continue;
+      const card=col[col.length-1];
+      for(let fi=0;fi<4;fi++){
+        if(canPlaceOnFoundation(card,fi)){
+          G.tableau[c].splice(col.length-1);
+          G.foundations[fi].push(card);
+          addScore(15);addMove();
+          soundPlace();vibrate(15);
+          renderGame();moved=true;
+          setTimeout(checkWin,100);
+          break;
+        }
+      }
+      if(moved)break;
+    }
+    if(moved)setTimeout(doAutoStep,PREFS.fast?80:180);
+    else if(!checkWin())sdk.toast.success('🎴 Auto-complétion terminée');
+  }
+  doAutoStep();
+}
+
+function checkWin(){
+  const won=G.foundations.every(f=>f.length===13);
+  if(won&&!G.over){
+    G.over=true;
+    clearInterval(G.timerInterval);
+    const elapsed=Math.floor((Date.now()-G.startTime)/1000);
+    
+    // Update stats
+    const st=loadStats();
+    st.wins++;
+    if(!st.bestScore||G.score>st.bestScore)st.bestScore=G.score;
+    if(!st.bestTime||elapsed<st.bestTime)st.bestTime=elapsed;
+    if(!st.achievements.includes('first_win')){st.achievements.push('first_win');showAchievementToast('first_win');addXP(50);}
+    if(!G.undoUsed&&!st.achievements.includes('perfectionist')){st.achievements.push('perfectionist');showAchievementToast('perfectionist');addXP(120);}
+    if(elapsed<300&&!st.achievements.includes('speed_win')){st.achievements.push('speed_win');showAchievementToast('speed_win');addXP(80);}
+    if(!st.achievements.includes('ondine_royale')){st.achievements.push('ondine_royale');showAchievementToast('ondine_royale');addXP(100);}
+    if(st.games>=50&&!st.achievements.includes('tempete')){st.achievements.push('tempete');showAchievementToast('tempete');addXP(60);}
+    addXP(Math.floor(G.score/10));
+    saveStats(st);
+    
+    setTimeout(()=>showVictory(elapsed),600);
+    return true;
+  }
+  return false;
+}
+
+function showVictory(elapsed){
+  soundVictory();vibrate([40,60,40,60,80]);
+  spawnVictoryRain();
+  
+  const m=Math.floor(elapsed/60);const s=elapsed%60;
+  const timeStr=m+':'+(s<10?'0'+s:s);
+  document.getElementById('vicSub').textContent=G.moves+' coups • '+timeStr+' • '+G.score+' pts';
+  
+  const statsEl=document.getElementById('vicStats');
+  statsEl.innerHTML=`
+    <div class="vic-stat"><div class="sv">${G.score}</div><div class="sl">Score</div></div>
+    <div class="vic-stat"><div class="sv">${timeStr}</div><div class="sl">Temps</div></div>
+    <div class="vic-stat"><div class="sv">${G.moves}</div><div class="sl">Coups</div></div>
+  `;
+  document.getElementById('svic').classList.remove('hidden'); /* audit UX fin de partie : overlay sans masquer le plateau/la grille en dessous */
+  
+  // Maybe show chest
+  const st=loadStats();
+  if(st.wins%3===0){
+    setTimeout(()=>showChest(),2500);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════════════════════════════
+let dragGhost=null;
+let dragData={active:false,srcType:'',srcIdx:0,cardIdx:0,cards:[],startX:0,startY:0};
+
+function onDragStart(e,srcType,srcIdx,cardIdx){
+  if(G.over)return;
+  const pt=e.touches?e.touches[0]:e;
+  
+  let cards=[];
+  if(srcType==='waste'&&G.waste.length>0)cards=[G.waste[G.waste.length-1]];
+  else if(srcType==='tableau'){
+    const col=G.tableau[srcIdx];
+    const card=col[cardIdx];
+    if(!card||!card.faceUp)return;
+    cards=col.slice(cardIdx);
+  }
+  if(cards.length===0)return;
+  
+  dragData={active:true,srcType,srcIdx,cardIdx,cards,startX:pt.clientX,startY:pt.clientY};
+  
+  // Create ghost
+  if(dragGhost){dragGhost.remove();dragGhost=null;}
+  dragGhost=document.createElement('div');
+  dragGhost.style.cssText=`position:fixed;z-index:9000;pointer-events:none;top:${pt.clientY-36}px;left:${pt.clientX-26}px;`;
+  const th=theme();
+  cards.forEach((c,i)=>{
+    const el=makeCardEl(c);
+    el.style.position='absolute';el.style.top=(i*CARD_OVERLAP)+'px';el.style.left='0';el.style.zIndex=i+1;
+    el.style.transform='scale(1.05) rotate(2deg)';
+    el.style.boxShadow='0 16px 48px rgba(56,189,248,.4)';
+    dragGhost.appendChild(el);
+  });
+  dragGhost.style.width='var(--card-w)';dragGhost.style.height=(52+(cards.length-1)*CARD_OVERLAP+20)+'px';
+  document.body.appendChild(dragGhost);
+  
+  document.addEventListener('touchmove',onDragMove,{passive:false});
+  document.addEventListener('touchend',onDragEnd,{passive:false});
+  document.addEventListener('mousemove',onDragMove);
+  document.addEventListener('mouseup',onDragEnd);
+  
+  vibrate(20);soundCard();
+  if(e.preventDefault)e.preventDefault();
+}
+
+function onDragMove(e){
+  if(!dragData.active)return;
+  const pt=e.touches?e.touches[0]:e;
+  if(dragGhost){
+    dragGhost.style.left=(pt.clientX-26)+'px';
+    dragGhost.style.top=(pt.clientY-36)+'px';
+  }
+  if(e.preventDefault)e.preventDefault();
+}
+
+function onDragEnd(e){
+  if(!dragData.active)return;
+  document.removeEventListener('touchmove',onDragMove);
+  document.removeEventListener('touchend',onDragEnd);
+  document.removeEventListener('mousemove',onDragMove);
+  document.removeEventListener('mouseup',onDragEnd);
+  
+  const pt=e.changedTouches?e.changedTouches[0]:(e.touches&&e.touches[0])||e;
+  
+  // Find drop target
+  if(dragGhost){dragGhost.style.display='none';}
+  const target=document.elementFromPoint(pt.clientX,pt.clientY);
+  if(dragGhost){dragGhost.style.display='';}
+  
+  let moved=false;
+  if(target){
+    // Foundation?
+    const fndWrap=target.closest('[data-fnd-idx]');
+    if(fndWrap){
+      const fi=parseInt(fndWrap.dataset.fndIdx);
+      moved=moveCards(dragData.srcType,dragData.srcIdx,dragData.cardIdx,'foundation',fi);
+    }
+    // Tableau?
+    if(!moved){
+      const colEl=target.closest('[data-col-idx]');
+      if(colEl){
+        const ci=parseInt(colEl.dataset.colIdx);
+        moved=moveCards(dragData.srcType,dragData.srcIdx,dragData.cardIdx,'tableau',ci);
+      }
+    }
+    // Foundation area click
+    if(!moved){
+      const faEl=target.closest('#foundationsArea');
+      if(faEl){
+        for(let fi=0;fi<4;fi++){
+          if(moveCards(dragData.srcType,dragData.srcIdx,dragData.cardIdx,'foundation',fi)){moved=true;break;}
+        }
+      }
+    }
+  }
+  
+  if(!moved)soundError();
+  
+  if(dragGhost){dragGhost.remove();dragGhost=null;}
+  dragData.active=false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EFFECTS
+// ═══════════════════════════════════════════════════════════════
+function spawnScoreFloat(text){
+  if(PREFS.battery)return;
+  const el=document.createElement('div');el.className='score-float';el.textContent=text;
+  const x=100+Math.random()*200;const y=100+Math.random()*100;
+  el.style.left=x+'px';el.style.top=y+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+}
+function showComboText(text){
+  if(PREFS.battery)return;
+  const el=document.createElement('div');el.className='combo-text';el.textContent=text;
+  el.style.left='50%';el.style.top='40%';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1600);
+}
+function spawnFoundationEffect(){
+  if(PREFS.battery)return;
+  const cols=['#38bdf8','#818cf8','#34d399','#fbbf24'];
+  const cont=document.getElementById('cfc');
+  for(let i=0;i<16;i++){
+    const p=document.createElement('div');p.className='cfp';
+    const dur=.8+Math.random()*.8;const del=Math.random()*.3;
+    p.style.cssText=`left:${60+Math.random()*30}%;width:${4+Math.round(Math.random()*6)}px;height:${4+Math.round(Math.random()*6)}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${dur}s;animation-delay:${del}s;border-radius:${Math.random()>.5?'50%':'2px'};position:absolute;`;
+    cont.appendChild(p);
+    setTimeout(()=>p.remove(),(dur+del)*1000+100);
+  }
+}
+function spawnVictoryRain(){
+  const rain=document.getElementById('vicRain');rain.innerHTML='';
+  const suits=['♠','♥','♦','♣'];
+  const cols=['#38bdf8','#818cf8','#f472b6','#fbbf24','#34d399','#bae6fd'];
+  for(let i=0;i<30;i++){
+    const p=document.createElement('div');
+    const dur=1.5+Math.random()*2;const del=Math.random()*1.5;
+    p.style.cssText=`position:absolute;left:${Math.random()*100}%;top:-30px;font-size:${14+Math.random()*14}px;color:${cols[Math.floor(Math.random()*cols.length)]};animation:cf-fall ${dur}s linear ${del}s forwards;`;
+    p.textContent=suits[Math.floor(Math.random()*4)];
+    rain.appendChild(p);
+  }
+}
+function showAchievementToast(id){
+  const ach=ACHIEVEMENTS.find(a=>a.id===id);
+  if(!ach)return;
+  sdk.toast.success('🏅 Succès: '+ach.name);
+  vibrate([20,30,20]);
+}
+function addXP(amount){
+  const st=loadStats();
+  st.xp=(st.xp||0)+amount;
+  const xpPerLevel=100;
+  st.level=Math.floor(st.xp/xpPerLevel)+1;
+  saveStats(st);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHEST
+// ═══════════════════════════════════════════════════════════════
+function showChest(){
+  const content=document.getElementById('chestContent');
+  content.innerHTML=`
+    <div class="chest-icon" id="chestIcon" onclick="openChest()">🎁</div>
+    <div class="chest-title">Coffre Mystère !</div>
+    <div class="chest-hint">Appuie pour ouvrir...</div>
+  `;
+  showScreen('schest');
+  vibrate([30,40,30]);
+}
+function openChest(){
+  vibrate([20,40,80,40,20]);
+  soundVictory();
+  
+  const st=loadStats();st.chestsOpened=(st.chestsOpened||0)+1;saveStats(st);
+  
+  // Pick reward
+  const rarityRoll=Math.random();
+  let pool;
+  if(rarityRoll>.95)pool=CHEST_REWARDS.filter(r=>r.rarity==='legendaire');
+  else if(rarityRoll>.7)pool=CHEST_REWARDS.filter(r=>r.rarity==='epique');
+  else if(rarityRoll>.4)pool=CHEST_REWARDS.filter(r=>r.rarity==='rare');
+  else pool=CHEST_REWARDS.filter(r=>r.rarity==='commun');
+  if(!pool.length)pool=CHEST_REWARDS;
+  const reward=pool[Math.floor(Math.random()*pool.length)];
+  
+  // Unlock theme if applicable
+  if(reward.themeId){
+    const col=loadCollection();
+    if(!col.includes(reward.themeId)){col.push(reward.themeId);saveCollection(col);}
+  }
+  if(reward.id==='xp_bonus')addXP(50);
+  if(reward.id==='xp_big')addXP(150);
+  
+  const rarityClass='rb-'+reward.rarity;
+  const rarityNames={commun:'Commun',rare:'Rare',epique:'Épique',legendaire:'Légendaire'};
+  
+  const content=document.getElementById('chestContent');
+  content.innerHTML=`
+    <div class="chest-reward">
+      <div class="reward-icon">${reward.icon}</div>
+      <div class="reward-name">${reward.name}</div>
+      <div class="reward-rarity-badge ${rarityClass}">${rarityNames[reward.rarity]}</div>
+      <button class="btn-primary" onclick="closeChest()" style="max-width:200px;">Super !</button>
+    </div>
+  `;
+  spawnFoundationEffect();
+}
+function closeChest(){showScreen('sh');}
+
+// ═══════════════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════════════
+function updateTimer(){
+  if(G.over)return;
+  const el=document.getElementById('ghTimer');if(!el)return;
+  const elapsed=Math.floor((Date.now()-G.startTime)/1000);
+  const m=Math.floor(elapsed/60);const s=elapsed%60;
+  el.textContent=m+':'+(s<10?'0':'')+s;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HOME STATS
+// ═══════════════════════════════════════════════════════════════
+function updateHomeStats(){
+  const st=loadStats();
+  document.getElementById('stGames').textContent=st.games||0;
+  document.getElementById('stWins').textContent=st.wins||0;
+  document.getElementById('stBest').textContent=st.bestScore||'—';
+}
+function updateHomeLevelBar(){
+  const st=loadStats();
+  const xp=st.xp||0;const xpPL=100;
+  const level=Math.floor(xp/xpPL)+1;
+  const xpInLevel=xp%(xpPL);
+  const pct=Math.min(100,Math.round(xpInLevel/xpPL*100));
+  const names=['Apprenti','Marin','Navigateur','Maître','Légende','Ondine'];
+  const name=names[Math.min(level-1,names.length-1)];
+  document.getElementById('homeLevelLabel').textContent='Niv. '+level+' — '+name;
+  document.getElementById('homeXPLabel').textContent=xpInLevel+' / '+xpPL+' XP';
+  document.getElementById('homeLevelFill').style.width=pct+'%';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATS SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderStats(){
+  const st=loadStats();
+  const elapsed=st.bestTime||0;const m=Math.floor(elapsed/60);const s=elapsed%60;
+  const bestTimeStr=elapsed?m+':'+(s<10?'0':'')+s:'—';
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-card"><div class="sv">${st.games||0}</div><div class="sl">Parties</div></div>
+    <div class="stat-card"><div class="sv">${st.wins||0}</div><div class="sl">Victoires</div></div>
+    <div class="stat-card"><div class="sv">${st.bestScore||0}</div><div class="sl">Meilleur score</div></div>
+    <div class="stat-card"><div class="sv">${bestTimeStr}</div><div class="sl">Meilleur temps</div></div>
+    <div class="stat-card"><div class="sv">${st.totalCards||0}</div><div class="sl">Cartes déplacées</div></div>
+    <div class="stat-card"><div class="sv">${st.chestsOpened||0}</div><div class="sl">Coffres ouverts</div></div>
+  `;
+  const unlocked=st.achievements||[];
+  document.getElementById('achieveList').innerHTML=ACHIEVEMENTS.map(a=>{
+    const done=unlocked.includes(a.id);
+    return`<div class="achieve-item${done?' unlocked':''}">
+      <div class="ach-icon">${a.icon}</div>
+      <div><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div></div>
+      <div class="ach-badge ${done?'done':'todo'}">${done?'+'+a.xp+' XP':'🔒'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COLLECTION SCREEN
+// ═══════════════════════════════════════════════════════════════
+function renderThemes(){
+  const col=loadCollection();
+  const grid=document.getElementById('themesGrid');
+  const rarityNames={commun:'Commun',rare:'Rare',epique:'Épique',legendaire:'Légendaire'};
+  const rarityColors={commun:'#64748b',rare:'#38bdf8',epique:'#818cf8',legendaire:'#fbbf24'};
+  grid.innerHTML=THEMES.map(t=>{
+    const unlocked=col.includes(t.id);
+    const active=ACTIVE_THEME===t.id;
+    return`<div class="theme-card${unlocked?'':' locked'}${active?' active':''}" 
+      style="background:${t.bg};border-color:${active?t.accent:unlocked?'rgba(255,255,255,.1)':'rgba(255,255,255,.05)'};${active?'box-shadow:0 0 20px '+t.accent+'44;':''}"
+      onclick="${unlocked?'selectTheme(\''+t.id+'\')':''}">
+      <div class="theme-icon">${t.icon}</div>
+      <div class="theme-name" style="color:${t.accent}">${t.name}</div>
+      <div class="theme-rarity rarity-${t.rarity}">${rarityNames[t.rarity]}</div>
+      ${!unlocked?'<div class="theme-lock">🔒</div>':''}
+      ${active?'<div style="position:absolute;top:6px;right:8px;font-size:11px;color:'+t.accent+';">✓</div>':''}
+    </div>`;
+  }).join('');
+}
+function selectTheme(id){
+  ACTIVE_THEME=id;
+  localStorage.setItem('sol_theme',id);
+  renderThemes();
+  vibrate(20);soundPlace();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OPTIONS
+// ═══════════════════════════════════════════════════════════════
+function renderOptions(){
+  const keys=['sound','music','haptic','particles','fast','battery'];
+  keys.forEach(k=>{
+    const el=document.getElementById('tog'+k.charAt(0).toUpperCase()+k.slice(1));
+    if(el)el.classList.toggle('on',PREFS[k]);
+  });
+  document.getElementById('slFx').value=PREFS.fx;
+  document.getElementById('slFxVal').textContent=PREFS.fx;
+}
+function toggleOpt(key){
+  PREFS[key]=!PREFS[key];
+  renderOptions();
+  savePrefs();
+  if(key==='particles')spawnParticles();
+  vibrate(20);
+}
+function setFxLevel(v){
+  PREFS.fx=parseInt(v);
+  document.getElementById('slFxVal').textContent=v;
+  savePrefs();
+}
+function resetStats(){
+  if(confirm('Réinitialiser toutes les statistiques ?')){
+    localStorage.removeItem('sol_stats');
+    sdk.toast.success('🗑 Stats réinitialisées');vibrate([20,40,20]);
+    renderStats();updateHomeStats();
+  }
+}
+
+// Toast : géré par la plateforme via sdk.toast (voir bootstrap SDK
+// en haut de fichier + core/services/NotificationService.js)
+
+// ═══════════════════════════════════════════════════════════════
+// RESIZE / LAYOUT
+// ═══════════════════════════════════════════════════════════════
+function updateCardSize(){
+  const w=window.innerWidth;
+  const cardW=Math.floor((w-12)/7)-4;
+  const cardH=Math.floor(cardW*1.38);
+  document.documentElement.style.setProperty('--card-w',cardW+'px');
+  document.documentElement.style.setProperty('--card-h',cardH+'px');
+  const overlap=Math.floor(cardH*.25);
+  // dynamic overlap update via JS constant
+  if(typeof CARD_OVERLAP!=='undefined')window.CARD_OVERLAP_DYNAMIC=overlap;
+}
+
+window.addEventListener('resize',()=>{updateCardSize();if(G.started&&!G.over)renderGame();});
+
+// ═══════════════════════════════════════════════════════════════
+// DOUBLE TAP for auto-send
+// ═══════════════════════════════════════════════════════════════
+let lastTap={el:null,time:0};
+document.addEventListener('touchend',e=>{
+  const now=Date.now();
+  const target=e.target.closest('.card');
+  if(!target)return;
+  if(lastTap.el===target&&now-lastTap.time<350){
+    // Double tap → auto move
+    e.preventDefault();
+    const colEl=target.closest('[data-col-idx]');
+    if(colEl){
+      const ci=parseInt(colEl.dataset.colIdx);
+      const col=G.tableau[ci];
+      const cards=colEl.querySelectorAll('.card');
+      const idx=Array.from(cards).indexOf(target);
+      if(idx>=0&&idx<col.length&&col[idx].faceUp){
+        if(!tryMoveToFoundation('tableau',ci,idx)){
+          // Try move to best tableau spot
+          for(let di=0;di<7;di++){
+            if(di===ci)continue;
+            if(moveCards('tableau',ci,idx,'tableau',di))break;
+          }
+        }
+      }
+    }
+    const wasteSlot=target.closest('#wasteSlot');
+    if(wasteSlot&&G.waste.length>0)tryMoveToFoundation('waste',0,G.waste.length-1);
+    lastTap.el=null;lastTap.time=0;
+    return;
+  }
+  lastTap.el=target;lastTap.time=now;
+},{passive:false});
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+updateCardSize();
+init();
+</script>
+</body>
+</html>

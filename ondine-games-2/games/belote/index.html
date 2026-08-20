@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Belote × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/design-tokens.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">BELOTE</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStatsBelote"></div>
+  <div class="opt-grid">
+    <div class="opt-card sel" id="diffEasy" onclick="setDifficulty('facile')">🌱 Facile</div>
+    <div class="opt-card" id="diffNormal" onclick="setDifficulty('normal')">⚡ Normal</div>
+    <div class="opt-card" id="diffHard" onclick="setDifficulty('difficile')">🔥 Difficile</div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startMatch()">🃏 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showRules()">ⓘ Règles</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="beloteHeader">
+    <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
+    <div id="scoreBelote"></div>
+    <div id="trumpBelote"></div>
+  </div>
+  <div id="statusBelote"></div>
+
+  <div id="biddingBelote" style="display:none;">
+    <button class="ondine-btn ondine-btn-primary" onclick="playerBid(true)">✅ Je prends</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="playerBid(false)">❌ Je passe</button>
+  </div>
+
+  <div id="trickBelote"></div>
+  <div id="handOverBelote" style="display:none;">
+    Manche terminée !
+    <button class="ondine-btn ondine-btn-primary" onclick="nextHand()">Manche suivante</button>
+  </div>
+  <div id="matchOverBelote" style="display:none;"></div>
+
+  <div id="myHandBelote"></div>
+</div>
+
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListBelote"></div>
+</div>
+
+<div class="ondine-modal-overlay hidden" id="modalOverlay"></div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

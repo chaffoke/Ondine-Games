@@ -1,0 +1,22 @@
+/* games/reflexe/styles.css — spécifique au jeu uniquement */
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:12px;}
+#reflexeHomeStats{display:flex;gap:7px;width:100%;max-width:280px;}
+#reflexeLastTry{font-size:11px;color:var(--text2);}
+
+#sg{align-items:center;justify-content:center;text-align:center;padding:20px;gap:16px;}
+#reflexeStatus{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);min-height:26px;}
+#targetZone{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:320px;width:100%;}
+.reflexe-zone{aspect-ratio:1;border-radius:14px;background:var(--glass);border:1.5px solid var(--border);cursor:pointer;transition:all .15s;}
+.reflexe-zone.active{background:var(--cg);border-color:var(--cg);box-shadow:0 0 24px rgba(52,211,153,.6);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+#reflexeAchList{width:100%;display:flex;flex-direction:column;gap:6px;}

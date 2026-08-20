@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Othello × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;
+  --c1:#38bdf8;--c2:#7dd3fc;--c3:#bae6fd;
+  --cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);
+  --text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;
+  --sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:var(--r2);cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-btn-danger{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.35);color:var(--cr);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;max-width:320px;width:100%;box-shadow:var(--sh2);}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── HOME ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(30px,9vw,42px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+/* ── GAME ── */
+#sg{align-items:center;padding:10px;gap:10px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;}
+.turn-badge{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:6px 14px;font-family:'Fredoka One',cursive;font-size:13px;}
+.turn-dot{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 -2px 3px rgba(0,0,0,.35);}
+.turn-dot.black{background:radial-gradient(circle at 35% 30%,#555,#0a0a0a 70%);}
+.turn-dot.white{background:radial-gradient(circle at 35% 30%,#fff,#cbd5e1 70%);}
+.score-row{display:flex;gap:8px;}
+.score-pill{display:flex;align-items:center;gap:5px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:13px;}
+
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:rgba(6,60,40,.5);border:1px solid var(--border2);border-radius:12px;padding:6px;max-width:400px;width:100%;aspect-ratio:1;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4, même cause) */
+@media (min-width:900px){.board{max-width:600px;}}
+.cell{position:relative;background:rgba(10,90,60,.55);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cell.hint::after{content:'';width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.35);}
+.disc{width:84%;height:84%;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.4);transform:scale(0) rotateY(0deg);transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
+.disc.show{transform:scale(1);}
+.disc.black{background:radial-gradient(circle at 35% 28%,#4a4a4a,#0a0a0a 72%);}
+.disc.white{background:radial-gradient(circle at 35% 28%,#fff,#c7d2e0 72%);}
+.disc.flip{animation:flipDisc .4s ease;}
+@keyframes flipDisc{0%{transform:scale(1) rotateY(0);}50%{transform:scale(.75) rotateY(90deg);}100%{transform:scale(1) rotateY(0);}}
+.disc.last-move{box-shadow:0 0 0 3px var(--co),0 2px 5px rgba(0,0,0,.4);}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:400px;}
+
+/* ── RESULT ── */
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:280px;margin:12px 0;}
+
+/* ── STATS ── */
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+</style>
+</head>
+<body>
+
+<div id="toastHost" class="ondine-toast"></div>
+
+<!-- ═══════ HOME ═══════ -->
+<div class="screen" id="sh">
+  <div class="logo">OTHELLO</div>
+  <div class="logo-sub">× Ondine</div>
+
+  <div class="section-title">Mode</div>
+  <div class="opt-grid">
+    <div class="opt-card sel" id="modeSolo" onclick="setMode('solo')"><div class="opt-icon">🤖</div><div class="opt-name">Solo vs IA</div></div>
+    <div class="opt-card" id="mode2p" onclick="setMode('2p')"><div class="opt-icon">👥</div><div class="opt-name">2 Joueurs</div></div>
+  </div>
+
+  <div class="section-title" id="diffTitle">Difficulté</div>
+  <div class="opt-grid" id="diffGrid">
+    <div class="opt-card sel" id="diffEasy" onclick="setDiff('easy')"><div class="opt-icon">🌊</div><div class="opt-name">Facile</div></div>
+    <div class="opt-card" id="diffNormal" onclick="setDiff('normal')"><div class="opt-icon">⚡</div><div class="opt-name">Normal</div></div>
+    <div class="opt-card" id="diffHard" onclick="setDiff('hard')"><div class="opt-icon">🔥</div><div class="opt-name">Difficile</div></div>
+    <div class="opt-card" id="diffExpert" onclick="setDiff('expert')"><div class="opt-icon">💎</div><div class="opt-name">Expert</div></div>
+  </div>
+
+  <div class="hbtns" style="margin-top:8px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">⚫ Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" id="resumeBtn" onclick="resumeGame()" style="display:none;">▶ Reprendre la partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
+  </div>
+
+  <div class="hstats" id="homeStats"></div>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════ GAME ═══════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div class="icon-btn" onclick="confirmLeaveGame()">🏠</div>
+    <div class="turn-badge" id="turnBadge"></div>
+    <div class="icon-btn" id="hintToggle" onclick="toggleHints()">💡</div>
+  </div>
+  <div class="score-row" id="scoreRow"></div>
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+  <div class="game-footer">
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="confirmLeaveGame()">🏠 Accueil</button>
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="confirmNewGame()">🔄 Nouvelle partie</button>
+  </div>
+</div>
+
+<!-- ═══════ RESULT ═══════ -->
+<div class="screen hidden" id="sres">
+  <div class="res-icon" id="resIcon">🏆</div>
+  <div class="res-title" id="resTitle"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="res-grid" id="resGrid"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;">Succès</div>
+    <div class="ach-list" id="achList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// GRID / RULES — validé par tests isolés avant intégration
+// ═══════════════════════════════════════════════════════════════
+const DIRS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+function inBounds(r,c){ return r>=0&&r<8&&c>=0&&c<8; }
+function getFlips(board, r, c, player) {
+  if (board[r][c] !== 0) return [];
+  const opponent = player === 1 ? 2 : 1;
+  const allFlips = [];
+  for (const [dr,dc] of DIRS) {
+    let rr=r+dr, cc=c+dc;
+    const line = [];
+    while (inBounds(rr,cc) && board[rr][cc] === opponent) { line.push([rr,cc]); rr+=dr; cc+=dc; }
+    if (line.length && inBounds(rr,cc) && board[rr][cc] === player) allFlips.push(...line);
+  }
+  return allFlips;
+}
+function isLegalMove(board, r, c, player) { return getFlips(board,r,c,player).length > 0; }
+function getLegalMoves(board, player) {
+  const moves = [];
+  for (let r=0;r<8;r++) for (let c=0;c<8;c++) if (isLegalMove(board,r,c,player)) moves.push([r,c]);
+  return moves;
+}
+function applyMove(board, r, c, player) {
+  const nb = board.map(row=>row.slice());
+  const flips = getFlips(nb, r, c, player);
+  nb[r][c] = player;
+  flips.forEach(([rr,cc]) => { nb[rr][cc] = player; });
+  return { board: nb, flips };
+}
+function initialBoard() {
+  const b = Array.from({length:8},()=>Array(8).fill(0));
+  b[3][3]=2; b[3][4]=1; b[4][3]=1; b[4][4]=2;
+  return b;
+}
+function countPieces(board) {
+  let black=0, white=0;
+  for (const row of board) for (const v of row) { if (v===1) black++; else if (v===2) white++; }
+  return { black, white };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AI — 4 niveaux réellement différents en stratégie ET en force,
+// validés en auto-jeu (Facile<Normal<Difficile<Expert) avant intégration
+// ═══════════════════════════════════════════════════════════════
+const WEIGHTS = [
+  [100,-20,10,5,5,10,-20,100],[-20,-50,-2,-2,-2,-2,-50,-20],
+  [10,-2,-1,-1,-1,-1,-2,10],[5,-2,-1,-1,-1,-1,-2,5],
+  [5,-2,-1,-1,-1,-1,-2,5],[10,-2,-1,-1,-1,-1,-2,10],
+  [-20,-50,-2,-2,-2,-2,-50,-20],[100,-20,10,5,5,10,-20,100],
+];
+const CORNERS = [[0,0],[0,7],[7,0],[7,7]];
+function positionScore(board, player) {
+  const opp = player === 1 ? 2 : 1;
+  let score = 0;
+  for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
+    if (board[r][c] === player) score += WEIGHTS[r][c];
+    else if (board[r][c] === opp) score -= WEIGHTS[r][c];
+  }
+  return score;
+}
+function mobilityScore(board, player) {
+  const opp = player === 1 ? 2 : 1;
+  return getLegalMoves(board, player).length - getLegalMoves(board, opp).length;
+}
+function heuristic(board, player) { return positionScore(board, player) + mobilityScore(board, player) * 15; }
+
+function aiRandomMove(board, player) {
+  const moves = getLegalMoves(board, player);
+  return moves.length ? moves[Math.floor(Math.random() * moves.length)] : null;
+}
+function aiGreedyFlipMove(board, player) {
+  const moves = getLegalMoves(board, player);
+  if (!moves.length) return null;
+  let best = moves[0], bestFlips = -1;
+  moves.forEach(([r,c]) => { const n = getFlips(board,r,c,player).length; if (n > bestFlips) { bestFlips = n; best = [r,c]; } });
+  return best;
+}
+function aiHeuristicMove(board, player) {
+  const moves = getLegalMoves(board, player);
+  if (!moves.length) return null;
+  const cornerMove = moves.find(([r,c]) => CORNERS.some(([cr,cc]) => cr===r && cc===c));
+  if (cornerMove) return cornerMove;
+  const opponent = player === 1 ? 2 : 1;
+  let best = moves[0], bestScore = -Infinity;
+  moves.forEach(([r,c]) => {
+    const { board: next } = applyMove(board, r, c, player);
+    let s = heuristic(next, player);
+    const oppNext = getLegalMoves(next, opponent);
+    if (oppNext.some(([or,oc]) => CORNERS.some(([cr,cc]) => cr===or && cc===oc))) s -= 300;
+    if (s > bestScore) { bestScore = s; best = [r,c]; }
+  });
+  return best;
+}
+function minimax(board, player, depth, alpha, beta, maximizing, forPlayer) {
+  const moves = getLegalMoves(board, player);
+  if (depth === 0 || moves.length === 0) {
+    if (moves.length === 0) {
+      const oppMoves = getLegalMoves(board, player===1?2:1);
+      if (oppMoves.length === 0) {
+        const c = countPieces(board);
+        const diff = forPlayer===1 ? c.black-c.white : c.white-c.black;
+        return diff * 1000;
+      }
+    }
+    return heuristic(board, forPlayer);
+  }
+  const nextPlayer = player === 1 ? 2 : 1;
+  if (maximizing) {
+    let best = -Infinity;
+    for (const [r,c] of moves) {
+      const { board: next } = applyMove(board, r, c, player);
+      const val = minimax(next, nextPlayer, depth-1, alpha, beta, nextPlayer===forPlayer, forPlayer);
+      best = Math.max(best, val); alpha = Math.max(alpha, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const [r,c] of moves) {
+      const { board: next } = applyMove(board, r, c, player);
+      const val = minimax(next, nextPlayer, depth-1, alpha, beta, nextPlayer===forPlayer, forPlayer);
+      best = Math.min(best, val); beta = Math.min(beta, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+function aiExpertMove(board, player) {
+  const moves = getLegalMoves(board, player);
+  if (!moves.length) return null;
+  let best = moves[0], bestScore = -Infinity;
+  for (const [r,c] of moves) {
+    const { board: next } = applyMove(board, r, c, player);
+    const score = minimax(next, player===1?2:1, 4, -Infinity, Infinity, false, player);
+    if (score > bestScore) { bestScore = score; best = [r,c]; }
+  }
+  return best;
+}
+const AI_STRATEGIES = { easy: aiRandomMove, normal: aiGreedyFlipMove, hard: aiHeuristicMove, expert: aiExpertMove };
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE — autonome, pas de service partagé (batch standalone)
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'othello_ondine_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats: {}, achievements: [], save: null }, loadStore());
+function statGet(k, d=0) { return k in STORE.stats ? STORE.stats[k] : d; }
+function statInc(k, n=1) { STORE.stats[k] = (STORE.stats[k]||0)+n; saveStore(STORE); return STORE.stats[k]; }
+function statSetMax(k, v) { if (!(k in STORE.stats) || v > STORE.stats[k]) { STORE.stats[k] = v; saveStore(STORE); } }
+function achUnlock(id, name, icon) {
+  if (STORE.achievements.includes(id)) return;
+  STORE.achievements.push(id); saveStore(STORE);
+  playSound('unlock'); toast(`${icon} Succès : ${name}`);
+}
+const ACHIEVEMENTS = [
+  { id:'first_win', name:'Première Victoire', desc:'Gagner sa première partie', icon:'🎯' },
+  { id:'corner_master', name:'Coin Stratégique', desc:'Capturer les 4 coins dans une partie', icon:'📐' },
+  { id:'domination', name:'Domination', desc:'Gagner avec 50 pions ou plus', icon:'👑' },
+  { id:'invincible', name:'Invincible', desc:'Gagner sans jamais passer son tour', icon:'🛡️' },
+  { id:'beat_expert', name:'Battre Expert', desc:"Battre l'IA en difficulté Expert", icon:'💎' },
+  { id:'streak_5', name:'Série de 5', desc:'5 victoires consécutives', icon:'🔥' },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST / SOUND / HAPTIC — autonomes
+// ═══════════════════════════════════════════════════════════════
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toastHost');
+  t.textContent = msg; t.classList.remove('ondine-toast-show'); void t.offsetWidth; t.classList.add('ondine-toast-show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('ondine-toast-show'), 2000);
+}
+let audioCtx = null;
+function tone(freq, dur, type='sine', vol=.12) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+dur);
+    osc.start(); osc.stop(audioCtx.currentTime+dur);
+  } catch(e) {}
+}
+function playSound(name) {
+  const P = {
+    place: () => tone(500,.08,'sine',.14),
+    flip: () => tone(700,.05,'triangle',.08),
+    win: () => [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.16),i*100)),
+    lose: () => [392,330,262].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.12),i*120)),
+    error: () => tone(220,.15,'sawtooth',.1),
+    unlock: () => [660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,.14,'sine',.14),i*80)),
+  };
+  (P[name]||(()=>{}))();
+}
+function vibrate(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let CONFIG = { mode: 'solo', difficulty: 'easy' };
+let G = null;
+let hintsOn = true;
+
+function setMode(m) {
+  CONFIG.mode = m;
+  document.getElementById('modeSolo').classList.toggle('sel', m==='solo');
+  document.getElementById('mode2p').classList.toggle('sel', m==='2p');
+  document.getElementById('diffTitle').style.display = m==='solo' ? '' : 'none';
+  document.getElementById('diffGrid').style.display = m==='solo' ? '' : 'none';
+}
+function setDiff(d) {
+  CONFIG.difficulty = d;
+  ['Easy','Normal','Hard','Expert'].forEach(k => document.getElementById('diff'+k).classList.toggle('sel', k.toLowerCase()===d));
+}
+
+function newGameState() {
+  return { board: initialBoard(), current: 1, over: false, winner: null, lastMove: null, passedLastTurn: false, everPassed: false, moveCount: 0 };
+}
+
+function startGame() {
+  G = newGameState();
+  STORE.save = null; saveStore(STORE);
+  showScreen('sg');
+  renderAll();
+  playSound('place');
+  maybeAiTurn();
+}
+function resumeGame() {
+  if (!STORE.save) { toast('Aucune partie sauvegardée'); return; }
+  G = STORE.save.G; CONFIG = STORE.save.CONFIG;
+  showScreen('sg');
+  renderAll();
+  toast('▶ Partie reprise');
+  maybeAiTurn();
+}
+function persistSave() { STORE.save = { G, CONFIG }; saveStore(STORE); }
+
+function goHome() { updateHomeStats(); showScreen('sh'); document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none'; }
+
+async function confirmLeaveGame() {
+  if (G && !G.over) {
+    const ok = await confirmDialog('Quitter la partie ?', 'Ta partie sera sauvegardée, tu pourras la reprendre plus tard.', 'Quitter', 'Continuer');
+    if (!ok) return;
+    persistSave();
+  }
+  goHome();
+}
+async function confirmNewGame() {
+  const ok = await confirmDialog('Nouvelle partie ?', 'La partie en cours sera abandonnée.', 'Nouvelle partie', 'Annuler');
+  if (ok) startGame();
+}
+
+function toggleHints() { hintsOn = !hintsOn; document.getElementById('hintToggle').style.opacity = hintsOn ? '1' : '.4'; renderBoard(); }
+
+// ═══════════════════════════════════════════════════════════════
+// GAME FLOW
+// ═══════════════════════════════════════════════════════════════
+function isHumanTurn() { return CONFIG.mode === '2p' || G.current === 1; }
+
+function playAt(r, c) {
+  if (!G || G.over) return;
+  if (CONFIG.mode === 'solo' && G.current === 2) return; // au tour de l'IA
+  attemptMove(r, c);
+}
+function attemptMove(r, c) {
+  if (!isLegalMove(G.board, r, c, G.current)) { playSound('error'); return; }
+  const { board: next, flips } = applyMove(G.board, r, c, G.current);
+  G.board = next;
+  G.lastMove = { r, c, player: G.current };
+  G.moveCount++;
+  G.passedLastTurn = false;
+  playSound('place'); vibrate(15);
+  renderBoardWithFlip(r, c, flips);
+
+  advanceTurn();
+}
+
+function advanceTurn() {
+  const next = G.current === 1 ? 2 : 1;
+  const nextMoves = getLegalMoves(G.board, next);
+  if (nextMoves.length === 0) {
+    const afterNext = next === 1 ? 2 : 1;
+    const afterMoves = getLegalMoves(G.board, afterNext);
+    if (afterMoves.length === 0) { endGame(); return; }
+    // passe automatique
+    G.everPassed = true;
+    toast(`${next===1?'Noir':'Blanc'} n'a aucun coup possible — passe`);
+    G.current = afterNext;
+  } else {
+    G.current = next;
+  }
+  renderHud();
+  persistSave();
+  maybeAiTurn();
+}
+
+function maybeAiTurn() {
+  if (!G || G.over) return;
+  if (CONFIG.mode !== 'solo' || G.current !== 2) return;
+  renderBoard();
+  setTimeout(() => {
+    const strategy = AI_STRATEGIES[CONFIG.difficulty];
+    const move = strategy(G.board, 2);
+    if (!move) { advanceTurn(); return; }
+    const [r,c] = move;
+    const { board: next, flips } = applyMove(G.board, r, c, 2);
+    G.board = next;
+    G.lastMove = { r, c, player: 2 };
+    G.moveCount++;
+    playSound('place');
+    renderBoardWithFlip(r, c, flips);
+    advanceTurn();
+  }, 500);
+}
+
+function endGame() {
+  G.over = true;
+  const { black, white } = countPieces(G.board);
+  G.winner = black > white ? 1 : (white > black ? 2 : 0);
+  STORE.save = null; saveStore(STORE);
+  statInc('games');
+
+  const cornersOwned = CORNERS.filter(([r,c]) => G.board[r][c] === 1).length;
+  if (CONFIG.mode === 'solo') {
+    if (G.winner === 1) {
+      statInc('wins');
+      const streak = statInc('streak');
+      statSetMax('bestDiffBeaten', ['easy','normal','hard','expert'].indexOf(CONFIG.difficulty));
+      playSound('win'); vibrate([20,40,20]);
+      achUnlock('first_win','Première Victoire','🎯');
+      if (black >= 50) achUnlock('domination','Domination','👑');
+      if (cornersOwned === 4) achUnlock('corner_master','Coin Stratégique','📐');
+      if (!G.everPassed) achUnlock('invincible','Invincible','🛡️');
+      if (CONFIG.difficulty === 'expert') achUnlock('beat_expert','Battre Expert','💎');
+      if (streak >= 5) achUnlock('streak_5','Série de 5','🔥');
+    } else if (G.winner === 2) {
+      statInc('losses'); STORE.stats.streak = 0; saveStore(STORE);
+      playSound('lose');
+    } else {
+      statInc('draws'); STORE.stats.streak = 0; saveStore(STORE);
+    }
+  } else {
+    statInc('games2p');
+  }
+  setTimeout(showResult, 500);
+}
+
+function showResult() {
+  const { black, white } = countPieces(G.board);
+  const icon = document.getElementById('resIcon'), title = document.getElementById('resTitle'), sub = document.getElementById('resSub');
+  if (G.winner === 0) { icon.textContent='🤝'; title.textContent='Égalité !'; sub.textContent=`${black} — ${white}`; }
+  else if (CONFIG.mode === 'solo') {
+    icon.textContent = G.winner===1 ? '🏆' : '🤖';
+    title.textContent = G.winner===1 ? 'Victoire !' : "L'IA gagne...";
+    sub.textContent = `${black} — ${white}`;
+  } else {
+    icon.textContent='🏆'; title.textContent=(G.winner===1?'Noir':'Blanc')+' gagne !'; sub.textContent=`${black} — ${white}`;
+  }
+  const grid = document.getElementById('resGrid'); grid.innerHTML = '';
+  [{v:black,l:'Noir'},{v:white,l:'Blanc'}].forEach(s => {
+    const el = document.createElement('div'); el.className='statCard';
+    el.innerHTML = `<div class="v">${s.v}</div><div class="l">${s.l}</div>`;
+    grid.appendChild(el);
+  });
+  document.getElementById('sres').classList.remove('hidden'); /* audit UX fin de partie : overlay sans masquer le plateau/la grille en dessous */
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderAll() { renderBoard(); renderHud(); }
+
+function renderHud() {
+  const badge = document.getElementById('turnBadge');
+  const isAiThinking = CONFIG.mode==='solo' && G.current===2;
+  badge.innerHTML = `<span class="turn-dot ${G.current===1?'black':'white'}"></span>${isAiThinking ? "L'IA réfléchit…" : (CONFIG.mode==='solo' ? (G.current===1?'À toi':'IA') : (G.current===1?'Noir':'Blanc')+' joue')}`;
+  const { black, white } = countPieces(G.board);
+  document.getElementById('scoreRow').innerHTML = `
+    <div class="score-pill"><span class="turn-dot black"></span>${black}</div>
+    <div class="score-pill"><span class="turn-dot white"></span>${white}</div>`;
+}
+
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  const legalMoves = (!G.over && isHumanTurn()) ? getLegalMoves(G.board, G.current) : [];
+  for (let r=0;r<8;r++) for (let c=0;c<8;c++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const isHint = hintsOn && legalMoves.some(([mr,mc])=>mr===r&&mc===c);
+    if (isHint) cell.classList.add('hint');
+    if (G.board[r][c] !== 0) {
+      const disc = document.createElement('div');
+      disc.className = 'disc show ' + (G.board[r][c]===1?'black':'white');
+      if (G.lastMove && G.lastMove.r===r && G.lastMove.c===c) disc.classList.add('last-move');
+      cell.appendChild(disc);
+    }
+    cell.onclick = () => playAt(r, c);
+    board.appendChild(cell);
+  }
+}
+
+function renderBoardWithFlip(r, c, flips) {
+  renderBoard();
+  const cells = document.querySelectorAll('.board .cell');
+  flips.forEach(([fr,fc]) => {
+    const idx = fr*8+fc;
+    const disc = cells[idx] && cells[idx].querySelector('.disc');
+    if (disc) disc.classList.add('flip');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION / STATS SCREEN
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id==='sstats') renderStatsScreen();
+}
+function updateHomeStats() {
+  const host = document.getElementById('homeStats'); host.innerHTML = '';
+  [{v:statGet('games'),l:'Parties',i:'🎮'},{v:statGet('wins'),l:'Victoires',i:'🏆'},{v:statGet('streak'),l:'Série',i:'🔥'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.style.flex='1';
+      el.innerHTML = `<div class="v">${s.v}</div><div class="l">${s.i} ${s.l}</div>`; host.appendChild(el); });
+}
+function renderStatsScreen() {
+  const grid = document.getElementById('statsGrid'); grid.innerHTML = '';
+  const winRate = statGet('games') ? Math.round(100*statGet('wins')/statGet('games')) : 0;
+  [{v:statGet('games'),l:'Parties'},{v:statGet('wins'),l:'Victoires'},{v:statGet('losses'),l:'Défaites'},
+   {v:statGet('draws'),l:'Égalités'},{v:statGet('streak'),l:'Série actuelle'},{v:winRate+'%',l:'Ratio victoire'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; grid.appendChild(el); });
+  const list = document.getElementById('achList'); list.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = STORE.achievements.includes(a.id);
+    const el = document.createElement('div'); el.className='achCard'+(unlocked?' unlocked':'');
+    el.innerHTML = `<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`;
+    list.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONFIRM DIALOG (autonome, pas de service partagé)
+// ═══════════════════════════════════════════════════════════════
+function confirmDialog(title, message, confirmLabel, cancelLabel) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.innerHTML = `
+      <div class="modal-box">
+        <div class="modal-title">${title}</div>
+        <div class="modal-body">${message}</div>
+        <div class="modal-actions">
+          <button class="ondine-btn ondine-btn-primary" id="mdConfirm">${confirmLabel}</button>
+          <button class="ondine-btn ondine-btn-secondary" id="mdCancel">${cancelLabel}</button>
+        </div>
+      </div>`;
+    overlay.classList.remove('hidden');
+    document.getElementById('mdConfirm').onclick = () => { overlay.classList.add('hidden'); resolve(true); };
+    document.getElementById('mdCancel').onclick = () => { overlay.classList.add('hidden'); resolve(false); };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+updateHomeStats();
+document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none';
+window.setMode=setMode; window.setDiff=setDiff; window.startGame=startGame; window.resumeGame=resumeGame;
+window.goHome=goHome; window.showScreen=showScreen; window.confirmLeaveGame=confirmLeaveGame;
+window.confirmNewGame=confirmNewGame; window.toggleHints=toggleHints; window.playAt=playAt;
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;}
+#homeStatsNav{display:flex;gap:7px;width:100%;max-width:280px;}
+.diffgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:300px;}
+.diffgrid .opt{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;font-size:11px;font-weight:800;}
+.diffgrid .opt.sel{border-color:var(--c1);background:var(--glass3);}
+
+#splace{align-items:center;padding:14px;gap:10px;}
+#placeLabel{font-family:'Fredoka One',cursive;font-size:14px;color:var(--c2);text-align:center;}
+
+#sg{align-items:center;padding:10px;gap:8px;}
+.navboards{display:flex;flex-direction:column;gap:10px;width:100%;align-items:center;}
+.navboard-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:2px;}
+.navgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;width:100%;max-width:280px;aspect-ratio:1;}
+.navcell{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:3px;cursor:default;}
+.navcell.ship{background:rgba(56,189,248,.35);}
+.navcell.hit{background:var(--cr);}
+.navcell.miss{background:rgba(255,255,255,.15);}
+#enemyGrid .navcell{cursor:pointer;}
+#enemyGrid .navcell:active{transform:scale(.9);}
+
+#turnLabel{font-family:'Fredoka One',cursive;font-size:14px;color:var(--c2);}
+#overBanner{font-family:'Fredoka One',cursive;font-size:18px;color:var(--co);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+#achListNav{width:100%;display:flex;flex-direction:column;gap:6px;}

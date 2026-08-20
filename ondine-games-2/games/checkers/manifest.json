@@ -1,0 +1,10 @@
+{
+  "id": "checkers",
+  "name": "Dames Internationales",
+  "icon": "⚫",
+  "category": "plateau",
+  "description": "Plateau 10×10, captures obligatoires avec règle de majorité, dames volantes. Testé sur 300 parties simulées.",
+  "minPlayers": 1,
+  "maxPlayers": 2,
+  "version": "1.0.0"
+}

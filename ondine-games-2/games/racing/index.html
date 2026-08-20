@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Ondine Racing</title>
+<meta name="theme-color" content="#0a0620">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/design-tokens.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<!-- ACCUEIL -->
+<div class="screen" id="sh">
+  <div class="racing-hud-top"><div id="homeCredits">💰 0</div><div id="homeLevel">Niveau 1</div></div>
+  <div class="racing-mascot">🐀🕶️</div>
+  <div class="ondine-logo">ONDINE RACING</div>
+  <div class="ondine-logo-sub">🏎️ Course arcade</div>
+  <button class="ondine-btn ondine-btn-primary" onclick="goSelect()">🏁 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="goGarage()">🔧 Garage</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<!-- SÉLECTION DE COURSE -->
+<div class="screen hidden" id="sselect">
+  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">←</div>
+  <div id="trackList"></div>
+  <div class="diff-row">
+    <div class="diff-opt" id="diff_easy" onclick="selectDifficulty('easy')">🌱 Facile</div>
+    <div class="diff-opt sel" id="diff_normal" onclick="selectDifficulty('normal')">⚡ Normal</div>
+    <div class="diff-opt" id="diff_hard" onclick="selectDifficulty('hard')">🔥 Difficile</div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" id="launchBtn" onclick="startRace()">🏁 Lancer la course</button>
+</div>
+
+<!-- GARAGE -->
+<div class="screen hidden" id="sgarage">
+  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">←</div>
+  <div id="garageCredits">💰 0</div>
+  <div id="carList"></div>
+  <div id="upgradeList"></div>
+</div>
+
+<!-- COURSE -->
+<div class="screen hidden" id="sg">
+  <div class="race-hud">
+    <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
+    <div class="race-hud-item">Pos. <span id="hudPos">1 / 6</span></div>
+    <div class="race-hud-item">Tour <span id="hudLap">1 / 3</span></div>
+  </div>
+  <canvas id="raceCanvas" width="420" height="420"></canvas>
+  <div class="boost-row">
+    <div class="boost-gauge"><div id="boostFill" style="width:100%;"></div></div>
+  </div>
+  <div id="boostBtn" ontouchstart="onBoostPress()" onclick="onBoostPress()">⚡<span>BOOST</span></div>
+</div>
+
+<!-- RÉSULTAT (overlay — le circuit #sg reste visible en dessous) -->
+<div class="screen hidden" id="sresult">
+  <div id="resultIcon">🏆</div>
+  <div id="resultTitle">VICTOIRE !</div>
+  <div class="result-stats">
+    <div class="result-stat"><div class="rv" id="resultPos">1/6</div><div class="rl">Position</div></div>
+    <div class="result-stat"><div class="rv" id="resultTime">0.0s</div><div class="rl">Temps</div></div>
+    <div class="result-stat"><div class="rv" id="resultCredits">+0</div><div class="rl">Crédits</div></div>
+    <div class="result-stat"><div class="rv" id="resultXp">+0</div><div class="rl">XP</div></div>
+  </div>
+  <div class="result-btns">
+    <button class="ondine-btn ondine-btn-primary" onclick="replayRace()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="nextRace()">🏁 Course suivante</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="resultToGarage()">🔧 Garage</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="resultToHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- STATS / SUCCÈS -->
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListRacing"></div>
+</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

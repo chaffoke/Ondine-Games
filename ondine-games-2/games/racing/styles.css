@@ -1,0 +1,68 @@
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── Accueil ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px;background:radial-gradient(ellipse at 50% 20%,#2a1550,#0a0620 70%);}
+.racing-mascot{font-size:52px;filter:drop-shadow(0 0 20px rgba(192,132,252,.5));}
+.racing-hud-top{display:flex;gap:8px;}
+#homeCredits,#homeLevel{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-family:'Fredoka One',cursive;font-size:13px;}
+
+/* ── Sélection de course ── */
+#sselect{align-items:center;padding:16px;gap:10px;overflow-y:auto;}
+#trackList{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px;}
+.track-card{display:flex;align-items:center;gap:12px;background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:10px 14px;cursor:pointer;}
+.track-card.sel{border-color:var(--c1);background:var(--glass3);}
+.track-card.locked{opacity:.45;cursor:default;}
+.tc-icon{font-size:28px;}
+.tc-name{font-weight:800;font-size:14px;}
+.tc-sub{font-size:10px;color:var(--text2);}
+.diff-row{display:flex;gap:8px;width:100%;max-width:420px;}
+.diff-opt{flex:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px;text-align:center;cursor:pointer;font-weight:800;font-size:12px;}
+.diff-opt.sel{border-color:var(--co);background:rgba(251,191,36,.08);}
+
+/* ── Garage ── */
+#sgarage{align-items:center;padding:16px;gap:10px;overflow-y:auto;}
+#carList{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:420px;}
+.car-card{background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:10px;text-align:center;cursor:pointer;}
+.car-card.sel{border-color:var(--c1);background:var(--glass3);}
+.cc-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 6px;}
+.cc-name{font-weight:800;font-size:12px;}
+.cc-stats{font-size:9px;color:var(--text2);margin-top:2px;}
+#upgradeList{width:100%;max-width:420px;display:flex;flex-direction:column;gap:6px;}
+.upg-card{display:flex;align-items:center;justify-content:space-between;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 12px;}
+.upg-name{font-weight:800;font-size:12px;}
+.upg-sub{font-size:9px;color:var(--text2);}
+.upg-btn{padding:8px 12px !important;font-size:11px !important;}
+
+/* ── Course ── */
+#sg{padding:8px;gap:6px;align-items:center;}
+.race-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;}
+.race-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
+#raceCanvas{width:100%;max-width:420px;aspect-ratio:1;border-radius:16px;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4/Échecs/etc., même cause :
+   max-width jamais adapté au-delà du mobile). Additif. */
+@media (min-width:900px){#raceCanvas{max-width:640px;}}
+.boost-row{display:flex;align-items:center;gap:10px;width:100%;max-width:420px;}
+.boost-gauge{flex:1;height:14px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+#boostFill{height:100%;background:linear-gradient(90deg,#38bdf8,#c084fc);transition:width .1s linear;}
+#boostBtn{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.06);border:3px solid var(--border);color:var(--text2);font-family:'Fredoka One',cursive;font-size:13px;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:all .15s;}
+#boostBtn.ready{border-color:var(--co);color:var(--co);box-shadow:0 0 20px rgba(251,191,36,.4);animation:boostPulse 1s ease infinite;}
+#boostBtn.active{border-color:#38bdf8;color:#38bdf8;box-shadow:0 0 30px rgba(56,189,248,.6);transform:scale(1.05);}
+@keyframes boostPulse{0%,100%{box-shadow:0 0 12px rgba(251,191,36,.3);}50%{box-shadow:0 0 26px rgba(251,191,36,.6);}}
+
+/* ── Résultat (overlay, circuit reste visible derrière) ── */
+#sresult{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+#resultIcon{font-size:56px;}
+#resultTitle{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);}
+.result-stats{display:flex;gap:8px;width:100%;max-width:320px;margin:8px 0;}
+.result-stat{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 6px;}
+.result-stat .rv{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c1);}
+.result-stat .rl{font-size:8px;color:var(--text2);text-transform:uppercase;}
+.result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
+.result-btns button{flex:1;min-width:130px;}

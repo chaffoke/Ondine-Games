@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Bataille Navale × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/design-tokens.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">BATAILLE NAVALE</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStatsNav"></div>
+  <div class="diffgrid">
+    <div class="opt" id="diffEasy" onclick="setDifficulty('easy')">🌱 Facile</div>
+    <div class="opt sel" id="diffNormal" onclick="setDifficulty('normal')">⚡ Normal</div>
+    <div class="opt" id="diffHard" onclick="setDifficulty('difficile')">🔥 Difficile</div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🚢 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<div class="screen hidden" id="splace">
+  <div id="placeLabel"></div>
+  <div class="navgrid" id="placeGrid"></div>
+  <div style="display:flex;gap:8px;">
+    <button class="ondine-btn ondine-btn-secondary" onclick="toggleOrientation()">🔄 Orientation</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="autoPlacePlayer()">🎲 Auto</button>
+  </div>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">🏠</div>
+  <div id="turnLabel"></div>
+  <div id="overBanner" style="display:none;"></div>
+  <span id="shotsCount"></span>
+  <div class="navboards">
+    <div><div class="navboard-label">Flotte adverse</div><div class="navgrid" id="enemyGrid"></div></div>
+    <div><div class="navboard-label">Ta flotte</div><div class="navgrid" id="myGrid"></div></div>
+  </div>
+</div>
+
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListNav"></div>
+</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

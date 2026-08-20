@@ -1,0 +1,10 @@
+{
+  "id": "bataille-navale",
+  "name": "Bataille Navale",
+  "icon": "🚢",
+  "category": "reflexion",
+  "description": "Coule la flotte adverse. IA en 3 niveaux, sans triche — testée sur 1500 parties simulées.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}

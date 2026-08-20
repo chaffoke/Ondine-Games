@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Puzzle Mosaïque</title>
+<meta name="theme-color" content="#0a0620">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/design-tokens.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<!-- ACCUEIL -->
+<div class="screen" id="sh">
+  <div class="pc-mascot">🧩</div>
+  <div class="ondine-logo">PUZZLE MOSAÏQUE</div>
+  <div class="ondine-logo-sub">Sudoku irrégulier 8×8</div>
+  <div id="homeStatsPuzzleMosaique"></div>
+  <div class="char-picker-label">Choisis ton personnage</div>
+  <div id="characterPicker"></div>
+  <div class="diff-row">
+    <div class="diff-card sel" data-diff="facile" onclick="selectDifficulty('facile')"><div class="dc-name">🌱 Facile</div><div class="dc-clues">34-38 indices</div></div>
+    <div class="diff-card" data-diff="normal" onclick="selectDifficulty('normal')"><div class="dc-name">⚡ Normal</div><div class="dc-clues">28-32 indices</div></div>
+    <div class="diff-card" data-diff="difficile" onclick="selectDifficulty('difficile')"><div class="dc-name">🔥 Difficile</div><div class="dc-clues">24-27 indices</div></div>
+    <div class="diff-card" data-diff="expert" onclick="selectDifficulty('expert')"><div class="dc-name">💀 Expert</div><div class="dc-clues">20-23 indices</div></div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startNewPuzzle()">🧩 Nouveau puzzle</button>
+  <button class="ondine-btn ondine-btn-secondary" id="resumeBtnPC" onclick="resumePuzzle()" style="display:none;">↩️ Reprendre</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<!-- JEU -->
+<div class="screen hidden" id="sg">
+  <div class="pc-hud">
+    <div class="ondine-icon-btn" onclick="confirmQuit()">🏠</div>
+    <div class="pc-hud-item">⏱ <span id="gameTimer">0:00</span></div>
+    <div class="pc-hud-item">💡 <span id="hintsUsedLabel">0</span></div>
+    <div class="pc-hud-item" id="diffLabel">normal</div>
+  </div>
+  <div id="puzzleGrid"></div>
+  <div id="catPalette"></div>
+  <div class="pc-actions">
+    <button class="ondine-btn ondine-btn-secondary" onclick="useHint()">💡 Indice</button>
+  </div>
+  <div id="genOverlay"><div class="spin">🐾</div><div>Génération du puzzle…</div></div>
+</div>
+
+<!-- RÉSULTAT (overlay — la grille #sg reste visible en dessous) -->
+<div class="screen hidden" id="sresult">
+  <div id="resultIcon">🏆</div>
+  <div id="resultTitle">PUZZLE RÉSOLU !</div>
+  <div class="result-stats">
+    <div class="result-stat"><div class="rv" id="resultTime">0:00</div><div class="rl">Temps</div></div>
+    <div class="result-stat"><div class="rv" id="resultHints">0</div><div class="rl">Indices</div></div>
+    <div class="result-stat"><div class="rv" id="resultDiff">normal</div><div class="rl">Difficulté</div></div>
+  </div>
+  <div class="result-btns">
+    <button class="ondine-btn ondine-btn-primary" onclick="nextPuzzle()">🧩 Puzzle suivant</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="replaySame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="resultToHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- STATS / SUCCÈS -->
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListPC"></div>
+</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

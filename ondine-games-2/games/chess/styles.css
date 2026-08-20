@@ -1,0 +1,29 @@
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;}
+#homeStatsChess{display:flex;gap:7px;width:100%;max-width:300px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:300px;}
+.opt-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:10px 6px;cursor:pointer;text-align:center;font-size:12px;font-weight:800;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+
+#sg{align-items:center;padding:10px;gap:8px;}
+#chessStatus{font-family:'Fredoka One',cursive;font-size:14px;color:var(--c2);}
+
+#chessBoard{display:grid;grid-template-columns:repeat(8,1fr);width:100%;max-width:340px;aspect-ratio:1;border-radius:8px;overflow:hidden;border:2px solid var(--border2);}
+/* Polish desktop (même correctif que Puissance 4/Othello/Dames/Démineur,
+   même cause : max-width pensé uniquement pour mobile). Additif. */
+@media (min-width:900px){#chessBoard{max-width:560px;}}
+.chesscell{display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;user-select:none;}
+.chesscell.light{background:#ebd9b4;}
+.chesscell.dark{background:#8a6642;}
+.chesscell.selected{background:#7fc9e8 !important;}
+.chesscell.target{box-shadow:inset 0 0 0 3px rgba(52,211,153,.8);}
+.chesscell.check{background:#e57373 !important;}

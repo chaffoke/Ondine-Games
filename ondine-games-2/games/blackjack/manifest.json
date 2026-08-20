@@ -1,0 +1,10 @@
+{
+  "id": "blackjack",
+  "name": "Blackjack",
+  "icon": "🃏",
+  "category": "cartes",
+  "description": "21 classique. Sabot de 4 jeux, croupier s'arrête à 17. Monnaie 100% virtuelle. Testé sur 5000 manches.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}

@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Belote × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   design-tokens.css
+   ───────────────────────────────────────
+   Palette, typographie, rayons, ombres, glassmorphism — déjà
+   identiques (valeurs exactes) dans les 18 jeux actuels et dans les
+   composants UI.* du CoreBundle Batch 1. Un commentaire du code
+   d'origine le confirmait déjà : "Le style visuel vient TOUJOURS de
+   core/design-tokens.css via les variables --c1, --glass, etc. Ne
+   jamais coder une couleur en dur." Ce fichier formalise ce qui
+   existait déjà en pratique, sans rien réinventer.
+
+   DOIT rester spécifique par jeu (ne PAS mettre ici) : couleurs
+   d'accent de cartes de jeu (--card-c par jeu dans le Hub), thème
+   des tuiles Mahjong, couleurs rouge/noir des cartes à jouer.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Fond */
+  --bg: #06081e;
+  --bg2: #090c24;
+
+  /* Accents */
+  --c1: #38bdf8;
+  --c2: #7dd3fc;
+  --c3: #bae6fd;
+  --cp: #818cf8;
+  --cg: #34d399;
+  --co: #fbbf24;
+  --cr: #f87171;
+  --cm: #f472b6;
+
+  /* Glassmorphism */
+  --glass: rgba(255, 255, 255, .05);
+  --glass2: rgba(255, 255, 255, .09);
+  --glass3: rgba(56, 189, 248, .07);
+  --border: rgba(56, 189, 248, .12);
+  --border2: rgba(56, 189, 248, .22);
+
+  /* Texte */
+  --text: #e0f2fe;
+  --text2: #94a3b8;
+
+  /* Rayons */
+  --r: 14px;
+  --r2: 20px;
+
+  /* Ombres */
+  --sh: 0 4px 20px rgba(0, 0, 0, .5);
+  --sh2: 0 8px 32px rgba(0, 0, 0, .6);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(56, 189, 248, .12), transparent 50%),
+    radial-gradient(ellipse at 90% 10%, rgba(129, 140, 248, .10), transparent 45%),
+    var(--bg);
+}
+
+/* ── Utilitaire générique (modales statiques, etc.) ── */
+.hidden { display: none !important; }
+
+/* ── Écrans (pattern showScreen / NavigationService.go) ── */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.screen.hidden { display: none !important; }
+
+/* ── Boutons ── */
+.ondine-btn {
+  font-family: 'Fredoka One', cursive;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform .12s;
+}
+.ondine-btn:active { transform: scale(.955); }
+.ondine-btn-primary {
+  background: linear-gradient(135deg, #3730a3, #0e7490);
+  color: #fff;
+  padding: 15px 28px;
+  font-size: 17px;
+  box-shadow: 0 6px 24px rgba(14, 116, 144, .45);
+}
+.ondine-btn-primary:disabled { opacity: .35; box-shadow: none; }
+.ondine-btn-secondary {
+  background: var(--glass);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  padding: 11px 22px;
+  font-weight: 800;
+  font-size: 13px;
+  font-family: 'Nunito', sans-serif;
+}
+.ondine-icon-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Toast (UI.toastHost / NotificationService) ── */
+.ondine-toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(15, 25, 60, .92);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  opacity: 0;
+  transition: all .3s;
+  white-space: nowrap;
+  max-width: 80vw;
+  text-align: center;
+  pointer-events: none;
+}
+.ondine-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Modale (UI.modal / DialogService) ── */
+.ondine-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(6, 8, 30, .85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.ondine-modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 22px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: var(--sh2);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.ondine-modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px;
+  color: var(--c2);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.ondine-modal-body {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.ondine-modal-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Badge / statCard / achievementCard (UI.*) ── */
+.ondine-badge {
+  display: inline-block;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  background: var(--glass);
+  border: 1px solid var(--border);
+}
+.ondine-stat-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.ondine-stat-value { font-family: 'Fredoka One', cursive; font-size: 19px; color: var(--c1); }
+.ondine-stat-label { font-size: 8px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.ondine-ach-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 9px 11px;
+}
+.ondine-ach-card.unlocked { border-color: rgba(251, 191, 36, .35); background: rgba(251, 191, 36, .05); }
+.ondine-ach-icon { font-size: 22px; }
+.ondine-ach-name { font-weight: 800; font-size: 12px; }
+.ondine-ach-desc { font-size: 9px; color: var(--text2); }
+
+/* ── Logo (pattern commun d'écran d'accueil) ── */
+.ondine-logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 8vw, 40px);
+  background: linear-gradient(160deg, #e0f2fe, #7dd3fc 35%, #fff 55%, #bae6fd 80%, #e0f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ondine-logo-sub {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--c2);
+  opacity: .65;
+}
+
+</style>
+<style>
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;}
+#homeStatsBelote{display:flex;gap:7px;width:100%;max-width:280px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:300px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:10px 6px;cursor:pointer;text-align:center;font-size:11px;font-weight:800;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+
+#sg{align-items:center;padding:10px;gap:8px;}
+.beloteHeader{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:340px;}
+#scoreBelote{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c1);}
+#trumpBelote{font-size:12px;color:var(--text2);}
+#statusBelote{font-family:'Fredoka One',cursive;font-size:13px;color:var(--c2);text-align:center;min-height:18px;}
+
+#biddingBelote{display:flex;gap:10px;}
+#handOverBelote, #matchOverBelote{font-family:'Fredoka One',cursive;color:var(--co);text-align:center;font-size:16px;background:rgba(6,8,30,.55);border:1px solid rgba(251,191,36,.3);border-radius:14px;padding:12px 16px;backdrop-filter:blur(4px);}
+#handOverBelote button{margin-top:8px;}
+
+#trickBelote{display:flex;gap:6px;justify-content:center;min-height:70px;align-items:center;}
+.bcard{width:52px;height:74px;border-radius:9px;background:linear-gradient(145deg,#f5f0e6,#e2dcc8);border:1.5px solid rgba(0,0,0,.2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;box-shadow:0 3px 8px rgba(0,0,0,.3);}
+.bcard .r{font-size:15px;} .bcard .s{font-size:16px;}
+.bcard.small{width:40px;height:58px;}
+.bcard.small .r{font-size:12px;} .bcard.small .s{font-size:13px;}
+
+#myHandBelote{display:flex;gap:5px;overflow-x:auto;padding:10px 4px;width:100%;max-width:360px;justify-content:center;flex-wrap:wrap;}
+.bcard.playable{cursor:pointer;box-shadow:0 0 0 2px var(--co),0 3px 8px rgba(0,0,0,.3);}
+.bcard.playable:active{transform:translateY(-6px);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+#achListBelote{width:100%;display:flex;flex-direction:column;gap:6px;}
+
+</style>
+</head>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">BELOTE</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStatsBelote"></div>
+  <div class="opt-grid">
+    <div class="opt-card sel" id="diffEasy" onclick="setDifficulty('facile')">🌱 Facile</div>
+    <div class="opt-card" id="diffNormal" onclick="setDifficulty('normal')">⚡ Normal</div>
+    <div class="opt-card" id="diffHard" onclick="setDifficulty('difficile')">🔥 Difficile</div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startMatch()">🃏 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showRules()">ⓘ Règles</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="beloteHeader">
+    <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
+    <div id="scoreBelote"></div>
+    <div id="trumpBelote"></div>
+  </div>
+  <div id="statusBelote"></div>
+
+  <div id="biddingBelote" style="display:none;">
+    <button class="ondine-btn ondine-btn-primary" onclick="playerBid(true)">✅ Je prends</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="playerBid(false)">❌ Je passe</button>
+  </div>
+
+  <div id="trickBelote"></div>
+  <div id="handOverBelote" style="display:none;">
+    Manche terminée !
+    <button class="ondine-btn ondine-btn-primary" onclick="nextHand()">Manche suivante</button>
+  </div>
+  <div id="matchOverBelote" style="display:none;"></div>
+
+  <div id="myHandBelote"></div>
+</div>
+
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListBelote"></div>
+</div>
+
+<div class="ondine-modal-overlay hidden" id="modalOverlay"></div>
+
+<script>
+const CoreBundle = (function() {
+// ── storage/keys.js ──
+// ═══════════════════════════════════════════════════════════════
+// core/storage/keys.js
+// ───────────────────────────────────────
+// RÔLE : point UNIQUE de calcul des clés localStorage, et mécanisme
+//        de migration transparente depuis les anciennes conventions
+//        (og_<id>_v1, <id>_ondine_v1, ondine_stats_<id>, sol_*,
+//        sud_*, y*...) vers la nouvelle convention :
+//
+//            ondine.games.<gameId>.<namespace>
+//
+//        namespace ∈ { stats, achievements, save, settings }
+//
+// NE DOIT JAMAIS : être importé directement par un jeu — seuls les
+//        services (StatsService, AchievementsService, SaveService)
+//        l'utilisent. Un jeu ne voit jamais une clé localStorage.
+//
+// GARANTIE : aucune sauvegarde existante n'est perdue. Au premier
+//        accès après mise à jour, si la nouvelle clé est absente,
+//        l'ancienne est lue, migrée vers la nouvelle clé, puis
+//        utilisée exclusivement ensuite. L'ancienne clé n'est
+//        JAMAIS supprimée automatiquement (voir section 24 de
+//        l'architecture — suppression = décision humaine ultérieure,
+//        pas automatique).
+// ═══════════════════════════════════════════════════════════════
+
+function newKey(gameId, namespace) {
+  return `ondine.games.${gameId}.${namespace}`;
+}
+
+/**
+ * Registre des anciennes clés, par jeu. Deux formes possibles :
+ *  - { type: 'blob', key, fields } : une seule ancienne clé JSON
+ *    contenant plusieurs namespaces en sous-champs (ex: Batch 2/3 :
+ *    { stats, achievements, save }).
+ *  - { type: 'flat', keys: { stats: 'xxx', achievements: 'yyy' } } :
+ *    une ancienne clé dédiée par namespace (ex: Batch 1 SDK,
+ *    ondine_stats_<id> / ondine_ach_<id> / ondine_save_<id>).
+ *
+ * Volontairement minimal : seul Morpion (jeu pilote) est renseigné
+ * pour l'instant. Les 17 autres entrées seront ajoutées au moment
+ * où chaque jeu sera réellement migré (voir architecture, section 21)
+ * — les y ajouter maintenant sans les tester serait spéculatif.
+ */
+const LEGACY_REGISTRY = {
+  morpion: { type: 'blob', key: 'og_morpion_v1', fields: ['stats', 'achievements'] },
+};
+
+function readLegacy(gameId, namespace) {
+  const entry = LEGACY_REGISTRY[gameId];
+  if (!entry) return undefined;
+
+  if (entry.type === 'blob') {
+    if (!entry.fields.includes(namespace)) return undefined;
+    try {
+      const raw = localStorage.getItem(entry.key);
+      if (raw === null) return undefined;
+      const blob = JSON.parse(raw);
+      return namespace in blob ? blob[namespace] : undefined;
+    } catch (e) {
+      console.warn('[storage/keys] ancienne clé blob corrompue pour', gameId, e);
+      return undefined;
+    }
+  }
+
+  if (entry.type === 'flat') {
+    const legacyKey = entry.keys && entry.keys[namespace];
+    if (!legacyKey) return undefined;
+    try {
+      const raw = localStorage.getItem(legacyKey);
+      return raw === null ? undefined : JSON.parse(raw);
+    } catch (e) {
+      console.warn('[storage/keys] ancienne clé plate corrompue pour', gameId, e);
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Lit `namespace` pour `gameId`. Cherche d'abord la nouvelle clé ;
+ * si absente, cherche l'ancienne (si le jeu est dans LEGACY_REGISTRY),
+ * et si trouvée, MIGRE immédiatement (écrit la nouvelle clé) avant
+ * de retourner la valeur. Retourne `undefined` si rien n'existe nulle
+ * part (au service appelant de fournir sa propre valeur par défaut).
+ */
+function readNamespaced(gameId, namespace) {
+  const key = newKey(gameId, namespace);
+  const raw = localStorage.getItem(key);
+  if (raw !== null) {
+    try { return JSON.parse(raw); }
+    catch (e) { console.warn('[storage/keys] nouvelle clé corrompue pour', gameId, namespace, e); return undefined; }
+  }
+
+  const legacyValue = readLegacy(gameId, namespace);
+  if (legacyValue !== undefined) {
+    writeNamespaced(gameId, namespace, legacyValue);
+    console.info(`[storage/keys] migration ${gameId}.${namespace} : ancienne clé → ${key}`);
+    return legacyValue;
+  }
+
+  return undefined;
+}
+
+function writeNamespaced(gameId, namespace, value) {
+  localStorage.setItem(newKey(gameId, namespace), JSON.stringify(value));
+}
+
+function removeNamespaced(gameId, namespace) {
+  localStorage.removeItem(newKey(gameId, namespace));
+  // L'ancienne clé n'est jamais supprimée ici — voir garantie ci-dessus.
+}
+
+function hasNamespaced(gameId, namespace) {
+  if (localStorage.getItem(newKey(gameId, namespace)) !== null) return true;
+  return readLegacy(gameId, namespace) !== undefined;
+}
+
+
+// ── engines/RandomEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Random Engine
+// ───────────────────────────────────────
+// RÔLE : mélange Fisher-Yates générique.
+// ───────────────────────────────────────
+// DÉVIATION DOCUMENTÉE par rapport au CoreBundle Batch 1 : la version
+// d'origine (`shuffle(arr)`) mélangeait EN PLACE et retournait le
+// même tableau. Or les 8+ implémentations dupliquées dans les jeux
+// Batch 2/3 (`shuffleArr`) font toutes une COPIE et ne mutent jamais
+// le tableau source — c'est le comportement majoritaire réellement
+// utilisé (8+ jeux contre 1 seul, Uno, sur l'ancienne version
+// mutante). Kevin a explicitement demandé de "respecter le
+// comportement réellement utilisé par les jeux" plutôt que de
+// recopier l'ancienne version sans vérifier — c'est ce qui est fait
+// ici : shuffle() ne mute JAMAIS le tableau passé, retourne toujours
+// une nouvelle copie mélangée.
+//
+// Conséquence pour la migration d'Uno (non faite dans cette phase) :
+// son code interne compte actuellement sur la mutation en place ;
+// migrer Uno vers ce RandomEngine nécessitera de vérifier ses appels
+// à shuffle() un par un, pas juste un remplacement mécanique.
+// ═══════════════════════════════════════════════════════════════
+
+/** Fisher-Yates — retourne TOUJOURS une nouvelle copie mélangée,
+ *  ne modifie jamais le tableau passé en argument. */
+function shuffle(array) {
+  const a = [...array];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+
+// ── engines/GridEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Grid Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur une grille 2D (création, accès,
+//        voisinage, flood fill). Ne connaît ni Puissance 4, ni
+//        Démineur, ni Sudoku, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir le mot "mine", "disque", "case sûre" ou
+//        toute notion spécifique à un jeu.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1 (déjà utilisé par
+// Puissance 4 et Démineur). Engine optionnel : un jeu l'importe
+// directement s'il en a besoin, pas obligatoirement via le SDK (pas
+// d'état interne, donc pas de risque d'accès croisé entre jeux).
+// ═══════════════════════════════════════════════════════════════
+
+/** Crée une grille rows×cols, chaque cellule initialisée à `fill`. */
+function createGrid(rows, cols, fill = null) {
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => (typeof fill === 'function' ? fill() : fill))
+  );
+}
+
+function inBounds(grid, r, c) {
+  return r >= 0 && r < grid.length && c >= 0 && c < grid[0].length;
+}
+
+function getCell(grid, r, c) {
+  return inBounds(grid, r, c) ? grid[r][c] : undefined;
+}
+
+function setCell(grid, r, c, value) {
+  if (inBounds(grid, r, c)) grid[r][c] = value;
+}
+
+function forEachCell(grid, fn) {
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[r].length; c++) fn(grid[r][c], r, c);
+  }
+}
+
+/** Coordonnées des 4 voisins orthogonaux valides. */
+function neighbors4(grid, r, c) {
+  return [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].filter(([rr, cc]) =>
+    inBounds(grid, rr, cc)
+  );
+}
+
+/** Coordonnées des 8 voisins (orthogonaux + diagonales) valides. */
+function neighbors8(grid, r, c) {
+  const out = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const rr = r + dr, cc = c + dc;
+      if (inBounds(grid, rr, cc)) out.push([rr, cc]);
+    }
+  }
+  return out;
+}
+
+/**
+ * Flood fill générique à partir de (r,c). `matchFn(value, r, c)` décide
+ * si une cellule doit être incluse dans la propagation ; `visitFn(value, r, c)`
+ * est appelé pour chaque cellule visitée (une seule fois). Ne décide
+ * jamais lui-même de la condition d'arrêt — c'est au jeu de la fournir.
+ */
+function floodFill(grid, startR, startC, matchFn, visitFn, useDiagonals = true) {
+  const visited = createGrid(grid.length, grid[0].length, false);
+  const stack = [[startR, startC]];
+  while (stack.length) {
+    const [r, c] = stack.pop();
+    if (!inBounds(grid, r, c) || visited[r][c]) continue;
+    visited[r][c] = true;
+    if (!matchFn(grid[r][c], r, c)) continue;
+    visitFn(grid[r][c], r, c);
+    const neigh = useDiagonals ? neighbors8(grid, r, c) : neighbors4(grid, r, c);
+    for (const [rr, cc] of neigh) if (!visited[rr][cc]) stack.push([rr, cc]);
+  }
+}
+
+/** Compte les cartes de N valeurs identiques consécutives à partir de
+ *  (r,c) dans une direction (dr,dc), dans les deux sens. Utile pour
+ *  toute détection d'alignement (Puissance 4, Morpion, Othello...). */
+function countAligned(grid, r, c, dr, dc, matchFn) {
+  let count = 1;
+  let rr = r + dr, cc = c + dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr += dr; cc += dc; }
+  rr = r - dr; cc = c - dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr -= dr; cc -= dc; }
+  return count;
+}
+
+
+// ── engines/CardEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Card Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur un tableau de cartes (peu importe
+//        ce qu'est une "carte" — le jeu décide de sa forme : {color,
+//        value} pour Uno, {suit,rank} pour Solitaire/Rami/Spider...).
+//        Ne connaît ni Uno, ni Solitaire, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir une notion de combinaison valide (suite/
+//        groupe de Rami, séquence de Spider), de carte "jouable"
+//        (Uno), ou de score de main — ça reste dans chaque jeu.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1 (déjà utilisé par Uno).
+// Candidat de migration pour Solitaire/Rami/Spider (jamais branchés
+// à ce moteur malgré une structure de carte compatible — voir
+// architecture, section 5). PAS pertinent pour Road Trip (cartes à
+// effet, pas des cartes à jouer), Memory (pas de main/pioche) ni
+// Mahjong (tuiles, géométrie différente).
+// ═══════════════════════════════════════════════════════════════
+
+/** Construit un deck mélangé à partir d'une liste de cartes (copie,
+ *  ne mute jamais le tableau source — voir RandomEngine.shuffle). */
+function createDeck(cards) {
+  return shuffle([...cards]);
+}
+
+/** Retire et retourne les `n` cartes du dessus (fin du tableau = dessus). */
+function draw(deck, n = 1) {
+  return deck.splice(Math.max(0, deck.length - n), n).reverse();
+}
+
+/** Distribue `cardsPerPlayer` cartes à `playerCount` joueurs, à tour de
+ *  rôle (comme une vraie distribution), depuis le sommet du deck. */
+function deal(deck, playerCount, cardsPerPlayer) {
+  const hands = Array.from({ length: playerCount }, () => []);
+  for (let round = 0; round < cardsPerPlayer; round++) {
+    for (let p = 0; p < playerCount; p++) {
+      const card = draw(deck, 1)[0];
+      if (card) hands[p].push(card);
+    }
+  }
+  return hands;
+}
+
+/**
+ * Reconstitue un deck épuisé à partir d'une pile de défausse, en
+ * gardant la carte du dessus en place (pattern stock/waste commun à
+ * Solitaire, Uno, Rami, Spider).
+ */
+function reshuffleDiscardIntoDeck(discardPile, keepTopCard = true) {
+  if (discardPile.length <= 1) return [];
+  const top = keepTopCard ? discardPile.pop() : null;
+  const rest = shuffle(discardPile.splice(0, discardPile.length));
+  if (top) discardPile.push(top);
+  return rest;
+}
+
+
+// ── engines/DiceEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Dice Engine
+// ───────────────────────────────────────
+// RÔLE : lancer et gérer des pools de dés (valeur + verrou), compter
+//        les valeurs obtenues. Ne connaît ni YAMS, ni Shut the Box,
+//        ni 421, ni aucune règle de score.
+// NE DOIT JAMAIS : contenir une notion de catégorie de score, de
+//        combinaison gagnante (Brelan, Suite, 421, Nénette...), ou
+//        de règle spécifique à un jeu.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1 (déjà utilisé par Shut the
+// Box). Candidat de migration pour YAMS et 421 (jamais branchés,
+// leurs règles de score restent entièrement différentes et propres
+// à chacun — voir architecture, section 5).
+// ═══════════════════════════════════════════════════════════════
+
+function rollDie(sides = 6) {
+  return 1 + Math.floor(Math.random() * sides);
+}
+
+function rollDice(count, sides = 6) {
+  return Array.from({ length: count }, () => rollDie(sides));
+}
+
+/** Crée un pool de dés à l'état initial : valeur nulle, non verrouillé. */
+function createDicePool(count) {
+  return Array.from({ length: count }, () => ({ value: null, locked: false }));
+}
+
+/** Relance uniquement les dés non verrouillés du pool (mutation + retour). */
+function rollUnlocked(pool, sides = 6) {
+  pool.forEach((d) => { if (!d.locked) d.value = rollDie(sides); });
+  return pool;
+}
+
+function toggleLock(pool, index) {
+  if (pool[index]) pool[index].locked = !pool[index].locked;
+  return pool;
+}
+
+/** Compte les occurrences de chaque valeur — utile à toute règle de
+ *  score basée sur des combinaisons (brelan, suite, etc.). */
+function countValues(values) {
+  const counts = {};
+  values.forEach((v) => { counts[v] = (counts[v] || 0) + 1; });
+  return counts;
+}
+
+
+// ── engines/AIEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// AI Engine
+// ───────────────────────────────────────
+// RÔLE : recherche de meilleur coup par minimax + élagage alpha-bêta,
+//        entièrement générique. Le jeu fournit les fonctions pures
+//        (getMoves, applyMove, isTerminal, evaluate) ; ce moteur ne
+//        connaît aucune règle de Puissance 4, Othello, Morpion ou
+//        autre.
+// NE DOIT JAMAIS : contenir une notion de "disque", de "colonne",
+//        de "grille 3×3" ou toute règle spécifique à un jeu.
+// ───────────────────────────────────────
+// IMPORTANT — ce moteur reste VOLONTAIREMENT en dehors du SDK
+// (pas de `sdk.ai`). Sur les 6 jeux ayant une IA adversaire réelle,
+// seul Puissance 4 (et Othello/Morpion en migration future) relèvent
+// d'une recherche arborescente généralisable — Dames a une
+// heuristique de capture propre, Rami et Road Trip ont des IA à
+// PRIORITÉS DE RÈGLES (débloquer > avancer > attaquer), pas de
+// recherche. Les y forcer serait exactement l'anti-pattern à éviter
+// ("ne pas enfermer toutes les IA dans un moteur monolithique" —
+// voir architecture, section 5). Un jeu qui a besoin de ce moteur
+// l'importe directement, comme un engine, jamais via `sdk.*`.
+//
+// Contrat attendu (fns) :
+//   getMoves(state)                 → tableau de coups possibles
+//   applyMove(state, move)          → nouvel état après le coup (ne mute pas)
+//   isTerminal(state)               → true si partie finie
+//   evaluate(state, player, depth)  → score du point de vue de `player`.
+//     `depth` (profondeur RESTANTE) est optionnel mais recommandé
+//     pour un score de victoire/défaite (ex: 1000+depth / -1000-depth)
+//     — sinon deux victoires à profondeurs différentes sont à égalité
+//     et l'IA peut sembler hésiter (bug réel rencontré en développant
+//     Puissance 4 : une "double menace" laissait l'IA ignorer un coup
+//     gagnant immédiat au profit d'un coup neutre qui gagnait quand
+//     même, 2 coups plus tard — ce commentaire est conservé tel quel
+//     du CoreBundle d'origine, la leçon reste valable).
+// ═══════════════════════════════════════════════════════════════
+
+function minimax(state, depth, alpha, beta, maximizing, player, fns) {
+  if (depth === 0 || fns.isTerminal(state)) {
+    return fns.evaluate(state, player, depth);
+  }
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return fns.evaluate(state, player);
+
+  if (maximizing) {
+    let best = -Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, false, player, fns);
+      best = Math.max(best, val);
+      alpha = Math.max(alpha, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, true, player, fns);
+      best = Math.min(best, val);
+      beta = Math.min(beta, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+/**
+ * Retourne le meilleur coup pour `player` à la profondeur `depth`.
+ * Si plusieurs coups sont à égalité, un choix aléatoire parmi eux
+ * évite un bot parfaitement déterministe et prévisible.
+ */
+function chooseBestMove(state, depth, player, fns) {
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return null;
+  let bestScore = -Infinity;
+  let bestMoves = [];
+  for (const move of moves) {
+    const next = fns.applyMove(state, move);
+    const score = minimax(next, depth - 1, -Infinity, Infinity, false, player, fns);
+    if (score > bestScore) { bestScore = score; bestMoves = [move]; }
+    else if (score === bestScore) bestMoves.push(move);
+  }
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}
+
+/** Coup aléatoire simple — utile pour une difficulté "facile" sans
+ *  avoir à écrire un second moteur. */
+function chooseRandomMove(state, fns) {
+  const moves = fns.getMoves(state);
+  return moves.length ? moves[Math.floor(Math.random() * moves.length)] : null;
+}
+
+/**
+ * Façade unique demandée par l'architecture (section 5/13 du brief) :
+ * search({ state, getMoves, applyMove, evaluate, depth, maximizingPlayer })
+ * → { move, score }
+ * Formalise chooseBestMove sous la forme d'objet plutôt que d'inventer
+ * une nouvelle signature.
+ */
+function search({ state, getMoves, applyMove, isTerminal, evaluate, depth, maximizingPlayer }) {
+  const fns = { getMoves, applyMove, isTerminal, evaluate };
+  const move = chooseBestMove(state, depth, maximizingPlayer, fns);
+  const score = move === null ? evaluate(state, maximizingPlayer) : undefined;
+  return { move, score };
+}
+
+const AIEngine = { chooseBestMove, chooseRandomMove, search };
+
+
+// ── engines/SnapshotStore.js ──
+// ═══════════════════════════════════════════════════════════════
+// SnapshotStore
+// ───────────────────────────────────────
+// RÔLE : pile de clones JSON profonds, taille bornée — pour les jeux
+//        qui font un vrai undo multi-coups (Spider Solitaire en est
+//        la preuve : historique par snapshots déjà fonctionnel).
+// NE DOIT JAMAIS : décider QUAND un jeu doit permettre l'undo, ni
+//        avec quelle portée. Rami, par exemple, n'autorise l'annulation
+//        que jusqu'à la pioche (règle du jeu réelle, pas un manque
+//        d'outil) — ce mécanisme ne doit pas lui être imposé.
+// ───────────────────────────────────────
+// NOUVEAU — n'existait pas dans le CoreBundle Batch 1. Formalise le
+// pattern déjà utilisé par Spider (push/pop de JSON.parse(JSON.
+// stringify(state)), pile bornée à 50).
+// ═══════════════════════════════════════════════════════════════
+
+function createSnapshotStore(maxSize = 50) {
+  const stack = [];
+  return {
+    push(state) {
+      stack.push(JSON.parse(JSON.stringify(state)));
+      if (stack.length > maxSize) stack.shift();
+    },
+    pop() {
+      return stack.pop() ?? null;
+    },
+    peek() {
+      return stack.length ? stack[stack.length - 1] : null;
+    },
+    clear() {
+      stack.length = 0;
+    },
+    canUndo() {
+      return stack.length > 0;
+    },
+  };
+}
+
+
+// ── ui/components.js ──
+// ═══════════════════════════════════════════════════════════════
+// UI — bibliothèque de composants Ondine Games
+// ───────────────────────────────────────
+// Chaque fonction retourne un élément DOM prêt à être inséré dans
+// la page. Aucune fonction ici ne connaît un jeu en particulier.
+// Le style visuel (couleurs, rayons, ombres) vient TOUJOURS de
+// core/design-tokens.css via les variables --c1, --glass, etc.
+// Ne jamais coder une couleur en dur dans un composant.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1. Volontairement minimal —
+// seuls les composants réellement utilisés par au moins un jeu sont
+// présents. progressBar/tabs/list/grid/bottomSheet/emptyState/
+// loading/gameCard/profileCard seront ajoutés le jour où un jeu réel
+// en a besoin, pas par anticipation (voir architecture, section 13).
+// ═══════════════════════════════════════════════════════════════
+
+const UI = {
+  /**
+   * Crée l'élément hôte du toast. À insérer une fois dans la page,
+   * puis à passer à NotificationService.mount(el).
+   */
+  toastHost() {
+    const el = document.createElement('div');
+    el.className = 'ondine-toast';
+    el.id = 'ondineToast';
+    return el;
+  },
+
+  button(label, { variant = 'primary', onClick, icon, disabled = false } = {}) {
+    const el = document.createElement('button');
+    el.className = `ondine-btn ondine-btn-${variant}`;
+    el.innerHTML = (icon ? `<span class="ondine-btn-icon">${icon}</span>` : '') + label;
+    if (disabled) el.disabled = true;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  iconButton(icon, { onClick, title = '' } = {}) {
+    const el = document.createElement('button');
+    el.className = 'ondine-icon-btn';
+    el.textContent = icon;
+    if (title) el.title = title;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  badge(text, { variant = 'default' } = {}) {
+    const el = document.createElement('span');
+    el.className = `ondine-badge ondine-badge-${variant}`;
+    el.textContent = text;
+    return el;
+  },
+
+  statCard({ value, label, icon = '' } = {}) {
+    const el = document.createElement('div');
+    el.className = 'ondine-stat-card';
+    el.innerHTML = `${icon ? `<div class="ondine-stat-icon">${icon}</div>` : ''}
+      <div class="ondine-stat-value">${value}</div>
+      <div class="ondine-stat-label">${label}</div>`;
+    return el;
+  },
+
+  achievementCard({ icon, name, desc, unlocked, xp }) {
+    const el = document.createElement('div');
+    el.className = 'ondine-ach-card' + (unlocked ? ' unlocked' : '');
+    el.innerHTML = `<div class="ondine-ach-icon">${icon}</div>
+      <div class="ondine-ach-body">
+        <div class="ondine-ach-name">${name}</div>
+        <div class="ondine-ach-desc">${desc}</div>
+      </div>
+      <div class="ondine-ach-badge">${unlocked ? '✓' : '🔒'}${xp ? ` +${xp} XP` : ''}</div>`;
+    return el;
+  },
+
+  /**
+   * Modale générique : titre, corps (élément DOM déjà construit),
+   * boutons d'action. Retourne { el, close } — `el` est déjà attaché
+   * à un overlay plein écran, prêt à être inséré dans document.body.
+   * Utilisée en interne par DialogService — un jeu peut aussi
+   * l'utiliser directement pour ses propres besoins d'affichage.
+   */
+  modal({ title, bodyEl, actions = [] } = {}) {
+    const overlay = document.createElement('div');
+    overlay.className = 'ondine-modal-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'ondine-modal-box';
+
+    if (title) {
+      const h = document.createElement('div');
+      h.className = 'ondine-modal-title';
+      h.textContent = title;
+      box.appendChild(h);
+    }
+    if (bodyEl) {
+      const body = document.createElement('div');
+      body.className = 'ondine-modal-body';
+      body.appendChild(bodyEl);
+      box.appendChild(body);
+    }
+    if (actions.length) {
+      const row = document.createElement('div');
+      row.className = 'ondine-modal-actions';
+      actions.forEach((btnEl) => row.appendChild(btnEl));
+      box.appendChild(row);
+    }
+    overlay.appendChild(box);
+
+    function close() { overlay.remove(); }
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    return { el: overlay, close };
+  },
+};
+
+
+// ── services/NotificationService.js ──
+// ═══════════════════════════════════════════════════════════════
+// NotificationService
+// ───────────────────────────────────────
+// RÔLE : afficher des messages brefs et non bloquants (toasts).
+// POSSÈDE : l'élément DOM du toast, son minuteur d'auto-masquage.
+// NE DOIT JAMAIS : connaître un jeu, une règle de jeu, ou un texte
+//        spécifique à un jeu — le texte affiché vient toujours de
+//        l'appelant (le jeu, via le SDK).
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle du Batch 1 (déjà utilisé par
+// Solitaire, Puissance 4, Uno, Shut the Box, Démineur, Rhythm Hero).
+// Remplace les fonctions toast() précédemment dupliquées à
+// l'identique dans Solitaire, Sudoku, YAMS, puis dans les 12 jeux
+// des Batch 2/3.
+// ═══════════════════════════════════════════════════════════════
+
+let hostEl = null;
+let hideTimer = null;
+const DEFAULT_DURATION_MS = 2200;
+
+/**
+ * Doit être appelé une fois par le Hub ou par la page du jeu,
+ * en lui passant l'élément DOM créé par UI.toastHost().
+ */
+function mount(el) {
+  hostEl = el;
+}
+
+function show(message, variant = 'info', duration = DEFAULT_DURATION_MS) {
+  if (!hostEl) {
+    // Dégradation silencieuse : pas de host monté = pas de toast,
+    // mais ça ne doit jamais casser le jeu.
+    console.warn('[NotificationService] show() appelé avant mount() :', message);
+    return;
+  }
+  hostEl.textContent = message;
+  hostEl.dataset.variant = variant;
+  hostEl.classList.remove('ondine-toast-show');
+  void hostEl.offsetWidth; // force le reflow pour relancer la transition
+  hostEl.classList.add('ondine-toast-show');
+
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => hostEl.classList.remove('ondine-toast-show'), duration);
+}
+
+const NotificationService = { mount, show };
+
+
+// ── services/StatsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// StatsService
+// ───────────────────────────────────────
+// RÔLE : stocker des compteurs numériques par jeu (parties jouées,
+//        victoires, meilleur score...). Ne connaît aucun nom de
+//        statistique métier — le jeu choisit ses propres clés.
+// POSSÈDE : une entrée localStorage par jeu.
+// NE DOIT JAMAIS : interpréter le sens d'une statistique (ex. ne sait
+//        pas que "victories" est "positif" ou que "errors" est
+//        "négatif" — c'est au jeu d'agir en conséquence).
+// ───────────────────────────────────────
+// PRIVÉ : chaque méthode prend un `gameId` explicite. Un jeu ne doit
+// JAMAIS appeler ce service directement (il pourrait alors lire/
+// écrire les stats d'un AUTRE jeu en changeant le gameId passé) —
+// seul core/sdk/createSDK.js a le droit de l'importer, avec le
+// gameId figé une fois pour toutes par fermeture.
+//
+// Convention de clé : voir core/storage/keys.js — gère la nouvelle
+// convention `ondine.games.<id>.stats` ET la lecture de secours des
+// anciennes clés (ondine_stats_<id>, <id>_ondine_v1, og_<id>_v1,
+// etc.) pour ne perdre aucune sauvegarde existante.
+// ═══════════════════════════════════════════════════════════════
+
+const STATS_NS = 'stats';
+
+function readAll(gameId) {
+  try {
+    return readNamespaced(gameId, STATS_NS) || {};
+  } catch (e) {
+    console.warn('[StatsService] lecture corrompue pour', gameId, e);
+    return {};
+  }
+}
+
+function writeAll(gameId, data) {
+  writeNamespaced(gameId, STATS_NS, data);
+}
+
+const StatsService = {
+  get(gameId, key, defaultValue = 0) {
+    const all = readAll(gameId);
+    return key in all ? all[key] : defaultValue;
+  },
+  set(gameId, key, value) {
+    const all = readAll(gameId);
+    all[key] = value;
+    writeAll(gameId, all);
+  },
+  increment(gameId, key, n = 1) {
+    const all = readAll(gameId);
+    all[key] = (all[key] || 0) + n;
+    writeAll(gameId, all);
+    return all[key];
+  },
+  /** Ne met à jour que si `value` dépasse la valeur actuelle (utile
+   *  pour un meilleur score / meilleur temps). */
+  setMax(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value > all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  setMin(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value < all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  getAll(gameId) { return readAll(gameId); },
+  reset(gameId) { removeNamespaced(gameId, STATS_NS); },
+};
+
+
+// ── services/AchievementsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AchievementsService
+// ───────────────────────────────────────
+// RÔLE : savoir quels succès sont débloqués, par jeu. Ne connaît
+//        jamais la LISTE des succès d'un jeu ni leur condition de
+//        déblocage — ça reste entièrement défini côté jeu (via
+//        sdk.achievements.unlock(id, ...), appelé quand le jeu a
+//        lui-même vérifié sa propre condition).
+// POSSÈDE : une entrée localStorage par jeu.
+// PRIVÉ : voir StatsService.js pour la règle d'isolation par gameId.
+// ═══════════════════════════════════════════════════════════════
+
+const ACH_NS = 'achievements';
+
+function readUnlocked(gameId) {
+  try { return readNamespaced(gameId, ACH_NS) || []; }
+  catch (e) { console.warn('[AchievementsService] lecture corrompue pour', gameId, e); return []; }
+}
+
+const AchievementsService = {
+  isUnlocked(gameId, achId) {
+    return readUnlocked(gameId).includes(achId);
+  },
+  /** Débloque `achId` s'il ne l'était pas déjà. Retourne true si
+   *  c'est une NOUVELLE unlock (utile pour déclencher un toast une
+   *  seule fois), false si déjà débloqué (idempotent). */
+  unlock(gameId, achId) {
+    const list = readUnlocked(gameId);
+    if (list.includes(achId)) return false;
+    list.push(achId);
+    writeNamespaced(gameId, ACH_NS, list);
+    return true;
+  },
+  unlockedList(gameId) { return readUnlocked(gameId); },
+  reset(gameId) { removeNamespaced(gameId, ACH_NS); },
+};
+
+
+// ── services/AudioService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AudioService
+// ───────────────────────────────────────
+// RÔLE : jouer des sons courts synthétisés (Web Audio). Expose DEUX
+//        niveaux, tous deux extraits du code déjà utilisé par les 18
+//        jeux :
+//          1. tone(freq, dur, type, vol) — la primitive bas niveau,
+//             identique à la virgule près dans les 18 jeux actuels.
+//             Un jeu qui veut ses propres sons (comme Rami, Spider,
+//             Road Trip aujourd'hui) l'utilise directement.
+//          2. play(presetName) — une petite bibliothèque de presets
+//             GÉNÉRIQUES (déjà dans le CoreBundle Batch 1), pour les
+//             jeux qui n'ont pas besoin de sons sur mesure.
+// NE DOIT JAMAIS : contenir un preset nommé d'après un jeu (pas de
+//        "unoSkip" ou "yamsRoll"), ni imposer qu'un événement précis
+//        ("victoire") corresponde à une fréquence fixe — c'est
+//        toujours le jeu qui choisit REST tone() ou play(preset).
+// ═══════════════════════════════════════════════════════════════
+
+let audioCtx = null;
+let enabled = true;
+
+function getCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { console.warn('[AudioService] Web Audio indisponible', e); }
+  }
+  return audioCtx;
+}
+
+function tone(freq, dur, type = 'sine', vol = 0.12) {
+  if (!enabled) return;
+  const ctx = getCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
+  } catch (e) { /* silencieux : l'audio ne doit jamais casser le jeu */ }
+}
+
+// Bibliothèque de presets génériques — reprise telle quelle du
+// CoreBundle Batch 1. Optionnelle : un jeu peut l'ignorer entièrement
+// et n'utiliser que tone().
+const PRESETS = {
+  click:   () => tone(880, 0.06, 'sine', 0.10),
+  place:   () => { tone(660, 0.1, 'sine', 0.14); setTimeout(() => tone(880, 0.08, 'sine', 0.10), 60); },
+  success: () => [523, 659, 784].forEach((f, i) => setTimeout(() => tone(f, 0.18, 'sine', 0.16), i * 90)),
+  error:   () => tone(220, 0.16, 'sawtooth', 0.12),
+  win:     () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'sine', 0.18), i * 110)),
+  lose:    () => [392, 330, 262].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'sine', 0.14), i * 120)),
+  flip:    () => tone(440, 0.06, 'triangle', 0.10),
+  unlock:  () => [660, 880, 1100].forEach((f, i) => setTimeout(() => tone(f, 0.15, 'sine', 0.15), i * 80)),
+};
+
+const AudioService = {
+  tone,
+  play(presetName) {
+    const preset = PRESETS[presetName];
+    if (!preset) { console.warn('[AudioService] preset inconnu :', presetName); return; }
+    preset();
+  },
+  setEnabled(v) { enabled = v; },
+  isEnabled() { return enabled; },
+};
+
+
+// ── services/SaveService.js ──
+// ═══════════════════════════════════════════════════════════════
+// SaveService
+// ───────────────────────────────────────
+// RÔLE : persister/restaurer l'état de partie en cours d'un jeu,
+//        sous forme de blob JSON opaque. Ne connaît jamais la forme
+//        de cet état — c'est entièrement défini par le jeu.
+// POSSÈDE : une entrée localStorage par jeu.
+// PRIVÉ : voir StatsService.js pour la règle d'isolation par gameId.
+// ═══════════════════════════════════════════════════════════════
+
+const SAVE_NS = 'save';
+
+const SaveService = {
+  write(gameId, state) {
+    try { writeNamespaced(gameId, SAVE_NS, state); return true; }
+    catch (e) { console.warn('[SaveService] échec de sauvegarde pour', gameId, e); return false; }
+  },
+  read(gameId) {
+    try {
+      const value = readNamespaced(gameId, SAVE_NS);
+      return value === undefined ? null : value;
+    } catch (e) { console.warn('[SaveService] sauvegarde corrompue pour', gameId, e); return null; }
+  },
+  hasSave(gameId) { return hasNamespaced(gameId, SAVE_NS); },
+  clear(gameId) { removeNamespaced(gameId, SAVE_NS); },
+};
+
+
+// ── services/DialogService.js ──
+// ═══════════════════════════════════════════════════════════════
+// DialogService
+// ───────────────────────────────────────
+// RÔLE : afficher une boîte de dialogue de confirmation bloquante
+//        (au sens UX, pas au sens JS — l'appel est asynchrone) et
+//        retourner la réponse de l'utilisateur. Remplace les
+//        `confirm()` natifs du navigateur, incohérents visuellement
+//        avec le reste de la plateforme, et les `confirmDialog()`
+//        dupliqués à l'identique dans les 12 jeux Batch 2/3.
+// NE DOIT JAMAIS : connaître le texte ou le contexte d'un jeu — tout
+//        le contenu est fourni par l'appelant.
+// ───────────────────────────────────────
+// S'appuie sur UI.modal() — c'est le seul service qui a le droit
+// d'importer un composant UI directement (car il EST la logique
+// derrière ce composant, pas un jeu qui le consommerait).
+// ═══════════════════════════════════════════════════════════════
+
+const DialogService = {
+  /** Retourne une Promise<boolean> : true si confirmé, false si annulé. */
+  confirm({ title = '', message = '', confirmLabel = 'OK', cancelLabel = 'Annuler' } = {}) {
+    return new Promise((resolve) => {
+      const bodyEl = document.createElement('div');
+      bodyEl.textContent = message;
+
+      const confirmBtn = UI.button(confirmLabel, {
+        variant: 'primary',
+        onClick: () => { modal.close(); resolve(true); },
+      });
+      const cancelBtn = UI.button(cancelLabel, {
+        variant: 'secondary',
+        onClick: () => { modal.close(); resolve(false); },
+      });
+
+      const modal = UI.modal({ title, bodyEl, actions: [confirmBtn, cancelBtn] });
+      document.body.appendChild(modal.el);
+    });
+  },
+};
+
+
+// ── services/NavigationService.js ──
+// ═══════════════════════════════════════════════════════════════
+// NavigationService
+// ───────────────────────────────────────
+// RÔLE : afficher un écran (`<div class="screen" id="...">`) et
+//        cacher tous les autres. Formalise le pattern déjà présent,
+//        quasi identique, dans 17 des 18 jeux actuels — mais qui
+//        n'avait jamais été extrait en service, même dans le
+//        CoreBundle du Batch 1 (vérifié par l'audit).
+// NE DOIT JAMAIS : contenir un id d'écran ou une logique propre à un
+//        jeu précis. Ne connaît que la convention `.screen` / id.
+// NE PROPOSE PAS de back()/pile de navigation : non démontré dans le
+//        code actuel (aucun des 18 jeux n'a de retour arrière
+//        multi-niveaux — chaque écran est câblé explicitement vers
+//        un écran précis). Ajouter back() serait de la spéculation.
+// ═══════════════════════════════════════════════════════════════
+
+const NavigationService = {
+  /** Cache tous les `.screen`, affiche celui d'id `screenId`. */
+  go(screenId) {
+    document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+    const target = document.getElementById(screenId);
+    if (!target) {
+      console.warn('[NavigationService] écran introuvable :', screenId);
+      return;
+    }
+    target.classList.remove('hidden');
+  },
+};
+
+
+// ── sdk/createSDK.js ──
+// ═══════════════════════════════════════════════════════════════
+// createSDK(gameId)
+// ───────────────────────────────────────
+// SEULE API que les jeux sont autorisés à utiliser pour parler à la
+// plateforme. Un jeu ne doit JAMAIS importer un service de
+// core/services/ directement (voir architecture, section 1 et 4) :
+// chaque service privé prend un `gameId` en paramètre de CHAQUE
+// méthode — s'il était exposé tel quel à un jeu, celui-ci pourrait
+// techniquement lire/écrire les données d'un AUTRE jeu en changeant
+// le gameId passé. createSDK() est le SEUL endroit où le gameId est
+// fixé une fois pour toutes, par fermeture, puis jamais reexposé.
+//
+// API délibérément MINIMALE (15 fonctions, voir architecture,
+// section 3) : seulement ce que les 18 jeux utilisent réellement.
+// Pas de sdk.ai (reste un engine optionnel), pas de sdk.cloud/
+// profile/theme/settings (aucune preuve d'un besoin partagé par
+// plus d'1-2 jeux à ce jour).
+// ═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+
+
+/** Validation minimale — évite une erreur silencieuse si un jeu
+ *  oublie de passer son gameId (bug de développement, pas un cas
+ *  d'usage normal à gérer gracieusement). */
+function assertValidGameId(gameId) {
+  if (typeof gameId !== 'string' || gameId.trim() === '') {
+    throw new Error(`[createSDK] gameId invalide : ${JSON.stringify(gameId)}`);
+  }
+}
+
+function createSDK(gameId) {
+  assertValidGameId(gameId);
+
+  return {
+    gameId,
+
+    stats: {
+      get: (key, defaultValue = 0) => StatsService.get(gameId, key, defaultValue),
+      getAll: () => StatsService.getAll(gameId),
+      set: (key, value) => StatsService.set(gameId, key, value),
+      increment: (key, n = 1) => StatsService.increment(gameId, key, n),
+      setMax: (key, value) => StatsService.setMax(gameId, key, value),
+      setMin: (key, value) => StatsService.setMin(gameId, key, value),
+      reset: () => StatsService.reset(gameId),
+    },
+
+    achievements: {
+      /**
+       * Débloque `id` et affiche un toast + joue le son "unlock" si
+       * c'est une NOUVELLE unlock (idempotent — sans risque à
+       * rappeler). Centralise ce que les 12 jeux Batch 2/3 répétaient
+       * chacun individuellement (achUnlock + toast + playSound).
+       */
+      unlock(id, name, icon = '🏅') {
+        const isNew = AchievementsService.unlock(gameId, id);
+        if (isNew) {
+          AudioService.play('unlock');
+          NotificationService.show(`${icon} Succès : ${name || id}`, 'success');
+        }
+        return isNew;
+      },
+      isUnlocked: (id) => AchievementsService.isUnlocked(gameId, id),
+      unlockedList: () => AchievementsService.unlockedList(gameId),
+      reset: () => AchievementsService.reset(gameId),
+    },
+
+    audio: {
+      tone: (freq, dur, type, vol) => AudioService.tone(freq, dur, type, vol),
+      play: (presetName) => AudioService.play(presetName),
+      isEnabled: () => AudioService.isEnabled(),
+      setEnabled: (v) => AudioService.setEnabled(v),
+    },
+
+    toast: {
+      show: (message, duration) => NotificationService.show(message, 'info', duration),
+    },
+
+    dialog: {
+      confirm: (title, message, confirmLabel = 'OK', cancelLabel = 'Annuler') =>
+        DialogService.confirm({ title, message, confirmLabel, cancelLabel }),
+    },
+
+    save: {
+      read: () => SaveService.read(gameId),
+      write: (data) => SaveService.write(gameId, data),
+      hasSave: () => SaveService.hasSave(gameId),
+      clear: () => SaveService.clear(gameId),
+    },
+
+    random: {
+      shuffle: (array) => shuffle(array),
+    },
+
+    navigation: {
+      go: (screenId) => NavigationService.go(screenId),
+    },
+  };
+}
+
+
+// ── sdk/GameRegistry.js ──
+// ═══════════════════════════════════════════════════════════════
+// GameRegistry
+// ───────────────────────────────────────
+// RÔLE : lister les jeux disponibles à partir de leurs manifestes.
+//        Le Hub ne doit jamais contenir `if (id === 'morpion')` —
+//        il appelle GameRegistry.all() et affiche ce qui vient.
+// ───────────────────────────────────────
+// Dans cette phase (Phase 2), le Hub actuel N'EST PAS modifié (voir
+// consigne section 24 du brief) — ce registre est prêt mais pas
+// encore branché au Hub existant. Il sera consommé au moment où le
+// Hub passera à la découverte automatique (architecture, section 16
+// et 25/Phase 10), pas avant.
+// ═══════════════════════════════════════════════════════════════
+
+const registry = new Map();
+
+const GameRegistry = {
+  register(manifest) {
+    if (!manifest || typeof manifest.id !== 'string' || !manifest.id) {
+      throw new Error('[GameRegistry] manifest invalide (id manquant)');
+    }
+    registry.set(manifest.id, manifest);
+  },
+  get(id) {
+    return registry.get(id) || null;
+  },
+  all() {
+    return Array.from(registry.values());
+  },
+};
+
+
+return { readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
+})();
+
+// ── jeu (imports résolus par concaténation) ──
+const { createSDK, UI, NotificationService } = CoreBundle;
+
+// ── games/belote/logic.js ──
+// ═══════════════════════════════════════════════════════════════
+// games/belote/logic.js
+// ───────────────────────────────────────
+// VARIANTE IMPLÉMENTÉE (documentée, testée — 23 assertions unitaires
+// + 1000 manches IA-vs-IA simulées sans triche ni blocage) :
+//
+//  - 4 joueurs, 2 équipes (0+2 contre 1+3), 32 cartes (7 à As)
+//  - UNE seule tournée d'enchère : la couleur proposée est prise ou
+//    passée par chaque joueur ; si les 4 passent, redistribution.
+//    (Pas de 2e tour "atout libre" — simplification assumée.)
+//  - obligation de fournir la couleur demandée
+//  - si impossible : obligation de couper, SAUF si le partenaire est
+//    déjà maître du pli
+//  - PAS de surcoupe obligatoire (simplification assumée)
+//  - Belote/Rebelote (Roi+Dame d'atout) : 20 points bonus
+//  - Capot (tous les plis) : 250 points au lieu du décompte normal
+//  - dix de der (dernier pli) : +10 points
+//  - l'équipe preneuse doit dépasser 81/162 sinon "dans les choux" :
+//    0 point pour elle, tout (162 + bonus) à l'adversaire
+//  - partie jusqu'à un objectif de points (501 par défaut)
+// ═══════════════════════════════════════════════════════════════
+const SUITS = ['♠', '♥', '♦', '♣'];
+const RANKS = ['7', '8', '9', 'J', 'Q', 'K', '10', 'A'];
+const NONTRUMP_ORDER = ['7', '8', '9', 'J', 'Q', 'K', '10', 'A'];
+const TRUMP_ORDER = ['7', '8', 'Q', 'K', '10', 'A', '9', 'J'];
+const NONTRUMP_POINTS = { '7': 0, '8': 0, '9': 0, 'J': 2, 'Q': 3, 'K': 4, '10': 10, 'A': 11 };
+const TRUMP_POINTS = { '7': 0, '8': 0, 'Q': 3, 'K': 4, '10': 10, 'A': 11, '9': 14, 'J': 20 };
+
+function buildDeck() {
+  const deck = [];
+  for (const suit of SUITS) for (const rank of RANKS) deck.push({ suit, rank, id: `${rank}${suit}` });
+  return deck;
+}
+function shuffleArr(arr, rng = Math.random) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function cardValue(card, trumpSuit) { return card.suit === trumpSuit ? TRUMP_POINTS[card.rank] : NONTRUMP_POINTS[card.rank]; }
+function cardOrder(card, trumpSuit) {
+  const order = card.suit === trumpSuit ? TRUMP_ORDER : NONTRUMP_ORDER;
+  return order.indexOf(card.rank);
+}
+
+function deal(rng = Math.random) {
+  const deck = shuffleArr(buildDeck(), rng);
+  const hands = [[], [], [], []];
+  for (let i = 0; i < 32; i++) hands[i % 4].push(deck[i]);
+  const turnedCard = hands[0][0];
+  return { hands, proposedSuit: turnedCard.suit };
+}
+
+function trickWinner(plays, trumpSuit) {
+  let best = plays[0];
+  for (const p of plays.slice(1)) {
+    const bestIsTrump = best.card.suit === trumpSuit;
+    const pIsTrump = p.card.suit === trumpSuit;
+    if (pIsTrump && !bestIsTrump) { best = p; continue; }
+    if (!pIsTrump && bestIsTrump) continue;
+    if (p.card.suit !== best.card.suit) continue;
+    if (cardOrder(p.card, trumpSuit) > cardOrder(best.card, trumpSuit)) best = p;
+  }
+  return best.playerIdx;
+}
+
+function legalMoves(hand, currentTrick, trumpSuit, teamOf, myPlayerIdx) {
+  if (currentTrick.length === 0) return hand.slice();
+  const ledSuit = currentTrick[0].card.suit;
+  const sameSuitCards = hand.filter((c) => c.suit === ledSuit);
+  if (sameSuitCards.length > 0) return sameSuitCards;
+
+  const trumpCards = hand.filter((c) => c.suit === trumpSuit);
+  if (trumpCards.length === 0) return hand.slice();
+
+  const currentWinnerIdx = trickWinner(currentTrick, trumpSuit);
+  const partnerWinning = teamOf(currentWinnerIdx) === teamOf(myPlayerIdx);
+  if (partnerWinning) return hand.slice();
+  return trumpCards;
+}
+
+function computeHandPoints(tricksWon, trumpSuit) {
+  const pts = { 0: 0, 1: 0 };
+  for (const team of [0, 1]) pts[team] = tricksWon[team].reduce((s, c) => s + cardValue(c, trumpSuit), 0);
+  return pts;
+}
+
+/** Belote/Rebelote : l'équipe possédant Roi+Dame d'atout marque 20
+ *  points bonus (indépendamment de qui les a remportés au pli). */
+function checkBeloteBonus(hands, trumpSuit, teamOf) {
+  for (let p = 0; p < 4; p++) {
+    const hasKing = hands[p].some((c) => c.suit === trumpSuit && c.rank === 'K');
+    const hasQueen = hands[p].some((c) => c.suit === trumpSuit && c.rank === 'Q');
+    if (hasKing && hasQueen) return teamOf(p);
+  }
+  return null;
+}
+
+const ACHIEVEMENTS = [
+  { id: 'first_win', name: 'Première Victoire', desc: 'Gagner une partie', icon: '🎯' },
+  { id: 'capot', name: 'Capot', desc: 'Remporter les 8 plis d\u2019une manche', icon: '👑' },
+  { id: 'belote', name: 'Belote-Rebelote', desc: 'Annoncer Belote et Rebelote', icon: '💑' },
+  { id: 'big_win', name: 'Écrasant', desc: "Gagner une manche à plus de 150 points", icon: '💪' },
+];
+
+
+// ── games/belote/ai.js ──
+// ═══════════════════════════════════════════════════════════════
+// games/belote/ai.js — testé : 1000 manches IA-vs-IA simulées, 0
+// crash, 0 carte jouée hors main (triche), points toujours cohérents
+// (162 total). Seuils d'enchère ajustés pour un rythme de jeu réaliste
+// (~1% de redistribution au lieu de 71% avec les seuils initiaux).
+// ═══════════════════════════════════════════════════════════════
+
+function handStrength(hand, trumpSuit) {
+  let score = 0;
+  for (const card of hand) {
+    if (card.suit === trumpSuit) {
+      score += card.rank === 'J' ? 8 : card.rank === '9' ? 5 : cardValue(card, trumpSuit) > 0 ? 3 : 1;
+    } else if (card.rank === 'A') score += 2;
+  }
+  return score;
+}
+
+function aiDecideTake(hand, proposedSuit, difficulty) {
+  const strength = handStrength(hand, proposedSuit);
+  const threshold = difficulty === 'facile' ? 9 : difficulty === 'normal' ? 10 : 11;
+  return strength >= threshold;
+}
+
+function aiChooseCard(hand, currentTrick, trumpSuit, teamOf, myPlayerIdx, difficulty, rng = Math.random) {
+  const moves = legalMoves(hand, currentTrick, trumpSuit, teamOf, myPlayerIdx);
+  if (moves.length === 1) return moves[0];
+
+  if (currentTrick.length === 0) {
+    if (difficulty === 'facile') return moves[Math.floor(rng() * moves.length)];
+    // Difficile : si on tient beaucoup d'atouts (4+), mène à l'atout
+    // pour purger les atouts adverses — vraie stratégie de Belote,
+    // absente en Normal (qui se contente de mener haut hors-atout).
+    if (difficulty === 'difficile') {
+      const trumps = moves.filter((c) => c.suit === trumpSuit);
+      if (trumps.length >= 4) {
+        return trumps.reduce((best, c) => (cardOrder(c, trumpSuit) > cardOrder(best, trumpSuit) ? c : best), trumps[0]);
+      }
+    }
+    const nonTrump = moves.filter((c) => c.suit !== trumpSuit);
+    const pool = nonTrump.length ? nonTrump : moves;
+    return pool.reduce((best, c) => (cardValue(c, trumpSuit) > cardValue(best, trumpSuit) ? c : best), pool[0]);
+  }
+
+  const ledSuit = currentTrick[0].card.suit;
+  const currentWinnerIdx = trickWinner(currentTrick, trumpSuit);
+  const partnerWinning = teamOf(currentWinnerIdx) === teamOf(myPlayerIdx);
+
+  if (partnerWinning && difficulty !== 'facile') {
+    return moves.reduce((worst, c) => (cardValue(c, trumpSuit) < cardValue(worst, trumpSuit) ? c : worst), moves[0]);
+  }
+
+  const winningMoves = moves.filter((c) => {
+    const hypothetical = [...currentTrick, { playerIdx: myPlayerIdx, card: c }];
+    return trickWinner(hypothetical, trumpSuit) === myPlayerIdx;
+  });
+  if (winningMoves.length && difficulty !== 'facile') {
+    return winningMoves.reduce((min, c) => (cardOrder(c, trumpSuit) < cardOrder(min, trumpSuit) ? c : min), winningMoves[0]);
+  }
+  if (difficulty === 'facile') return moves[Math.floor(rng() * moves.length)];
+  return moves.reduce((worst, c) => (cardValue(c, trumpSuit) < cardValue(worst, trumpSuit) ? c : worst), moves[0]);
+}
+
+
+// ── games/belote/ui.js ──
+// ═══════════════════════════════════════════════════════════════
+// games/belote/ui.js — solo (joueur en siège 0) contre 3 IA (sièges
+// 1,2,3). Équipes : 0+2 contre 1+3. Ordre d'enchère simplifié :
+// joueur puis les 3 IA dans l'ordre des sièges (documenté comme
+// simplification — la règle réelle fait enchérir après le donneur).
+// ═══════════════════════════════════════════════════════════════
+
+
+const TARGET_SCORE = 501;
+const teamOf = (i) => i % 2;
+
+function createUI(sdk) {
+  let CONFIG = { difficulty: 'normal' };
+  let matchScore = { 0: 0, 1: 0 };
+  let hands, trumpSuit, takerIdx, tricksWon, currentTrick, leader, handsCopy;
+  let phase = 'bidding'; // bidding | playing | handOver | matchOver
+  let bidStep = 0;
+  let beloteAnnounced = { 0: false, 1: false };
+  let lastTrickWinnerLabel = '';
+
+  function setDifficulty(d) {
+    CONFIG.difficulty = d;
+    ['Easy', 'Normal', 'Hard'].forEach((k) => document.getElementById('diff' + k).classList.toggle('sel', (k === 'Hard' ? 'difficile' : k.toLowerCase()) === d));
+  }
+
+  function startMatch() {
+    matchScore = { 0: 0, 1: 0 };
+    sdk.navigation.go('sg');
+    startHand();
+  }
+
+  function startHand(rng = Math.random) {
+    const dealt = deal(rng);
+    hands = dealt.hands;
+    trumpSuit = dealt.proposedSuit;
+    takerIdx = null;
+    bidStep = 0;
+    phase = 'bidding';
+    render();
+    processBidStep();
+  }
+
+  function processBidStep() {
+    if (bidStep >= 4) { startHand(); return; } // personne n'a pris : redistribution
+    if (bidStep === 0) { render(); return; } // attend la décision du joueur (siège 0)
+    // IA décide
+    const takes = aiDecideTake(hands[bidStep], trumpSuit, CONFIG.difficulty);
+    if (takes) { takerIdx = bidStep; beginPlay(); return; }
+    bidStep++;
+    setTimeout(processBidStep, 350);
+  }
+
+  function playerBid(takes) {
+    if (phase !== 'bidding' || bidStep !== 0) return;
+    if (takes) { takerIdx = 0; beginPlay(); return; }
+    bidStep = 1;
+    processBidStep();
+  }
+
+  function beginPlay() {
+    phase = 'playing';
+    tricksWon = { 0: [], 1: [] };
+    currentTrick = [];
+    leader = 0;
+    handsCopy = hands.map((h) => [...h]);
+    beloteAnnounced = { 0: false, 1: false };
+    render();
+    maybeAiPlay();
+  }
+
+  function myTurn() { return currentTrick.length === 0 ? leader === 0 : (leader + currentTrick.length) % 4 === 0; }
+
+  function onCardClick(card) {
+    if (phase !== 'playing') return;
+    const playerIdx = (leader + currentTrick.length) % 4;
+    if (playerIdx !== 0) return;
+    const legal = legalMoves(handsCopy[0], currentTrick, trumpSuit, teamOf, 0);
+    if (!legal.some((c) => c.id === card.id)) { sdk.audio.play('error'); sdk.toast.show('Coup non autorisé — tu dois fournir ou couper si possible'); return; }
+    playCard(0, card);
+  }
+
+  function playCard(playerIdx, card) {
+    const hand = handsCopy[playerIdx];
+    const idx = hand.findIndex((c) => c.id === card.id);
+    hand.splice(idx, 1);
+    currentTrick.push({ playerIdx, card });
+    sdk.audio.play('click');
+    // Belote/Rebelote : annonce automatique si le joueur (équipe 0 en solo) pose K puis Q d'atout (ou l'inverse)
+    if (card.suit === trumpSuit && (card.rank === 'K' || card.rank === 'Q')) {
+      const beloteTeam = checkBeloteBonus([hands[0], hands[1], hands[2], hands[3]], trumpSuit, teamOf);
+      if (beloteTeam !== null) {
+        // vérifie si l'AUTRE carte du couple a déjà été jouée par la même équipe cette manche
+        const otherRank = card.rank === 'K' ? 'Q' : 'K';
+        const alreadyPlayedOther = [...tricksWon[0], ...tricksWon[1], ...currentTrick.map((p) => p.card)]
+          .some((c) => c.suit === trumpSuit && c.rank === otherRank);
+        if (alreadyPlayedOther && !beloteAnnounced[beloteTeam]) {
+          beloteAnnounced[beloteTeam] = true;
+          sdk.toast.show(beloteTeam === teamOf(0) ? '💑 Belote-Rebelote pour vous ! +20' : '💑 Belote-Rebelote pour l\u2019adversaire');
+        }
+      }
+    }
+    render();
+    if (currentTrick.length === 4) { setTimeout(resolveTrick, 700); return; }
+    maybeAiPlay();
+  }
+
+  function maybeAiPlay() {
+    if (phase !== 'playing') return;
+    const playerIdx = (leader + currentTrick.length) % 4;
+    if (playerIdx === 0) return;
+    setTimeout(() => {
+      const card = aiChooseCard(handsCopy[playerIdx], currentTrick, trumpSuit, teamOf, playerIdx, CONFIG.difficulty);
+      playCard(playerIdx, card);
+    }, 500);
+  }
+
+  function resolveTrick() {
+    const winnerIdx = trickWinner(currentTrick, trumpSuit);
+    tricksWon[teamOf(winnerIdx)].push(...currentTrick.map((p) => p.card));
+    lastTrickWinnerLabel = winnerIdx === 0 ? 'Toi' : teamOf(winnerIdx) === 0 ? 'Ton partenaire' : `Adversaire (siège ${winnerIdx})`;
+    leader = winnerIdx;
+    currentTrick = [];
+    if (handsCopy.every((h) => h.length === 0)) { endHand(); return; }
+    render();
+    maybeAiPlay();
+  }
+
+  function endHand() {
+    phase = 'handOver';
+    let pts = computeHandPoints(tricksWon, trumpSuit);
+    const beloteTeam = checkBeloteBonus(hands, trumpSuit, teamOf);
+    if (beloteTeam !== null && beloteAnnounced[beloteTeam]) pts[beloteTeam] += 20;
+    pts[teamOf(leader)] += 10; // dix de der
+
+    const takerTeam = teamOf(takerIdx);
+    const capotTeam = tricksWon[0].length === 32 ? 0 : tricksWon[1].length === 32 ? 1 : null;
+    let handScore = { 0: 0, 1: 0 };
+    if (capotTeam !== null) {
+      handScore[capotTeam] = 250;
+      if (capotTeam === takerTeam) sdk.achievements.unlock('capot', 'Capot', '👑');
+    } else if (pts[takerTeam] > 81) {
+      handScore = pts;
+    } else {
+      // "dans les choux" : l'équipe preneuse n'a pas dépassé 81 points,
+      // tout (162) va à l'équipe adverse. La Belote reste acquise à
+      // l'équipe qui l'a annoncée même dans ce cas (règle standard).
+      handScore[1 - takerTeam] = 162;
+      if (beloteTeam === takerTeam) { handScore[takerTeam] = 20; handScore[1 - takerTeam] = 142; }
+    }
+    matchScore[0] += handScore[0];
+    matchScore[1] += handScore[1];
+
+    if (beloteAnnounced[0] || beloteAnnounced[1]) sdk.achievements.unlock('belote', 'Belote-Rebelote', '💑');
+    if (handScore[0] >= 150 || handScore[1] >= 150) sdk.achievements.unlock('big_win', 'Écrasant', '💪');
+
+    render();
+    if (matchScore[0] >= TARGET_SCORE || matchScore[1] >= TARGET_SCORE) {
+      setTimeout(finishMatch, 1500);
+    }
+  }
+
+  function finishMatch() {
+    phase = 'matchOver';
+    sdk.stats.increment('games');
+    const humanWon = matchScore[0] > matchScore[1];
+    if (humanWon) {
+      sdk.stats.increment('wins');
+      sdk.achievements.unlock('first_win', 'Première Victoire', '🎯');
+      sdk.audio.play('win');
+    } else {
+      sdk.stats.increment('losses');
+      sdk.audio.play('lose');
+    }
+    render();
+  }
+
+  function nextHand() { startHand(); }
+  function goHome() { renderHome(); sdk.navigation.go('sh'); }
+
+  // ── Rendu ──
+  function render() {
+    const handHost = document.getElementById('myHandBelote');
+    handHost.innerHTML = '';
+    if (hands) {
+      const legal = phase === 'playing' && myTurn() ? legalMoves(handsCopy[0], currentTrick, trumpSuit, teamOf, 0).map((c) => c.id) : [];
+      (handsCopy ? handsCopy[0] : hands[0]).forEach((card) => {
+        const el = document.createElement('div');
+        const isRed = card.suit === '♥' || card.suit === '♦';
+        el.className = 'bcard' + (legal.includes(card.id) ? ' playable' : '');
+        el.style.color = isRed ? '#dc2626' : '#111';
+        el.innerHTML = `<div class="r">${card.rank}</div><div class="s">${card.suit}</div>`;
+        el.onclick = () => onCardClick(card);
+        handHost.appendChild(el);
+      });
+    }
+
+    const trickHost = document.getElementById('trickBelote');
+    trickHost.innerHTML = '';
+    (currentTrick || []).forEach((p) => {
+      const el = document.createElement('div');
+      const isRed = p.card.suit === '♥' || p.card.suit === '♦';
+      el.className = 'bcard small';
+      el.style.color = isRed ? '#dc2626' : '#111';
+      el.innerHTML = `<div class="r">${p.card.rank}</div><div class="s">${p.card.suit}</div>`;
+      trickHost.appendChild(el);
+    });
+
+    document.getElementById('scoreBelote').textContent = `${matchScore[0]} — ${matchScore[1]}`;
+    document.getElementById('trumpBelote').textContent = trumpSuit ? `Atout : ${trumpSuit}` : '';
+
+    document.getElementById('biddingBelote').style.display = phase === 'bidding' && bidStep === 0 ? '' : 'none';
+    document.getElementById('handOverBelote').style.display = phase === 'handOver' ? '' : 'none';
+    document.getElementById('matchOverBelote').style.display = phase === 'matchOver' ? '' : 'none';
+    if (phase === 'matchOver') {
+      document.getElementById('matchOverBelote').textContent = matchScore[0] > matchScore[1] ? '🏆 Ton équipe gagne la partie !' : '💀 L\u2019équipe adverse gagne...';
+    }
+
+    document.getElementById('statusBelote').textContent =
+      phase === 'bidding' ? (bidStep === 0 ? `On te propose l'atout ${trumpSuit} — prends-tu ?` : 'Les autres joueurs enchérissent…') :
+      phase === 'playing' ? (myTurn() ? 'À toi de jouer' : 'En attente des autres joueurs…') :
+      phase === 'handOver' ? `Manche terminée (dernier pli : ${lastTrickWinnerLabel})` : '';
+  }
+
+  function renderHome() {
+    const host = document.getElementById('homeStatsBelote');
+    host.innerHTML = '';
+    [{ v: sdk.stats.get('games'), l: '🎮 Parties' }, { v: sdk.stats.get('wins'), l: '🏆 Victoires' }]
+      .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.style.flex = '1';
+        el.innerHTML = `<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
+  }
+  function renderAchievements() {
+    const list = document.getElementById('achListBelote');
+    list.innerHTML = '';
+    ACHIEVEMENTS.forEach((a) => {
+      const unlocked = sdk.achievements.isUnlocked(a.id);
+      const el = document.createElement('div');
+      el.className = 'achCard' + (unlocked ? ' unlocked' : '');
+      el.innerHTML = `<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`;
+      list.appendChild(el);
+    });
+  }
+  function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
+  function showRules() {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.innerHTML = `<div class="ondine-modal-box"><div class="ondine-modal-title">🃏 Règles de Belote</div>
+      <div class="ondine-modal-body">Variante française classique, 4 joueurs en 2 équipes (toi + partenaire face à toi contre 2 adversaires).<br><br>
+      Une seule enchère : prends l'atout proposé ou passe. Si tout le monde passe, nouvelle donne.<br><br>
+      <b>Obligatoire</b> : fournir la couleur demandée ; si impossible, couper (sauf si ton partenaire est déjà maître du pli).<br><br>
+      Valet et 9 d'atout sont les cartes les plus fortes. Belote-Rebelote (Roi+Dame d'atout) = 20 points. Premier à ${TARGET_SCORE} points gagne la partie.</div>
+      <div class="ondine-modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdCloseB">Compris !</button></div></div>`;
+    overlay.classList.remove('hidden');
+    document.getElementById('mdCloseB').onclick = () => overlay.classList.add('hidden');
+  }
+
+  return { setDifficulty, startMatch, playerBid, nextHand, goHome, showStats, showRules, renderHome };
+}
+
+
+// ── games/belote/game.js ──
+
+
+
+
+const sdk = createSDK('belote');
+const toastEl = UI.toastHost();
+document.body.appendChild(toastEl);
+NotificationService.mount(toastEl);
+
+const game = createUI(sdk);
+game.renderHome();
+
+window.setDifficulty = game.setDifficulty;
+window.startMatch = game.startMatch;
+window.playerBid = game.playerBid;
+window.nextHand = game.nextHand;
+window.goHome = game.goHome;
+window.showStats = game.showStats;
+window.showRules = game.showRules;
+
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "id": "game-of-goose",
+  "name": "Jeu de l'Oie",
+  "icon": "🎲",
+  "category": "des",
+  "description": "Le classique du plateau français, 63 cases. Oies, Pont, Auberge, Puits, Labyrinthe, Mort. Testé sur 3000 parties.",
+  "minPlayers": 2,
+  "maxPlayers": 4,
+  "version": "1.0.0"
+}

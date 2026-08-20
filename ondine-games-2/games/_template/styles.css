@@ -1,0 +1,17 @@
+/* games/_template/styles.css — uniquement ce qui est spécifique à
+   TON jeu. Boutons/toast/modale/écrans viennent déjà de
+   core/design-tokens.css, ne les redéfinis pas ici. */
+
+#sh, #sg {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+#score {
+  font-family: 'Fredoka One', cursive;
+  font-size: 48px;
+  color: var(--c1);
+}

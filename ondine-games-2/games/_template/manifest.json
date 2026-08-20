@@ -1,0 +1,10 @@
+{
+  "id": "_template",
+  "name": "Nom du jeu",
+  "icon": "🎮",
+  "category": "reflexion",
+  "description": "Une phrase qui décrit le jeu en langage clair.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}

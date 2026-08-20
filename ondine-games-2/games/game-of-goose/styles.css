@@ -1,0 +1,29 @@
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;}
+#homeStatsGoose{display:flex;gap:7px;width:100%;max-width:280px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:300px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:10px 6px;cursor:pointer;text-align:center;font-size:12px;font-weight:800;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+
+#sg{align-items:center;padding:10px;gap:8px;}
+#gooseTurn{font-family:'Fredoka One',cursive;font-size:14px;color:var(--c2);}
+#gooseLog{font-size:11px;color:var(--text2);text-align:center;min-height:14px;}
+#gooseOverBanner{font-family:'Fredoka One',cursive;color:var(--co);font-size:15px;}
+
+#gooseBoard{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;width:100%;max-width:340px;max-height:50vh;overflow-y:auto;}
+.gsquare{position:relative;aspect-ratio:1;background:var(--glass);border:1px solid var(--border);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:8px;}
+.gnum{color:var(--text2);}
+.gspecial{font-size:11px;}
+.gtoken{position:absolute;width:8px;height:8px;border-radius:50%;bottom:2px;}
+.gtoken.p0{background:var(--c1);left:2px;}
+.gtoken.p1{background:var(--cm);right:2px;}
+.gtoken.p2{background:var(--cg);left:2px;top:2px;}
+.gtoken.p3{background:var(--co);right:2px;top:2px;}

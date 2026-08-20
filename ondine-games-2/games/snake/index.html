@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Snake × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/design-tokens.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">SNAKE</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStatsSnake"></div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🐍 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="snake-hud">
+    <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
+    <span id="snakeScore"></span>
+    <span id="snakeBest"></span>
+  </div>
+  <div id="snakeOverBanner" style="display:none;">💀 Game Over</div>
+  <div id="snakeGrid"></div>
+  <div class="dpad">
+    <div></div><div class="dpad-btn" onclick="handleDirection('up')">⬆️</div><div></div>
+    <div class="dpad-btn" onclick="handleDirection('left')">⬅️</div><div></div><div class="dpad-btn" onclick="handleDirection('right')">➡️</div>
+    <div></div><div class="dpad-btn" onclick="handleDirection('down')">⬇️</div><div></div>
+  </div>
+  <button class="ondine-btn ondine-btn-secondary" onclick="confirmNewGame()">🔄 Nouvelle partie</button>
+</div>
+
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListSnake"></div>
+</div>
+
+<script type="module" src="./game.js"></script>
+</body>
+</html>

@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Puzzle Mosaïque</title>
+<meta name="theme-color" content="#0a0620">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   design-tokens.css
+   ───────────────────────────────────────
+   Palette, typographie, rayons, ombres, glassmorphism — déjà
+   identiques (valeurs exactes) dans les 18 jeux actuels et dans les
+   composants UI.* du CoreBundle Batch 1. Un commentaire du code
+   d'origine le confirmait déjà : "Le style visuel vient TOUJOURS de
+   core/design-tokens.css via les variables --c1, --glass, etc. Ne
+   jamais coder une couleur en dur." Ce fichier formalise ce qui
+   existait déjà en pratique, sans rien réinventer.
+
+   DOIT rester spécifique par jeu (ne PAS mettre ici) : couleurs
+   d'accent de cartes de jeu (--card-c par jeu dans le Hub), thème
+   des tuiles Mahjong, couleurs rouge/noir des cartes à jouer.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Fond */
+  --bg: #06081e;
+  --bg2: #090c24;
+
+  /* Accents */
+  --c1: #38bdf8;
+  --c2: #7dd3fc;
+  --c3: #bae6fd;
+  --cp: #818cf8;
+  --cg: #34d399;
+  --co: #fbbf24;
+  --cr: #f87171;
+  --cm: #f472b6;
+
+  /* Glassmorphism */
+  --glass: rgba(255, 255, 255, .05);
+  --glass2: rgba(255, 255, 255, .09);
+  --glass3: rgba(56, 189, 248, .07);
+  --border: rgba(56, 189, 248, .12);
+  --border2: rgba(56, 189, 248, .22);
+
+  /* Texte */
+  --text: #e0f2fe;
+  --text2: #94a3b8;
+
+  /* Rayons */
+  --r: 14px;
+  --r2: 20px;
+
+  /* Ombres */
+  --sh: 0 4px 20px rgba(0, 0, 0, .5);
+  --sh2: 0 8px 32px rgba(0, 0, 0, .6);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(56, 189, 248, .12), transparent 50%),
+    radial-gradient(ellipse at 90% 10%, rgba(129, 140, 248, .10), transparent 45%),
+    var(--bg);
+}
+
+/* ── Utilitaire générique (modales statiques, etc.) ── */
+.hidden { display: none !important; }
+
+/* ── Écrans (pattern showScreen / NavigationService.go) ── */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.screen.hidden { display: none !important; }
+
+/* ── Boutons ── */
+.ondine-btn {
+  font-family: 'Fredoka One', cursive;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform .12s;
+}
+.ondine-btn:active { transform: scale(.955); }
+.ondine-btn-primary {
+  background: linear-gradient(135deg, #3730a3, #0e7490);
+  color: #fff;
+  padding: 15px 28px;
+  font-size: 17px;
+  box-shadow: 0 6px 24px rgba(14, 116, 144, .45);
+}
+.ondine-btn-primary:disabled { opacity: .35; box-shadow: none; }
+.ondine-btn-secondary {
+  background: var(--glass);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  padding: 11px 22px;
+  font-weight: 800;
+  font-size: 13px;
+  font-family: 'Nunito', sans-serif;
+}
+.ondine-icon-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Toast (UI.toastHost / NotificationService) ── */
+.ondine-toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(15, 25, 60, .92);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  backdrop-filter: blur(12px);
+  z-index: 9999;
+  opacity: 0;
+  transition: all .3s;
+  white-space: nowrap;
+  max-width: 80vw;
+  text-align: center;
+  pointer-events: none;
+}
+.ondine-toast-show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Modale (UI.modal / DialogService) ── */
+.ondine-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(6, 8, 30, .85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.ondine-modal-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 22px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: var(--sh2);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.ondine-modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 17px;
+  color: var(--c2);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.ondine-modal-body {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.ondine-modal-actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Badge / statCard / achievementCard (UI.*) ── */
+.ondine-badge {
+  display: inline-block;
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 800;
+  background: var(--glass);
+  border: 1px solid var(--border);
+}
+.ondine-stat-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.ondine-stat-value { font-family: 'Fredoka One', cursive; font-size: 19px; color: var(--c1); }
+.ondine-stat-label { font-size: 8px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.ondine-ach-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 9px 11px;
+}
+.ondine-ach-card.unlocked { border-color: rgba(251, 191, 36, .35); background: rgba(251, 191, 36, .05); }
+.ondine-ach-icon { font-size: 22px; }
+.ondine-ach-name { font-weight: 800; font-size: 12px; }
+.ondine-ach-desc { font-size: 9px; color: var(--text2); }
+
+/* ── Logo (pattern commun d'écran d'accueil) ── */
+.ondine-logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 8vw, 40px);
+  background: linear-gradient(160deg, #e0f2fe, #7dd3fc 35%, #fff 55%, #bae6fd 80%, #e0f2fe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ondine-logo-sub {
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--c2);
+  opacity: .65;
+}
+
+</style>
+<style>
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── Accueil ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px;}
+.pc-mascot{font-size:52px;}
+#homeStatsPuzzleChats{display:flex;gap:8px;width:100%;max-width:340px;margin:6px 0;}
+.char-picker-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
+#characterPicker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:380px;}
+.char-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer;}
+.char-card.sel{border-color:var(--c1);background:var(--glass3);}
+.char-symbol{font-size:24px;}
+.char-name{font-size:8px;color:var(--text2);margin-top:2px;}
+.diff-row{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:380px;justify-content:center;}
+.diff-card{flex:1;min-width:80px;background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;}
+.diff-card.sel{border-color:var(--c1);background:var(--glass3);}
+.diff-card .dc-name{font-weight:800;font-size:12px;}
+.diff-card .dc-clues{font-size:9px;color:var(--text2);}
+
+/* ── Jeu ── */
+#sg{padding:8px;gap:8px;align-items:center;position:relative;}
+.pc-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:460px;}
+.pc-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
+#puzzleGrid{display:grid;grid-template-columns:repeat(8,1fr);width:100%;max-width:460px;aspect-ratio:1;border-radius:10px;overflow:hidden;box-shadow:var(--sh2);border:2.5px solid var(--text);}
+/* Polish desktop (même correctif que les autres jeux à grille du projet,
+   même cause : max-width jamais adapté au-delà du mobile). Additif. */
+@media (min-width:900px){#puzzleGrid{max-width:620px;}}
+.pc-cell{display:flex;align-items:center;justify-content:center;cursor:pointer;border:.5px solid rgba(255,255,255,.06);transition:transform .1s;}
+.pc-token{position:relative;width:78%;height:78%;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:min(3.4vw,17px);box-shadow:0 1px 3px rgba(0,0,0,.4);}
+.pc-token b{position:absolute;bottom:-2px;right:-1px;font-size:8px;font-weight:900;color:rgba(255,255,255,.85);background:rgba(0,0,0,.35);border-radius:4px;padding:0 2px;line-height:1.3;}
+.cat-btn .pc-token{width:100%;height:100%;font-size:18px;}
+.cat-btn .pc-token b{font-size:8px;}
+.pc-cell.given{cursor:default;filter:brightness(.82);}
+.pc-cell.selected{outline:2px solid var(--c1);outline-offset:-2px;z-index:2;position:relative;}
+.pc-cell.conflict{background:rgba(248,113,113,.35) !important;}
+.pc-cell:not(.given):active{transform:scale(.92);}
+#catPalette{display:flex;gap:6px;width:100%;max-width:460px;justify-content:center;flex-wrap:wrap;}
+.cat-btn{width:42px;height:42px;border-radius:10px;background:var(--glass);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;}
+.cat-btn:active{transform:scale(.9);}
+.erase-btn{font-size:16px;background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.3);}
+.pc-actions{display:flex;gap:8px;width:100%;max-width:460px;}
+.pc-actions button{flex:1;}
+#genOverlay{display:none;position:absolute;inset:0;background:rgba(6,8,30,.85);backdrop-filter:blur(6px);align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:50;border-radius:16px;}
+#genOverlay .spin{font-size:40px;animation:pcSpin 1s linear infinite;}
+@keyframes pcSpin{to{transform:rotate(360deg);}}
+
+/* ── Résultat (overlay, plateau reste visible derrière) ── */
+#sresult{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+#resultIcon{font-size:56px;}
+#resultTitle{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);}
+.result-stats{display:flex;gap:8px;width:100%;max-width:320px;margin:8px 0;}
+.result-stat{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 6px;}
+.result-stat .rv{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c1);}
+.result-stat .rl{font-size:8px;color:var(--text2);text-transform:uppercase;}
+.result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
+.result-btns button{flex:1;min-width:130px;}
+
+</style>
+</head>
+<body>
+
+<!-- ACCUEIL -->
+<div class="screen" id="sh">
+  <div class="pc-mascot">🧩</div>
+  <div class="ondine-logo">PUZZLE MOSAÏQUE</div>
+  <div class="ondine-logo-sub">Sudoku irrégulier 8×8</div>
+  <div id="homeStatsPuzzleMosaique"></div>
+  <div class="char-picker-label">Choisis ton personnage</div>
+  <div id="characterPicker"></div>
+  <div class="diff-row">
+    <div class="diff-card sel" data-diff="facile" onclick="selectDifficulty('facile')"><div class="dc-name">🌱 Facile</div><div class="dc-clues">34-38 indices</div></div>
+    <div class="diff-card" data-diff="normal" onclick="selectDifficulty('normal')"><div class="dc-name">⚡ Normal</div><div class="dc-clues">28-32 indices</div></div>
+    <div class="diff-card" data-diff="difficile" onclick="selectDifficulty('difficile')"><div class="dc-name">🔥 Difficile</div><div class="dc-clues">24-27 indices</div></div>
+    <div class="diff-card" data-diff="expert" onclick="selectDifficulty('expert')"><div class="dc-name">💀 Expert</div><div class="dc-clues">20-23 indices</div></div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startNewPuzzle()">🧩 Nouveau puzzle</button>
+  <button class="ondine-btn ondine-btn-secondary" id="resumeBtnPC" onclick="resumePuzzle()" style="display:none;">↩️ Reprendre</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<!-- JEU -->
+<div class="screen hidden" id="sg">
+  <div class="pc-hud">
+    <div class="ondine-icon-btn" onclick="confirmQuit()">🏠</div>
+    <div class="pc-hud-item">⏱ <span id="gameTimer">0:00</span></div>
+    <div class="pc-hud-item">💡 <span id="hintsUsedLabel">0</span></div>
+    <div class="pc-hud-item" id="diffLabel">normal</div>
+  </div>
+  <div id="puzzleGrid"></div>
+  <div id="catPalette"></div>
+  <div class="pc-actions">
+    <button class="ondine-btn ondine-btn-secondary" onclick="useHint()">💡 Indice</button>
+  </div>
+  <div id="genOverlay"><div class="spin">🐾</div><div>Génération du puzzle…</div></div>
+</div>
+
+<!-- RÉSULTAT (overlay — la grille #sg reste visible en dessous) -->
+<div class="screen hidden" id="sresult">
+  <div id="resultIcon">🏆</div>
+  <div id="resultTitle">PUZZLE RÉSOLU !</div>
+  <div class="result-stats">
+    <div class="result-stat"><div class="rv" id="resultTime">0:00</div><div class="rl">Temps</div></div>
+    <div class="result-stat"><div class="rv" id="resultHints">0</div><div class="rl">Indices</div></div>
+    <div class="result-stat"><div class="rv" id="resultDiff">normal</div><div class="rl">Difficulté</div></div>
+  </div>
+  <div class="result-btns">
+    <button class="ondine-btn ondine-btn-primary" onclick="nextPuzzle()">🧩 Puzzle suivant</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="replaySame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="resultToHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- STATS / SUCCÈS -->
+<div class="screen hidden" id="sstats">
+  <div class="ondine-icon-btn" onclick="goHome()">←</div>
+  <div id="achListPC"></div>
+</div>
+
+<script>
+const CoreBundle = (function() {
+// ── data/characters.js ──
+// ═══════════════════════════════════════════════════════════════
+// core/data/characters.js
+// Bibliothèque de personnages partagée entre les jeux Ondine Games
+// qui proposent un choix d'animal cosmétique (Puzzle Mosaïque,
+// Labyrinthe, et les futurs jeux qui en auraient besoin).
+// Extensible : ajouter un objet à ce tableau suffit à faire
+// apparaître un nouveau personnage dans TOUS les jeux qui
+// consomment cette liste — aucune duplication de logique par animal.
+// ═══════════════════════════════════════════════════════════════
+const CHARACTERS = [
+  { id: 'cat',    name: 'Chat',      symbol: '🐱' },
+  { id: 'dog',    name: 'Chien',     symbol: '🐶' },
+  { id: 'rat',    name: 'Rat',       symbol: '🐭' },
+  { id: 'fox',    name: 'Renard',    symbol: '🦊' },
+  { id: 'rabbit', name: 'Lapin',     symbol: '🐰' },
+  { id: 'panda',  name: 'Panda',     symbol: '🐼' },
+  { id: 'frog',   name: 'Grenouille',symbol: '🐸' },
+  { id: 'koala',  name: 'Koala',     symbol: '🐨' },
+];
+
+const DEFAULT_CHARACTER_ID = 'cat';
+
+function getCharacter(id) {
+  return CHARACTERS.find(c => c.id === id) || CHARACTERS.find(c => c.id === DEFAULT_CHARACTER_ID);
+}
+
+
+// ── storage/keys.js ──
+// ═══════════════════════════════════════════════════════════════
+// core/storage/keys.js
+// ───────────────────────────────────────
+// RÔLE : point UNIQUE de calcul des clés localStorage, et mécanisme
+//        de migration transparente depuis les anciennes conventions
+//        (og_<id>_v1, <id>_ondine_v1, ondine_stats_<id>, sol_*,
+//        sud_*, y*...) vers la nouvelle convention :
+//
+//            ondine.games.<gameId>.<namespace>
+//
+//        namespace ∈ { stats, achievements, save, settings }
+//
+// NE DOIT JAMAIS : être importé directement par un jeu — seuls les
+//        services (StatsService, AchievementsService, SaveService)
+//        l'utilisent. Un jeu ne voit jamais une clé localStorage.
+//
+// GARANTIE : aucune sauvegarde existante n'est perdue. Au premier
+//        accès après mise à jour, si la nouvelle clé est absente,
+//        l'ancienne est lue, migrée vers la nouvelle clé, puis
+//        utilisée exclusivement ensuite. L'ancienne clé n'est
+//        JAMAIS supprimée automatiquement (voir section 24 de
+//        l'architecture — suppression = décision humaine ultérieure,
+//        pas automatique).
+// ═══════════════════════════════════════════════════════════════
+
+function newKey(gameId, namespace) {
+  return `ondine.games.${gameId}.${namespace}`;
+}
+
+/**
+ * Registre des anciennes clés, par jeu. Deux formes possibles :
+ *  - { type: 'blob', key, fields } : une seule ancienne clé JSON
+ *    contenant plusieurs namespaces en sous-champs (ex: Batch 2/3 :
+ *    { stats, achievements, save }).
+ *  - { type: 'flat', keys: { stats: 'xxx', achievements: 'yyy' } } :
+ *    une ancienne clé dédiée par namespace (ex: Batch 1 SDK,
+ *    ondine_stats_<id> / ondine_ach_<id> / ondine_save_<id>).
+ *
+ * Volontairement minimal : seul Morpion (jeu pilote) est renseigné
+ * pour l'instant. Les 17 autres entrées seront ajoutées au moment
+ * où chaque jeu sera réellement migré (voir architecture, section 21)
+ * — les y ajouter maintenant sans les tester serait spéculatif.
+ */
+const LEGACY_REGISTRY = {
+  morpion: { type: 'blob', key: 'og_morpion_v1', fields: ['stats', 'achievements'] },
+};
+
+function readLegacy(gameId, namespace) {
+  const entry = LEGACY_REGISTRY[gameId];
+  if (!entry) return undefined;
+
+  if (entry.type === 'blob') {
+    if (!entry.fields.includes(namespace)) return undefined;
+    try {
+      const raw = localStorage.getItem(entry.key);
+      if (raw === null) return undefined;
+      const blob = JSON.parse(raw);
+      return namespace in blob ? blob[namespace] : undefined;
+    } catch (e) {
+      console.warn('[storage/keys] ancienne clé blob corrompue pour', gameId, e);
+      return undefined;
+    }
+  }
+
+  if (entry.type === 'flat') {
+    const legacyKey = entry.keys && entry.keys[namespace];
+    if (!legacyKey) return undefined;
+    try {
+      const raw = localStorage.getItem(legacyKey);
+      return raw === null ? undefined : JSON.parse(raw);
+    } catch (e) {
+      console.warn('[storage/keys] ancienne clé plate corrompue pour', gameId, e);
+      return undefined;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Lit `namespace` pour `gameId`. Cherche d'abord la nouvelle clé ;
+ * si absente, cherche l'ancienne (si le jeu est dans LEGACY_REGISTRY),
+ * et si trouvée, MIGRE immédiatement (écrit la nouvelle clé) avant
+ * de retourner la valeur. Retourne `undefined` si rien n'existe nulle
+ * part (au service appelant de fournir sa propre valeur par défaut).
+ */
+function readNamespaced(gameId, namespace) {
+  const key = newKey(gameId, namespace);
+  const raw = localStorage.getItem(key);
+  if (raw !== null) {
+    try { return JSON.parse(raw); }
+    catch (e) { console.warn('[storage/keys] nouvelle clé corrompue pour', gameId, namespace, e); return undefined; }
+  }
+
+  const legacyValue = readLegacy(gameId, namespace);
+  if (legacyValue !== undefined) {
+    writeNamespaced(gameId, namespace, legacyValue);
+    console.info(`[storage/keys] migration ${gameId}.${namespace} : ancienne clé → ${key}`);
+    return legacyValue;
+  }
+
+  return undefined;
+}
+
+function writeNamespaced(gameId, namespace, value) {
+  localStorage.setItem(newKey(gameId, namespace), JSON.stringify(value));
+}
+
+function removeNamespaced(gameId, namespace) {
+  localStorage.removeItem(newKey(gameId, namespace));
+  // L'ancienne clé n'est jamais supprimée ici — voir garantie ci-dessus.
+}
+
+function hasNamespaced(gameId, namespace) {
+  if (localStorage.getItem(newKey(gameId, namespace)) !== null) return true;
+  return readLegacy(gameId, namespace) !== undefined;
+}
+
+
+// ── engines/RandomEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Random Engine
+// ───────────────────────────────────────
+// RÔLE : mélange Fisher-Yates générique.
+// ───────────────────────────────────────
+// DÉVIATION DOCUMENTÉE par rapport au CoreBundle Batch 1 : la version
+// d'origine (`shuffle(arr)`) mélangeait EN PLACE et retournait le
+// même tableau. Or les 8+ implémentations dupliquées dans les jeux
+// Batch 2/3 (`shuffleArr`) font toutes une COPIE et ne mutent jamais
+// le tableau source — c'est le comportement majoritaire réellement
+// utilisé (8+ jeux contre 1 seul, Uno, sur l'ancienne version
+// mutante). Kevin a explicitement demandé de "respecter le
+// comportement réellement utilisé par les jeux" plutôt que de
+// recopier l'ancienne version sans vérifier — c'est ce qui est fait
+// ici : shuffle() ne mute JAMAIS le tableau passé, retourne toujours
+// une nouvelle copie mélangée.
+//
+// Conséquence pour la migration d'Uno (non faite dans cette phase) :
+// son code interne compte actuellement sur la mutation en place ;
+// migrer Uno vers ce RandomEngine nécessitera de vérifier ses appels
+// à shuffle() un par un, pas juste un remplacement mécanique.
+// ═══════════════════════════════════════════════════════════════
+
+/** Fisher-Yates — retourne TOUJOURS une nouvelle copie mélangée,
+ *  ne modifie jamais le tableau passé en argument. */
+function shuffle(array) {
+  const a = [...array];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+
+// ── engines/GridEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Grid Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur une grille 2D (création, accès,
+//        voisinage, flood fill). Ne connaît ni Puissance 4, ni
+//        Démineur, ni Sudoku, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir le mot "mine", "disque", "case sûre" ou
+//        toute notion spécifique à un jeu.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1 (déjà utilisé par
+// Puissance 4 et Démineur). Engine optionnel : un jeu l'importe
+// directement s'il en a besoin, pas obligatoirement via le SDK (pas
+// d'état interne, donc pas de risque d'accès croisé entre jeux).
+// ═══════════════════════════════════════════════════════════════
+
+/** Crée une grille rows×cols, chaque cellule initialisée à `fill`. */
+function createGrid(rows, cols, fill = null) {
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () => (typeof fill === 'function' ? fill() : fill))
+  );
+}
+
+function inBounds(grid, r, c) {
+  return r >= 0 && r < grid.length && c >= 0 && c < grid[0].length;
+}
+
+function getCell(grid, r, c) {
+  return inBounds(grid, r, c) ? grid[r][c] : undefined;
+}
+
+function setCell(grid, r, c, value) {
+  if (inBounds(grid, r, c)) grid[r][c] = value;
+}
+
+function forEachCell(grid, fn) {
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < grid[r].length; c++) fn(grid[r][c], r, c);
+  }
+}
+
+/** Coordonnées des 4 voisins orthogonaux valides. */
+function neighbors4(grid, r, c) {
+  return [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]].filter(([rr, cc]) =>
+    inBounds(grid, rr, cc)
+  );
+}
+
+/** Coordonnées des 8 voisins (orthogonaux + diagonales) valides. */
+function neighbors8(grid, r, c) {
+  const out = [];
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const rr = r + dr, cc = c + dc;
+      if (inBounds(grid, rr, cc)) out.push([rr, cc]);
+    }
+  }
+  return out;
+}
+
+/**
+ * Flood fill générique à partir de (r,c). `matchFn(value, r, c)` décide
+ * si une cellule doit être incluse dans la propagation ; `visitFn(value, r, c)`
+ * est appelé pour chaque cellule visitée (une seule fois). Ne décide
+ * jamais lui-même de la condition d'arrêt — c'est au jeu de la fournir.
+ */
+function floodFill(grid, startR, startC, matchFn, visitFn, useDiagonals = true) {
+  const visited = createGrid(grid.length, grid[0].length, false);
+  const stack = [[startR, startC]];
+  while (stack.length) {
+    const [r, c] = stack.pop();
+    if (!inBounds(grid, r, c) || visited[r][c]) continue;
+    visited[r][c] = true;
+    if (!matchFn(grid[r][c], r, c)) continue;
+    visitFn(grid[r][c], r, c);
+    const neigh = useDiagonals ? neighbors8(grid, r, c) : neighbors4(grid, r, c);
+    for (const [rr, cc] of neigh) if (!visited[rr][cc]) stack.push([rr, cc]);
+  }
+}
+
+/** Compte les cartes de N valeurs identiques consécutives à partir de
+ *  (r,c) dans une direction (dr,dc), dans les deux sens. Utile pour
+ *  toute détection d'alignement (Puissance 4, Morpion, Othello...). */
+function countAligned(grid, r, c, dr, dc, matchFn) {
+  let count = 1;
+  let rr = r + dr, cc = c + dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr += dr; cc += dc; }
+  rr = r - dr; cc = c - dc;
+  while (inBounds(grid, rr, cc) && matchFn(grid[rr][cc])) { count++; rr -= dr; cc -= dc; }
+  return count;
+}
+
+
+// ── engines/CardEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Card Engine
+// ───────────────────────────────────────
+// RÔLE : opérations génériques sur un tableau de cartes (peu importe
+//        ce qu'est une "carte" — le jeu décide de sa forme : {color,
+//        value} pour Uno, {suit,rank} pour Solitaire/Rami/Spider...).
+//        Ne connaît ni Uno, ni Solitaire, ni aucune règle de jeu.
+// NE DOIT JAMAIS : contenir une notion de combinaison valide (suite/
+//        groupe de Rami, séquence de Spider), de carte "jouable"
+//        (Uno), ou de score de main — ça reste dans chaque jeu.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1 (déjà utilisé par Uno).
+// Candidat de migration pour Solitaire/Rami/Spider (jamais branchés
+// à ce moteur malgré une structure de carte compatible — voir
+// architecture, section 5). PAS pertinent pour Road Trip (cartes à
+// effet, pas des cartes à jouer), Memory (pas de main/pioche) ni
+// Mahjong (tuiles, géométrie différente).
+// ═══════════════════════════════════════════════════════════════
+
+/** Construit un deck mélangé à partir d'une liste de cartes (copie,
+ *  ne mute jamais le tableau source — voir RandomEngine.shuffle). */
+function createDeck(cards) {
+  return shuffle([...cards]);
+}
+
+/** Retire et retourne les `n` cartes du dessus (fin du tableau = dessus). */
+function draw(deck, n = 1) {
+  return deck.splice(Math.max(0, deck.length - n), n).reverse();
+}
+
+/** Distribue `cardsPerPlayer` cartes à `playerCount` joueurs, à tour de
+ *  rôle (comme une vraie distribution), depuis le sommet du deck. */
+function deal(deck, playerCount, cardsPerPlayer) {
+  const hands = Array.from({ length: playerCount }, () => []);
+  for (let round = 0; round < cardsPerPlayer; round++) {
+    for (let p = 0; p < playerCount; p++) {
+      const card = draw(deck, 1)[0];
+      if (card) hands[p].push(card);
+    }
+  }
+  return hands;
+}
+
+/**
+ * Reconstitue un deck épuisé à partir d'une pile de défausse, en
+ * gardant la carte du dessus en place (pattern stock/waste commun à
+ * Solitaire, Uno, Rami, Spider).
+ */
+function reshuffleDiscardIntoDeck(discardPile, keepTopCard = true) {
+  if (discardPile.length <= 1) return [];
+  const top = keepTopCard ? discardPile.pop() : null;
+  const rest = shuffle(discardPile.splice(0, discardPile.length));
+  if (top) discardPile.push(top);
+  return rest;
+}
+
+
+// ── engines/DiceEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// Dice Engine
+// ───────────────────────────────────────
+// RÔLE : lancer et gérer des pools de dés (valeur + verrou), compter
+//        les valeurs obtenues. Ne connaît ni YAMS, ni Shut the Box,
+//        ni 421, ni aucune règle de score.
+// NE DOIT JAMAIS : contenir une notion de catégorie de score, de
+//        combinaison gagnante (Brelan, Suite, 421, Nénette...), ou
+//        de règle spécifique à un jeu.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1 (déjà utilisé par Shut the
+// Box). Candidat de migration pour YAMS et 421 (jamais branchés,
+// leurs règles de score restent entièrement différentes et propres
+// à chacun — voir architecture, section 5).
+// ═══════════════════════════════════════════════════════════════
+
+function rollDie(sides = 6) {
+  return 1 + Math.floor(Math.random() * sides);
+}
+
+function rollDice(count, sides = 6) {
+  return Array.from({ length: count }, () => rollDie(sides));
+}
+
+/** Crée un pool de dés à l'état initial : valeur nulle, non verrouillé. */
+function createDicePool(count) {
+  return Array.from({ length: count }, () => ({ value: null, locked: false }));
+}
+
+/** Relance uniquement les dés non verrouillés du pool (mutation + retour). */
+function rollUnlocked(pool, sides = 6) {
+  pool.forEach((d) => { if (!d.locked) d.value = rollDie(sides); });
+  return pool;
+}
+
+function toggleLock(pool, index) {
+  if (pool[index]) pool[index].locked = !pool[index].locked;
+  return pool;
+}
+
+/** Compte les occurrences de chaque valeur — utile à toute règle de
+ *  score basée sur des combinaisons (brelan, suite, etc.). */
+function countValues(values) {
+  const counts = {};
+  values.forEach((v) => { counts[v] = (counts[v] || 0) + 1; });
+  return counts;
+}
+
+
+// ── engines/AIEngine.js ──
+// ═══════════════════════════════════════════════════════════════
+// AI Engine
+// ───────────────────────────────────────
+// RÔLE : recherche de meilleur coup par minimax + élagage alpha-bêta,
+//        entièrement générique. Le jeu fournit les fonctions pures
+//        (getMoves, applyMove, isTerminal, evaluate) ; ce moteur ne
+//        connaît aucune règle de Puissance 4, Othello, Morpion ou
+//        autre.
+// NE DOIT JAMAIS : contenir une notion de "disque", de "colonne",
+//        de "grille 3×3" ou toute règle spécifique à un jeu.
+// ───────────────────────────────────────
+// IMPORTANT — ce moteur reste VOLONTAIREMENT en dehors du SDK
+// (pas de `sdk.ai`). Sur les 6 jeux ayant une IA adversaire réelle,
+// seul Puissance 4 (et Othello/Morpion en migration future) relèvent
+// d'une recherche arborescente généralisable — Dames a une
+// heuristique de capture propre, Rami et Road Trip ont des IA à
+// PRIORITÉS DE RÈGLES (débloquer > avancer > attaquer), pas de
+// recherche. Les y forcer serait exactement l'anti-pattern à éviter
+// ("ne pas enfermer toutes les IA dans un moteur monolithique" —
+// voir architecture, section 5). Un jeu qui a besoin de ce moteur
+// l'importe directement, comme un engine, jamais via `sdk.*`.
+//
+// Contrat attendu (fns) :
+//   getMoves(state)                 → tableau de coups possibles
+//   applyMove(state, move)          → nouvel état après le coup (ne mute pas)
+//   isTerminal(state)               → true si partie finie
+//   evaluate(state, player, depth)  → score du point de vue de `player`.
+//     `depth` (profondeur RESTANTE) est optionnel mais recommandé
+//     pour un score de victoire/défaite (ex: 1000+depth / -1000-depth)
+//     — sinon deux victoires à profondeurs différentes sont à égalité
+//     et l'IA peut sembler hésiter (bug réel rencontré en développant
+//     Puissance 4 : une "double menace" laissait l'IA ignorer un coup
+//     gagnant immédiat au profit d'un coup neutre qui gagnait quand
+//     même, 2 coups plus tard — ce commentaire est conservé tel quel
+//     du CoreBundle d'origine, la leçon reste valable).
+// ═══════════════════════════════════════════════════════════════
+
+function minimax(state, depth, alpha, beta, maximizing, player, fns) {
+  if (depth === 0 || fns.isTerminal(state)) {
+    return fns.evaluate(state, player, depth);
+  }
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return fns.evaluate(state, player);
+
+  if (maximizing) {
+    let best = -Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, false, player, fns);
+      best = Math.max(best, val);
+      alpha = Math.max(alpha, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const move of moves) {
+      const next = fns.applyMove(state, move);
+      const val = minimax(next, depth - 1, alpha, beta, true, player, fns);
+      best = Math.min(best, val);
+      beta = Math.min(beta, val);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+/**
+ * Retourne le meilleur coup pour `player` à la profondeur `depth`.
+ * Si plusieurs coups sont à égalité, un choix aléatoire parmi eux
+ * évite un bot parfaitement déterministe et prévisible.
+ */
+function chooseBestMove(state, depth, player, fns) {
+  const moves = fns.getMoves(state);
+  if (moves.length === 0) return null;
+  let bestScore = -Infinity;
+  let bestMoves = [];
+  for (const move of moves) {
+    const next = fns.applyMove(state, move);
+    const score = minimax(next, depth - 1, -Infinity, Infinity, false, player, fns);
+    if (score > bestScore) { bestScore = score; bestMoves = [move]; }
+    else if (score === bestScore) bestMoves.push(move);
+  }
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+}
+
+/** Coup aléatoire simple — utile pour une difficulté "facile" sans
+ *  avoir à écrire un second moteur. */
+function chooseRandomMove(state, fns) {
+  const moves = fns.getMoves(state);
+  return moves.length ? moves[Math.floor(Math.random() * moves.length)] : null;
+}
+
+/**
+ * Façade unique demandée par l'architecture (section 5/13 du brief) :
+ * search({ state, getMoves, applyMove, evaluate, depth, maximizingPlayer })
+ * → { move, score }
+ * Formalise chooseBestMove sous la forme d'objet plutôt que d'inventer
+ * une nouvelle signature.
+ */
+function search({ state, getMoves, applyMove, isTerminal, evaluate, depth, maximizingPlayer }) {
+  const fns = { getMoves, applyMove, isTerminal, evaluate };
+  const move = chooseBestMove(state, depth, maximizingPlayer, fns);
+  const score = move === null ? evaluate(state, maximizingPlayer) : undefined;
+  return { move, score };
+}
+
+const AIEngine = { chooseBestMove, chooseRandomMove, search };
+
+
+// ── engines/SnapshotStore.js ──
+// ═══════════════════════════════════════════════════════════════
+// SnapshotStore
+// ───────────────────────────────────────
+// RÔLE : pile de clones JSON profonds, taille bornée — pour les jeux
+//        qui font un vrai undo multi-coups (Spider Solitaire en est
+//        la preuve : historique par snapshots déjà fonctionnel).
+// NE DOIT JAMAIS : décider QUAND un jeu doit permettre l'undo, ni
+//        avec quelle portée. Rami, par exemple, n'autorise l'annulation
+//        que jusqu'à la pioche (règle du jeu réelle, pas un manque
+//        d'outil) — ce mécanisme ne doit pas lui être imposé.
+// ───────────────────────────────────────
+// NOUVEAU — n'existait pas dans le CoreBundle Batch 1. Formalise le
+// pattern déjà utilisé par Spider (push/pop de JSON.parse(JSON.
+// stringify(state)), pile bornée à 50).
+// ═══════════════════════════════════════════════════════════════
+
+function createSnapshotStore(maxSize = 50) {
+  const stack = [];
+  return {
+    push(state) {
+      stack.push(JSON.parse(JSON.stringify(state)));
+      if (stack.length > maxSize) stack.shift();
+    },
+    pop() {
+      return stack.pop() ?? null;
+    },
+    peek() {
+      return stack.length ? stack[stack.length - 1] : null;
+    },
+    clear() {
+      stack.length = 0;
+    },
+    canUndo() {
+      return stack.length > 0;
+    },
+  };
+}
+
+
+// ── ui/components.js ──
+// ═══════════════════════════════════════════════════════════════
+// UI — bibliothèque de composants Ondine Games
+// ───────────────────────────────────────
+// Chaque fonction retourne un élément DOM prêt à être inséré dans
+// la page. Aucune fonction ici ne connaît un jeu en particulier.
+// Le style visuel (couleurs, rayons, ombres) vient TOUJOURS de
+// core/design-tokens.css via les variables --c1, --glass, etc.
+// Ne jamais coder une couleur en dur dans un composant.
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle Batch 1. Volontairement minimal —
+// seuls les composants réellement utilisés par au moins un jeu sont
+// présents. progressBar/tabs/list/grid/bottomSheet/emptyState/
+// loading/gameCard/profileCard seront ajoutés le jour où un jeu réel
+// en a besoin, pas par anticipation (voir architecture, section 13).
+// ═══════════════════════════════════════════════════════════════
+
+const UI = {
+  /**
+   * Crée l'élément hôte du toast. À insérer une fois dans la page,
+   * puis à passer à NotificationService.mount(el).
+   */
+  toastHost() {
+    const el = document.createElement('div');
+    el.className = 'ondine-toast';
+    el.id = 'ondineToast';
+    return el;
+  },
+
+  button(label, { variant = 'primary', onClick, icon, disabled = false } = {}) {
+    const el = document.createElement('button');
+    el.className = `ondine-btn ondine-btn-${variant}`;
+    el.innerHTML = (icon ? `<span class="ondine-btn-icon">${icon}</span>` : '') + label;
+    if (disabled) el.disabled = true;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  iconButton(icon, { onClick, title = '' } = {}) {
+    const el = document.createElement('button');
+    el.className = 'ondine-icon-btn';
+    el.textContent = icon;
+    if (title) el.title = title;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  },
+
+  badge(text, { variant = 'default' } = {}) {
+    const el = document.createElement('span');
+    el.className = `ondine-badge ondine-badge-${variant}`;
+    el.textContent = text;
+    return el;
+  },
+
+  statCard({ value, label, icon = '' } = {}) {
+    const el = document.createElement('div');
+    el.className = 'ondine-stat-card';
+    el.innerHTML = `${icon ? `<div class="ondine-stat-icon">${icon}</div>` : ''}
+      <div class="ondine-stat-value">${value}</div>
+      <div class="ondine-stat-label">${label}</div>`;
+    return el;
+  },
+
+  achievementCard({ icon, name, desc, unlocked, xp }) {
+    const el = document.createElement('div');
+    el.className = 'ondine-ach-card' + (unlocked ? ' unlocked' : '');
+    el.innerHTML = `<div class="ondine-ach-icon">${icon}</div>
+      <div class="ondine-ach-body">
+        <div class="ondine-ach-name">${name}</div>
+        <div class="ondine-ach-desc">${desc}</div>
+      </div>
+      <div class="ondine-ach-badge">${unlocked ? '✓' : '🔒'}${xp ? ` +${xp} XP` : ''}</div>`;
+    return el;
+  },
+
+  /**
+   * Modale générique : titre, corps (élément DOM déjà construit),
+   * boutons d'action. Retourne { el, close } — `el` est déjà attaché
+   * à un overlay plein écran, prêt à être inséré dans document.body.
+   * Utilisée en interne par DialogService — un jeu peut aussi
+   * l'utiliser directement pour ses propres besoins d'affichage.
+   */
+  modal({ title, bodyEl, actions = [] } = {}) {
+    const overlay = document.createElement('div');
+    overlay.className = 'ondine-modal-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'ondine-modal-box';
+
+    if (title) {
+      const h = document.createElement('div');
+      h.className = 'ondine-modal-title';
+      h.textContent = title;
+      box.appendChild(h);
+    }
+    if (bodyEl) {
+      const body = document.createElement('div');
+      body.className = 'ondine-modal-body';
+      body.appendChild(bodyEl);
+      box.appendChild(body);
+    }
+    if (actions.length) {
+      const row = document.createElement('div');
+      row.className = 'ondine-modal-actions';
+      actions.forEach((btnEl) => row.appendChild(btnEl));
+      box.appendChild(row);
+    }
+    overlay.appendChild(box);
+
+    function close() { overlay.remove(); }
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+    return { el: overlay, close };
+  },
+};
+
+
+// ── services/NotificationService.js ──
+// ═══════════════════════════════════════════════════════════════
+// NotificationService
+// ───────────────────────────────────────
+// RÔLE : afficher des messages brefs et non bloquants (toasts).
+// POSSÈDE : l'élément DOM du toast, son minuteur d'auto-masquage.
+// NE DOIT JAMAIS : connaître un jeu, une règle de jeu, ou un texte
+//        spécifique à un jeu — le texte affiché vient toujours de
+//        l'appelant (le jeu, via le SDK).
+// ───────────────────────────────────────
+// Extrait tel quel du CoreBundle du Batch 1 (déjà utilisé par
+// Solitaire, Puissance 4, Uno, Shut the Box, Démineur, Rhythm Hero).
+// Remplace les fonctions toast() précédemment dupliquées à
+// l'identique dans Solitaire, Sudoku, YAMS, puis dans les 12 jeux
+// des Batch 2/3.
+// ═══════════════════════════════════════════════════════════════
+
+let hostEl = null;
+let hideTimer = null;
+const DEFAULT_DURATION_MS = 2200;
+
+/**
+ * Doit être appelé une fois par le Hub ou par la page du jeu,
+ * en lui passant l'élément DOM créé par UI.toastHost().
+ */
+function mount(el) {
+  hostEl = el;
+}
+
+function show(message, variant = 'info', duration = DEFAULT_DURATION_MS) {
+  if (!hostEl) {
+    // Dégradation silencieuse : pas de host monté = pas de toast,
+    // mais ça ne doit jamais casser le jeu.
+    console.warn('[NotificationService] show() appelé avant mount() :', message);
+    return;
+  }
+  hostEl.textContent = message;
+  hostEl.dataset.variant = variant;
+  hostEl.classList.remove('ondine-toast-show');
+  void hostEl.offsetWidth; // force le reflow pour relancer la transition
+  hostEl.classList.add('ondine-toast-show');
+
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => hostEl.classList.remove('ondine-toast-show'), duration);
+}
+
+const NotificationService = { mount, show };
+
+
+// ── services/StatsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// StatsService
+// ───────────────────────────────────────
+// RÔLE : stocker des compteurs numériques par jeu (parties jouées,
+//        victoires, meilleur score...). Ne connaît aucun nom de
+//        statistique métier — le jeu choisit ses propres clés.
+// POSSÈDE : une entrée localStorage par jeu.
+// NE DOIT JAMAIS : interpréter le sens d'une statistique (ex. ne sait
+//        pas que "victories" est "positif" ou que "errors" est
+//        "négatif" — c'est au jeu d'agir en conséquence).
+// ───────────────────────────────────────
+// PRIVÉ : chaque méthode prend un `gameId` explicite. Un jeu ne doit
+// JAMAIS appeler ce service directement (il pourrait alors lire/
+// écrire les stats d'un AUTRE jeu en changeant le gameId passé) —
+// seul core/sdk/createSDK.js a le droit de l'importer, avec le
+// gameId figé une fois pour toutes par fermeture.
+//
+// Convention de clé : voir core/storage/keys.js — gère la nouvelle
+// convention `ondine.games.<id>.stats` ET la lecture de secours des
+// anciennes clés (ondine_stats_<id>, <id>_ondine_v1, og_<id>_v1,
+// etc.) pour ne perdre aucune sauvegarde existante.
+// ═══════════════════════════════════════════════════════════════
+
+const STATS_NS = 'stats';
+
+function readAll(gameId) {
+  try {
+    return readNamespaced(gameId, STATS_NS) || {};
+  } catch (e) {
+    console.warn('[StatsService] lecture corrompue pour', gameId, e);
+    return {};
+  }
+}
+
+function writeAll(gameId, data) {
+  writeNamespaced(gameId, STATS_NS, data);
+}
+
+const StatsService = {
+  get(gameId, key, defaultValue = 0) {
+    const all = readAll(gameId);
+    return key in all ? all[key] : defaultValue;
+  },
+  set(gameId, key, value) {
+    const all = readAll(gameId);
+    all[key] = value;
+    writeAll(gameId, all);
+  },
+  increment(gameId, key, n = 1) {
+    const all = readAll(gameId);
+    all[key] = (all[key] || 0) + n;
+    writeAll(gameId, all);
+    return all[key];
+  },
+  /** Ne met à jour que si `value` dépasse la valeur actuelle (utile
+   *  pour un meilleur score / meilleur temps). */
+  setMax(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value > all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  setMin(gameId, key, value) {
+    const all = readAll(gameId);
+    if (!(key in all) || value < all[key]) { all[key] = value; writeAll(gameId, all); }
+    return all[key];
+  },
+  getAll(gameId) { return readAll(gameId); },
+  reset(gameId) { removeNamespaced(gameId, STATS_NS); },
+};
+
+
+// ── services/AchievementsService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AchievementsService
+// ───────────────────────────────────────
+// RÔLE : savoir quels succès sont débloqués, par jeu. Ne connaît
+//        jamais la LISTE des succès d'un jeu ni leur condition de
+//        déblocage — ça reste entièrement défini côté jeu (via
+//        sdk.achievements.unlock(id, ...), appelé quand le jeu a
+//        lui-même vérifié sa propre condition).
+// POSSÈDE : une entrée localStorage par jeu.
+// PRIVÉ : voir StatsService.js pour la règle d'isolation par gameId.
+// ═══════════════════════════════════════════════════════════════
+
+const ACH_NS = 'achievements';
+
+function readUnlocked(gameId) {
+  try { return readNamespaced(gameId, ACH_NS) || []; }
+  catch (e) { console.warn('[AchievementsService] lecture corrompue pour', gameId, e); return []; }
+}
+
+const AchievementsService = {
+  isUnlocked(gameId, achId) {
+    return readUnlocked(gameId).includes(achId);
+  },
+  /** Débloque `achId` s'il ne l'était pas déjà. Retourne true si
+   *  c'est une NOUVELLE unlock (utile pour déclencher un toast une
+   *  seule fois), false si déjà débloqué (idempotent). */
+  unlock(gameId, achId) {
+    const list = readUnlocked(gameId);
+    if (list.includes(achId)) return false;
+    list.push(achId);
+    writeNamespaced(gameId, ACH_NS, list);
+    return true;
+  },
+  unlockedList(gameId) { return readUnlocked(gameId); },
+  reset(gameId) { removeNamespaced(gameId, ACH_NS); },
+};
+
+
+// ── services/AudioService.js ──
+// ═══════════════════════════════════════════════════════════════
+// AudioService
+// ───────────────────────────────────────
+// RÔLE : jouer des sons courts synthétisés (Web Audio). Expose DEUX
+//        niveaux, tous deux extraits du code déjà utilisé par les 18
+//        jeux :
+//          1. tone(freq, dur, type, vol) — la primitive bas niveau,
+//             identique à la virgule près dans les 18 jeux actuels.
+//             Un jeu qui veut ses propres sons (comme Rami, Spider,
+//             Road Trip aujourd'hui) l'utilise directement.
+//          2. play(presetName) — une petite bibliothèque de presets
+//             GÉNÉRIQUES (déjà dans le CoreBundle Batch 1), pour les
+//             jeux qui n'ont pas besoin de sons sur mesure.
+// NE DOIT JAMAIS : contenir un preset nommé d'après un jeu (pas de
+//        "unoSkip" ou "yamsRoll"), ni imposer qu'un événement précis
+//        ("victoire") corresponde à une fréquence fixe — c'est
+//        toujours le jeu qui choisit REST tone() ou play(preset).
+// ═══════════════════════════════════════════════════════════════
+
+let audioCtx = null;
+let enabled = true;
+
+function getCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { console.warn('[AudioService] Web Audio indisponible', e); }
+  }
+  return audioCtx;
+}
+
+function tone(freq, dur, type = 'sine', vol = 0.12) {
+  if (!enabled) return;
+  const ctx = getCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
+  } catch (e) { /* silencieux : l'audio ne doit jamais casser le jeu */ }
+}
+
+// Bibliothèque de presets génériques — reprise telle quelle du
+// CoreBundle Batch 1. Optionnelle : un jeu peut l'ignorer entièrement
+// et n'utiliser que tone().
+const PRESETS = {
+  click:   () => tone(880, 0.06, 'sine', 0.10),
+  place:   () => { tone(660, 0.1, 'sine', 0.14); setTimeout(() => tone(880, 0.08, 'sine', 0.10), 60); },
+  success: () => [523, 659, 784].forEach((f, i) => setTimeout(() => tone(f, 0.18, 'sine', 0.16), i * 90)),
+  error:   () => tone(220, 0.16, 'sawtooth', 0.12),
+  win:     () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'sine', 0.18), i * 110)),
+  lose:    () => [392, 330, 262].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'sine', 0.14), i * 120)),
+  flip:    () => tone(440, 0.06, 'triangle', 0.10),
+  unlock:  () => [660, 880, 1100].forEach((f, i) => setTimeout(() => tone(f, 0.15, 'sine', 0.15), i * 80)),
+};
+
+const AudioService = {
+  tone,
+  play(presetName) {
+    const preset = PRESETS[presetName];
+    if (!preset) { console.warn('[AudioService] preset inconnu :', presetName); return; }
+    preset();
+  },
+  setEnabled(v) { enabled = v; },
+  isEnabled() { return enabled; },
+};
+
+
+// ── services/SaveService.js ──
+// ═══════════════════════════════════════════════════════════════
+// SaveService
+// ───────────────────────────────────────
+// RÔLE : persister/restaurer l'état de partie en cours d'un jeu,
+//        sous forme de blob JSON opaque. Ne connaît jamais la forme
+//        de cet état — c'est entièrement défini par le jeu.
+// POSSÈDE : une entrée localStorage par jeu.
+// PRIVÉ : voir StatsService.js pour la règle d'isolation par gameId.
+// ═══════════════════════════════════════════════════════════════
+
+const SAVE_NS = 'save';
+
+const SaveService = {
+  write(gameId, state) {
+    try { writeNamespaced(gameId, SAVE_NS, state); return true; }
+    catch (e) { console.warn('[SaveService] échec de sauvegarde pour', gameId, e); return false; }
+  },
+  read(gameId) {
+    try {
+      const value = readNamespaced(gameId, SAVE_NS);
+      return value === undefined ? null : value;
+    } catch (e) { console.warn('[SaveService] sauvegarde corrompue pour', gameId, e); return null; }
+  },
+  hasSave(gameId) { return hasNamespaced(gameId, SAVE_NS); },
+  clear(gameId) { removeNamespaced(gameId, SAVE_NS); },
+};
+
+
+// ── services/DialogService.js ──
+// ═══════════════════════════════════════════════════════════════
+// DialogService
+// ───────────────────────────────────────
+// RÔLE : afficher une boîte de dialogue de confirmation bloquante
+//        (au sens UX, pas au sens JS — l'appel est asynchrone) et
+//        retourner la réponse de l'utilisateur. Remplace les
+//        `confirm()` natifs du navigateur, incohérents visuellement
+//        avec le reste de la plateforme, et les `confirmDialog()`
+//        dupliqués à l'identique dans les 12 jeux Batch 2/3.
+// NE DOIT JAMAIS : connaître le texte ou le contexte d'un jeu — tout
+//        le contenu est fourni par l'appelant.
+// ───────────────────────────────────────
+// S'appuie sur UI.modal() — c'est le seul service qui a le droit
+// d'importer un composant UI directement (car il EST la logique
+// derrière ce composant, pas un jeu qui le consommerait).
+// ═══════════════════════════════════════════════════════════════
+
+const DialogService = {
+  /** Retourne une Promise<boolean> : true si confirmé, false si annulé. */
+  confirm({ title = '', message = '', confirmLabel = 'OK', cancelLabel = 'Annuler' } = {}) {
+    return new Promise((resolve) => {
+      const bodyEl = document.createElement('div');
+      bodyEl.textContent = message;
+
+      const confirmBtn = UI.button(confirmLabel, {
+        variant: 'primary',
+        onClick: () => { modal.close(); resolve(true); },
+      });
+      const cancelBtn = UI.button(cancelLabel, {
+        variant: 'secondary',
+        onClick: () => { modal.close(); resolve(false); },
+      });
+
+      const modal = UI.modal({ title, bodyEl, actions: [confirmBtn, cancelBtn] });
+      document.body.appendChild(modal.el);
+    });
+  },
+};
+
+
+// ── services/NavigationService.js ──
+// ═══════════════════════════════════════════════════════════════
+// NavigationService
+// ───────────────────────────────────────
+// RÔLE : afficher un écran (`<div class="screen" id="...">`) et
+//        cacher tous les autres. Formalise le pattern déjà présent,
+//        quasi identique, dans 17 des 18 jeux actuels — mais qui
+//        n'avait jamais été extrait en service, même dans le
+//        CoreBundle du Batch 1 (vérifié par l'audit).
+// NE DOIT JAMAIS : contenir un id d'écran ou une logique propre à un
+//        jeu précis. Ne connaît que la convention `.screen` / id.
+// NE PROPOSE PAS de back()/pile de navigation : non démontré dans le
+//        code actuel (aucun des 18 jeux n'a de retour arrière
+//        multi-niveaux — chaque écran est câblé explicitement vers
+//        un écran précis). Ajouter back() serait de la spéculation.
+// ═══════════════════════════════════════════════════════════════
+
+const NavigationService = {
+  /** Cache tous les `.screen`, affiche celui d'id `screenId`. */
+  go(screenId) {
+    document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+    const target = document.getElementById(screenId);
+    if (!target) {
+      console.warn('[NavigationService] écran introuvable :', screenId);
+      return;
+    }
+    target.classList.remove('hidden');
+  },
+};
+
+
+// ── sdk/createSDK.js ──
+// ═══════════════════════════════════════════════════════════════
+// createSDK(gameId)
+// ───────────────────────────────────────
+// SEULE API que les jeux sont autorisés à utiliser pour parler à la
+// plateforme. Un jeu ne doit JAMAIS importer un service de
+// core/services/ directement (voir architecture, section 1 et 4) :
+// chaque service privé prend un `gameId` en paramètre de CHAQUE
+// méthode — s'il était exposé tel quel à un jeu, celui-ci pourrait
+// techniquement lire/écrire les données d'un AUTRE jeu en changeant
+// le gameId passé. createSDK() est le SEUL endroit où le gameId est
+// fixé une fois pour toutes, par fermeture, puis jamais reexposé.
+//
+// API délibérément MINIMALE (15 fonctions, voir architecture,
+// section 3) : seulement ce que les 18 jeux utilisent réellement.
+// Pas de sdk.ai (reste un engine optionnel), pas de sdk.cloud/
+// profile/theme/settings (aucune preuve d'un besoin partagé par
+// plus d'1-2 jeux à ce jour).
+// ═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+
+
+/** Validation minimale — évite une erreur silencieuse si un jeu
+ *  oublie de passer son gameId (bug de développement, pas un cas
+ *  d'usage normal à gérer gracieusement). */
+function assertValidGameId(gameId) {
+  if (typeof gameId !== 'string' || gameId.trim() === '') {
+    throw new Error(`[createSDK] gameId invalide : ${JSON.stringify(gameId)}`);
+  }
+}
+
+function createSDK(gameId) {
+  assertValidGameId(gameId);
+
+  return {
+    gameId,
+
+    stats: {
+      get: (key, defaultValue = 0) => StatsService.get(gameId, key, defaultValue),
+      getAll: () => StatsService.getAll(gameId),
+      set: (key, value) => StatsService.set(gameId, key, value),
+      increment: (key, n = 1) => StatsService.increment(gameId, key, n),
+      setMax: (key, value) => StatsService.setMax(gameId, key, value),
+      setMin: (key, value) => StatsService.setMin(gameId, key, value),
+      reset: () => StatsService.reset(gameId),
+    },
+
+    achievements: {
+      /**
+       * Débloque `id` et affiche un toast + joue le son "unlock" si
+       * c'est une NOUVELLE unlock (idempotent — sans risque à
+       * rappeler). Centralise ce que les 12 jeux Batch 2/3 répétaient
+       * chacun individuellement (achUnlock + toast + playSound).
+       */
+      unlock(id, name, icon = '🏅') {
+        const isNew = AchievementsService.unlock(gameId, id);
+        if (isNew) {
+          AudioService.play('unlock');
+          NotificationService.show(`${icon} Succès : ${name || id}`, 'success');
+        }
+        return isNew;
+      },
+      isUnlocked: (id) => AchievementsService.isUnlocked(gameId, id),
+      unlockedList: () => AchievementsService.unlockedList(gameId),
+      reset: () => AchievementsService.reset(gameId),
+    },
+
+    audio: {
+      tone: (freq, dur, type, vol) => AudioService.tone(freq, dur, type, vol),
+      play: (presetName) => AudioService.play(presetName),
+      isEnabled: () => AudioService.isEnabled(),
+      setEnabled: (v) => AudioService.setEnabled(v),
+    },
+
+    toast: {
+      show: (message, duration) => NotificationService.show(message, 'info', duration),
+    },
+
+    dialog: {
+      confirm: (title, message, confirmLabel = 'OK', cancelLabel = 'Annuler') =>
+        DialogService.confirm({ title, message, confirmLabel, cancelLabel }),
+    },
+
+    save: {
+      read: () => SaveService.read(gameId),
+      write: (data) => SaveService.write(gameId, data),
+      hasSave: () => SaveService.hasSave(gameId),
+      clear: () => SaveService.clear(gameId),
+    },
+
+    random: {
+      shuffle: (array) => shuffle(array),
+    },
+
+    navigation: {
+      go: (screenId) => NavigationService.go(screenId),
+    },
+  };
+}
+
+
+// ── sdk/GameRegistry.js ──
+// ═══════════════════════════════════════════════════════════════
+// GameRegistry
+// ───────────────────────────────────────
+// RÔLE : lister les jeux disponibles à partir de leurs manifestes.
+//        Le Hub ne doit jamais contenir `if (id === 'morpion')` —
+//        il appelle GameRegistry.all() et affiche ce qui vient.
+// ───────────────────────────────────────
+// Dans cette phase (Phase 2), le Hub actuel N'EST PAS modifié (voir
+// consigne section 24 du brief) — ce registre est prêt mais pas
+// encore branché au Hub existant. Il sera consommé au moment où le
+// Hub passera à la découverte automatique (architecture, section 16
+// et 25/Phase 10), pas avant.
+// ═══════════════════════════════════════════════════════════════
+
+const registry = new Map();
+
+const GameRegistry = {
+  register(manifest) {
+    if (!manifest || typeof manifest.id !== 'string' || !manifest.id) {
+      throw new Error('[GameRegistry] manifest invalide (id manquant)');
+    }
+    registry.set(manifest.id, manifest);
+  },
+  get(id) {
+    return registry.get(id) || null;
+  },
+  all() {
+    return Array.from(registry.values());
+  },
+};
+
+
+return { getCharacter, CHARACTERS, DEFAULT_CHARACTER_ID, readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
+})();
+
+// ── jeu (imports résolus par concaténation) ──
+const { CHARACTERS, DEFAULT_CHARACTER_ID, getCharacter, createSDK, UI, NotificationService } = CoreBundle;
+
+// ── games/puzzle-mosaique/logic.js ──
+// ═══════════════════════════════════════════════════════════════
+// PUZZLE MOSAÏQUE — Sudoku irrégulier 8×8 (8 régions de forme libre,
+// 8 cases chacune, au lieu de blocs 3×3 réguliers). Un symbole
+// unique (1-8, rendu selon le personnage choisi) par ligne/colonne/région.
+// ═══════════════════════════════════════════════════════════════
+const SIZE = 8;
+
+function idx(r, c) { return r * SIZE + c; }
+function neighbors(i) {
+  const r = Math.floor(i / SIZE), c = i % SIZE;
+  const out = [];
+  if (r > 0) out.push(i - SIZE);
+  if (r < SIZE - 1) out.push(i + SIZE);
+  if (c > 0) out.push(i - 1);
+  if (c < SIZE - 1) out.push(i + 1);
+  return out;
+}
+
+/** Partitionne la grille 8×8 en 8 régions connexes de 8 cases chacune,
+ *  par croissance aléatoire depuis 8 graines dispersées. Heuristique
+ *  "région la plus contrainte d'abord" (comme un MRV en CSP) : à
+ *  chaque étape, on fait grandir en priorité la région qui a le MOINS
+ *  de cases candidates disponibles — ça évite qu'une région se
+ *  retrouve encerclée avant d'atteindre sa taille cible (bug réel
+ *  rencontré avec une croissance "une case par région par tour" :
+ *  taux de réussite de 12% seulement, contre >95% avec cette
+ *  heuristique, vérifié par test). Réessaie si un vrai blocage survient. */
+function generateRegions(rng = Math.random) {
+  for (let attempt = 0; attempt < 300; attempt++) {
+    const regionOf = Array(64).fill(-1);
+    const seeds = [];
+    for (let i = 0; i < 8; i++) {
+      let cell, tries = 0;
+      do {
+        cell = idx(Math.floor(rng() * SIZE), Math.floor(rng() * SIZE));
+        tries++;
+      } while (regionOf[cell] !== -1 && tries < 500);
+      if (regionOf[cell] !== -1) break;
+      regionOf[cell] = i;
+      seeds.push(cell);
+    }
+    if (seeds.length < 8) continue;
+
+    const regionSizes = Array(8).fill(1);
+    const frontiers = seeds.map(s => [s]);
+    let assigned = 8;
+    let stuck = false;
+
+    while (assigned < 64 && !stuck) {
+      // calcule les candidats disponibles pour chaque région incomplète
+      let best = -1, bestCandidates = null, bestCount = Infinity;
+      for (let region = 0; region < 8; region++) {
+        if (regionSizes[region] >= 8) continue;
+        const candidates = [...new Set(
+          frontiers[region].flatMap(cell => neighbors(cell)).filter(n => regionOf[n] === -1)
+        )];
+        if (candidates.length > 0 && candidates.length < bestCount) {
+          bestCount = candidates.length; best = region; bestCandidates = candidates;
+        }
+      }
+      if (best === -1) { stuck = true; break; } // aucune région incomplète n'a de candidat -> vrai blocage
+      const pick = bestCandidates[Math.floor(rng() * bestCandidates.length)];
+      regionOf[pick] = best;
+      regionSizes[best]++;
+      frontiers[best].push(pick);
+      assigned++;
+    }
+    if (!stuck && assigned === 64 && regionSizes.every(s => s === 8)) {
+      return regionOf;
+    }
+  }
+  return null;
+}
+
+function regionCells(regionOf) {
+  const cells = Array.from({ length: 8 }, () => []);
+  regionOf.forEach((r, i) => cells[r].push(i));
+  return cells;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// REMPLISSAGE — génère une grille complète valide (1-8 partout,
+// respectant lignes/colonnes/régions) par backtracking randomisé.
+// ═══════════════════════════════════════════════════════════════
+function isValidPlacement(grid, regionOf, pos, value) {
+  const r = Math.floor(pos / SIZE), c = pos % SIZE;
+  for (let cc = 0; cc < SIZE; cc++) if (grid[idx(r, cc)] === value) return false;
+  for (let rr = 0; rr < SIZE; rr++) if (grid[idx(rr, c)] === value) return false;
+  const region = regionOf[pos];
+  for (let i = 0; i < 64; i++) if (regionOf[i] === region && grid[i] === value) return false;
+  return true;
+}
+
+/** Remplit une grille valide pour une partition de régions donnée, par
+ *  backtracking MRV. Certaines partitions de régions irrégulières sont
+ *  combinatoirement très difficiles à remplir (phénomène connu en
+ *  génération de puzzles à régions libres) — plutôt que de risquer un
+ *  blocage, le nombre d'étapes de backtracking est plafonné ; en cas
+ *  d'échec, l'appelant doit régénérer une AUTRE partition de régions
+ *  plutôt que de s'acharner sur celle-ci (voir generatePuzzleGrid). */
+function fillGrid(regionOf, rng = Math.random, maxSteps = 20000) {
+  const grid = Array(64).fill(0);
+  let steps = 0;
+  function findBestCell() {
+    let best = -1, bestOptions = null, bestCount = 10;
+    for (let i = 0; i < 64; i++) {
+      if (grid[i] !== 0) continue;
+      const options = [];
+      for (let v = 1; v <= 8; v++) if (isValidPlacement(grid, regionOf, i, v)) options.push(v);
+      if (options.length < bestCount) { bestCount = options.length; best = i; bestOptions = options; }
+      if (bestCount === 0) break;
+    }
+    return { best, bestOptions };
+  }
+  function backtrack() {
+    steps++;
+    if (steps > maxSteps) return 'timeout';
+    const { best, bestOptions } = findBestCell();
+    if (best === -1) return true;
+    if (bestOptions.length === 0) return false;
+    const shuffled = bestOptions.map(v => [rng(), v]).sort((a,b) => a[0]-b[0]).map(p => p[1]);
+    for (const v of shuffled) {
+      grid[best] = v;
+      const result = backtrack();
+      if (result === 'timeout') return 'timeout';
+      if (result === true) return true;
+      grid[best] = 0;
+    }
+    return false;
+  }
+  const result = backtrack();
+  return result === true ? grid : null;
+}
+
+/** Génère une grille complète valide en combinant les deux sources
+ *  d'aléatoire (partition de régions + remplissage) : si une partition
+ *  s'avère trop difficile à remplir, en régénère une nouvelle plutôt
+ *  que d'insister — bien plus robuste que de fixer une seule partition
+ *  et d'espérer qu'elle soit remplissable rapidement (bug réel
+ *  rencontré : certaines partitions bloquaient le remplissage pendant
+ *  un temps indéterminé même avec l'heuristique MRV). */
+function generatePuzzleGrid(rng = Math.random) {
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const regionOf = generateRegions(rng);
+    if (!regionOf) continue;
+    const grid = fillGrid(regionOf, rng);
+    if (grid) return { grid, regionOf };
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SOLVEUR — compte les solutions d'une grille partielle (plafonné à 2
+// pour l'efficacité : on n'a besoin de savoir QUE si c'est 0, 1, ou
+// "plus d'une", jamais le nombre exact au-delà de 2).
+// ═══════════════════════════════════════════════════════════════
+function countSolutions(grid, regionOf, cap = 2) {
+  const g = grid.slice();
+  let count = 0;
+
+  function findBestCell() {
+    // choisit la case vide avec le MOINS de valeurs possibles (MRV,
+    // même heuristique que pour les régions) — accélère énormément
+    // le solveur par rapport à un simple balayage gauche->droite
+    let best = -1, bestOptions = null, bestCount = 10;
+    for (let i = 0; i < 64; i++) {
+      if (g[i] !== 0) continue;
+      const options = [];
+      for (let v = 1; v <= 8; v++) if (isValidPlacement(g, regionOf, i, v)) options.push(v);
+      if (options.length < bestCount) { bestCount = options.length; best = i; bestOptions = options; }
+      if (bestCount === 0) break; // impasse détectée immédiatement
+    }
+    return { best, bestOptions };
+  }
+
+  function backtrack() {
+    if (count >= cap) return;
+    const { best, bestOptions } = findBestCell();
+    if (best === -1) { count++; return; } // grille pleine = 1 solution trouvée
+    if (bestOptions.length === 0) return; // impasse, remonte
+    for (const v of bestOptions) {
+      g[best] = v;
+      backtrack();
+      g[best] = 0;
+      if (count >= cap) return;
+    }
+  }
+  backtrack();
+  return count;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// GÉNÉRATEUR DE PUZZLE — part d'une grille complète, retire des
+// cases une à une (ordre aléatoire), en vérifiant à CHAQUE retrait
+// que le puzzle garde EXACTEMENT une solution. S'arrête au nombre
+// d'indices cible de la difficulté choisie, ou dès qu'aucun retrait
+// supplémentaire ne préserve l'unicité.
+// ═══════════════════════════════════════════════════════════════
+const DIFFICULTY_CLUES = {
+  facile:    { min: 34, max: 38 },
+  normal:    { min: 28, max: 32 },
+  difficile: { min: 24, max: 27 },
+  expert:    { min: 20, max: 23 },
+};
+
+function generatePuzzle(difficulty = 'normal', rng = Math.random) {
+  const base = generatePuzzleGrid(rng);
+  if (!base) return null;
+  const { grid: solution, regionOf } = base;
+  const target = DIFFICULTY_CLUES[difficulty] || DIFFICULTY_CLUES.normal;
+
+  const puzzle = solution.slice();
+  const order = [...Array(64).keys()].map(v => [rng(), v]).sort((a,b) => a[0]-b[0]).map(p => p[1]);
+  let clueCount = 64;
+
+  for (const pos of order) {
+    if (clueCount <= target.min) break;
+    const backup = puzzle[pos];
+    puzzle[pos] = 0;
+    const count = countSolutions(puzzle, regionOf, 2);
+    if (count === 1) {
+      clueCount--;
+    } else {
+      puzzle[pos] = backup; // le retrait casse l'unicité, on annule
+    }
+  }
+  return { puzzle, solution, regionOf, clueCount, difficulty };
+}
+
+
+const ACHIEVEMENTS = [
+  { id: 'first_win', name: 'Première Résolution', desc: 'Résoudre son premier puzzle', icon: '🧩' },
+  { id: 'no_hint', name: 'Sans Aide', desc: 'Résoudre un puzzle sans indice', icon: '🎯' },
+  { id: 'expert_win', name: 'Maître Mosaïque', desc: 'Résoudre un puzzle Expert', icon: '🏆' },
+  { id: 'speed_5min', name: 'Éclair', desc: 'Résoudre en moins de 5 minutes', icon: '⚡' },
+  { id: 'streak_5', name: '5 Puzzles d\u2019Affilée', desc: 'Résoudre 5 puzzles sans quitter', icon: '🔥' },
+  { id: 'multi_species', name: 'Multi-Espèces', desc: 'Jouer avec au moins 3 personnages différents', icon: '🐾' },
+];
+
+
+// ── games/puzzle-mosaique/ui.js ──
+// ═══════════════════════════════════════════════════════════════
+// games/puzzle-mosaique/ui.js
+// ═══════════════════════════════════════════════════════════════
+
+
+// Les 8 valeurs (1-8) du puzzle sont distinguées par une couleur de
+// badge, PAS par 8 animaux différents — le personnage choisi (un
+// seul) apparaît identique dans toutes les cases, c'est la couleur
+// du badge qui porte la contrainte visuelle (comme un vrai Sudoku où
+// c'est le CHIFFRE qui varie, pas le style). Ce choix rend le rendu
+// naturellement extensible à N'IMPORTE QUEL personnage futur, sans
+// dépendre de l'existence de 8 emoji distincts pour cet animal.
+const VALUE_COLORS = ['#f87171','#fb923c','#fbbf24','#34d399','#22d3ee','#818cf8','#c084fc','#f472b6'];
+const REGION_TINTS = ['#1e3a5f22','#3f1e5f22','#5f1e3a22','#1e5f3a22','#5f4a1e22','#1e4a5f22','#4a5f1e22','#5f1e4a22'];
+
+function createUI(sdk) {
+  let state = null; // { puzzle, solution, regionOf, difficulty, given (Set des cases de départ), startTime, hintsUsed, selectedCell, characterId }
+  let selectedCharacterId = DEFAULT_CHARACTER_ID;
+  let timerInterval = null;
+  let winStreak = 0;
+
+  function goHome() { stopTimer(); renderHome(); sdk.navigation.go('sh'); }
+
+  /** Le personnage préféré doit survivre à sdk.save.clear() (appelé en
+   *  fin de partie) — il ne peut donc pas vivre uniquement dans la
+   *  sauvegarde de la partie en cours. StatsService ne stocke QUE des
+   *  nombres (voir sa documentation) : on stocke donc l'INDEX du
+   *  personnage dans CHARACTERS plutôt que son id (chaîne). */
+  function loadPreferredCharacter() {
+    const idx = sdk.stats.get('lastCharacterIdx', null);
+    if (idx !== null && CHARACTERS[idx]) selectedCharacterId = CHARACTERS[idx].id;
+  }
+  function savePreferredCharacter(id) {
+    const idx = CHARACTERS.findIndex(c => c.id === id);
+    if (idx >= 0) sdk.stats.set('lastCharacterIdx', idx);
+  }
+  function selectCharacter(id) {
+    selectedCharacterId = id;
+    savePreferredCharacter(id);
+    renderCharacterPicker();
+  }
+
+  function selectDifficulty(d) {
+    document.querySelectorAll('.diff-card').forEach(el => el.classList.toggle('sel', el.dataset.diff === d));
+  }
+  function getSelectedDifficulty() {
+    const sel = document.querySelector('.diff-card.sel');
+    return sel ? sel.dataset.diff : 'normal';
+  }
+
+  function startNewPuzzle() {
+    const difficulty = getSelectedDifficulty();
+    document.getElementById('genOverlay').style.display = '';
+    setTimeout(() => {
+      const result = generatePuzzle(difficulty);
+      document.getElementById('genOverlay').style.display = 'none';
+      if (!result) { sdk.toast.show('Erreur de génération, réessaie'); return; }
+      beginState(result, difficulty);
+      sdk.navigation.go('sg');
+      renderPalette();
+      render();
+      startTimer();
+    }, 30);
+  }
+
+  function beginState(result, difficulty) {
+    state = {
+      puzzle: result.puzzle.slice(),
+      solution: result.solution,
+      regionOf: result.regionOf,
+      difficulty,
+      characterId: selectedCharacterId,
+      given: new Set(result.puzzle.map((v, i) => v !== 0 ? i : -1).filter(i => i >= 0)),
+      startTime: Date.now(),
+      elapsedBeforePause: 0,
+      hintsUsed: 0,
+      selectedCell: null,
+      over: false,
+    };
+    persist();
+  }
+
+  function persist() {
+    if (!state) return;
+    sdk.save.write({
+      puzzle: state.puzzle, solution: state.solution, regionOf: state.regionOf,
+      difficulty: state.difficulty, given: [...state.given], characterId: state.characterId,
+      elapsedBeforePause: Date.now() - state.startTime + state.elapsedBeforePause,
+      hintsUsed: state.hintsUsed,
+    });
+  }
+
+  function resumePuzzle() {
+    const saved = sdk.save.read();
+    if (!saved) { startNewPuzzle(); return; }
+    state = {
+      puzzle: saved.puzzle.slice(), solution: saved.solution, regionOf: saved.regionOf,
+      difficulty: saved.difficulty, given: new Set(saved.given),
+      characterId: saved.characterId || DEFAULT_CHARACTER_ID,
+      startTime: Date.now(), elapsedBeforePause: saved.elapsedBeforePause || 0,
+      hintsUsed: saved.hintsUsed || 0, selectedCell: null, over: false,
+    };
+    selectedCharacterId = state.characterId; // la reprise réaffiche bien le même personnage
+    sdk.navigation.go('sg');
+    renderPalette();
+    render();
+    startTimer();
+  }
+
+  /** Recommence LE MÊME puzzle depuis le début (les cases "given" ne
+   *  changent jamais, on repart de la solution pour les reconstruire
+   *  et on vide le reste). */
+  function restartSamePuzzle() {
+    if (!state) return;
+    const startPuzzle = state.solution.map((v, i) => state.given.has(i) ? v : 0);
+    beginState({ puzzle: startPuzzle, solution: state.solution, regionOf: state.regionOf }, state.difficulty);
+    renderPalette();
+    render();
+    startTimer();
+  }
+
+  function nextPuzzle() {
+    document.getElementById('sresult').classList.add('hidden');
+    startNewPuzzle();
+  }
+  function resultToHome() {
+    document.getElementById('sresult').classList.add('hidden');
+    goHome();
+  }
+  function replaySame() {
+    document.getElementById('sresult').classList.add('hidden');
+    restartSamePuzzle();
+  }
+
+  function startTimer() {
+    stopTimer();
+    timerInterval = setInterval(() => {
+      const el = document.getElementById('gameTimer');
+      if (el) el.textContent = formatTime(elapsedMs());
+    }, 1000);
+  }
+  function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+  function elapsedMs() { return state ? (Date.now() - state.startTime + state.elapsedBeforePause) : 0; }
+  function formatTime(ms) {
+    const s = Math.floor(ms / 1000);
+    return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  }
+
+  function selectCell(pos) {
+    if (!state || state.over || state.given.has(pos)) return;
+    state.selectedCell = pos;
+    render();
+  }
+
+  function placeCat(value) {
+    if (!state || state.over || state.selectedCell === null) return;
+    const pos = state.selectedCell;
+    if (state.given.has(pos)) return;
+    state.puzzle[pos] = value;
+    sdk.audio.play('click');
+    persist();
+    render();
+    checkCompletion();
+  }
+
+  function eraseCell() {
+    if (!state || state.over || state.selectedCell === null) return;
+    if (state.given.has(state.selectedCell)) return;
+    state.puzzle[state.selectedCell] = 0;
+    persist();
+    render();
+  }
+
+  function useHint() {
+    if (!state || state.over) return;
+    const empties = state.puzzle.map((v,i) => v === 0 ? i : -1).filter(i => i >= 0);
+    if (!empties.length) return;
+    const pos = empties[Math.floor(Math.random() * empties.length)];
+    state.puzzle[pos] = state.solution[pos];
+    state.hintsUsed++;
+    sdk.audio.play('success');
+    persist();
+    render();
+    checkCompletion();
+  }
+
+  function checkCompletion() {
+    if (state.puzzle.some(v => v === 0)) return;
+    // revalidation réelle des contraintes (pas seulement "identique à la
+    // solution stockée") au cas où une autre solution valide existerait
+    const isValid = state.puzzle.every((v, i) => {
+      const savedVal = state.puzzle[i];
+      state.puzzle[i] = 0;
+      const ok = isValidPlacement(state.puzzle, state.regionOf, i, savedVal);
+      state.puzzle[i] = savedVal;
+      return ok;
+    });
+    if (!isValid) { sdk.toast.show('❌ Il y a une erreur quelque part'); sdk.audio.play('error'); return; }
+    finishPuzzle();
+  }
+
+  function finishPuzzle() {
+    state.over = true;
+    stopTimer();
+    const timeMs = elapsedMs();
+    sdk.stats.increment('puzzlesSolved');
+    sdk.stats.setMin('bestTime_' + state.difficulty, Math.floor(timeMs/1000));
+    winStreak++;
+    sdk.achievements.unlock('first_win', 'Première Résolution', '🧩');
+    if (state.hintsUsed === 0) sdk.achievements.unlock('no_hint', 'Sans Aide', '🎯');
+    if (state.difficulty === 'expert') sdk.achievements.unlock('expert_win', 'Maître Mosaïque', '🏆');
+    if (timeMs < 5*60*1000) sdk.achievements.unlock('speed_5min', 'Éclair', '⚡');
+    if (winStreak >= 5) sdk.achievements.unlock('streak_5', '5 Puzzles d\u2019Affilée', '🔥');
+    // achievement générique lié aux personnages (masque de bits — reste
+    // un nombre, seul type accepté par StatsService)
+    const charIdx = CHARACTERS.findIndex(c => c.id === state.characterId);
+    if (charIdx >= 0) {
+      const mask = sdk.stats.get('charactersPlayedMask', 0) | (1 << charIdx);
+      sdk.stats.set('charactersPlayedMask', mask);
+      const distinctCount = mask.toString(2).split('1').length - 1;
+      if (distinctCount >= 3) sdk.achievements.unlock('multi_species', 'Multi-Espèces', '🐾');
+    }
+    sdk.audio.play('win');
+    sdk.save.clear();
+
+    document.getElementById('resultTime').textContent = formatTime(timeMs);
+    document.getElementById('resultHints').textContent = state.hintsUsed;
+    document.getElementById('resultDiff').textContent = state.difficulty;
+    render();
+    document.getElementById('sresult').classList.remove('hidden');
+  }
+
+  function render() {
+    if (!state) return;
+    const grid = document.getElementById('puzzleGrid');
+    grid.innerHTML = '';
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        const pos = r * SIZE + c;
+        const el = document.createElement('div');
+        const region = state.regionOf[pos];
+        el.className = 'pc-cell';
+        el.style.background = REGION_TINTS[region];
+        if (state.given.has(pos)) el.classList.add('given');
+        if (state.selectedCell === pos) el.classList.add('selected');
+        // bordures épaisses entre régions différentes (dérivées de la même
+        // donnée regionOf que la logique — une seule source de vérité)
+        const rightPos = c < 7 ? r*SIZE+c+1 : -1;
+        const downPos = r < 7 ? (r+1)*SIZE+c : -1;
+        if (rightPos === -1 || state.regionOf[rightPos] !== region) el.style.borderRight = '2.5px solid var(--text)';
+        if (downPos === -1 || state.regionOf[downPos] !== region) el.style.borderBottom = '2.5px solid var(--text)';
+        if (c === 0) el.style.borderLeft = '2.5px solid var(--text)';
+        if (r === 0) el.style.borderTop = '2.5px solid var(--text)';
+
+        const val = state.puzzle[pos];
+        if (val) {
+          const char = getCharacter(state.characterId);
+          el.innerHTML = `<span class="pc-token" style="background:${VALUE_COLORS[val-1]};">${char.symbol}<b>${val}</b></span>`;
+          const conflict = !isValidPlacementIgnoringSelf(state.puzzle, state.regionOf, pos, val);
+          if (conflict) el.classList.add('conflict');
+        }
+        el.onclick = () => selectCell(pos);
+        grid.appendChild(el);
+      }
+    }
+    document.getElementById('gameTimer').textContent = formatTime(elapsedMs());
+    document.getElementById('hintsUsedLabel').textContent = state.hintsUsed;
+    document.getElementById('diffLabel').textContent = state.difficulty;
+  }
+
+  function isValidPlacementIgnoringSelf(puzzle, regionOf, pos, value) {
+    const saved = puzzle[pos];
+    puzzle[pos] = 0;
+    const ok = isValidPlacement(puzzle, regionOf, pos, value);
+    puzzle[pos] = saved;
+    return ok;
+  }
+
+  function renderPalette() {
+    const host = document.getElementById('catPalette');
+    host.innerHTML = '';
+    const char = getCharacter(state ? state.characterId : selectedCharacterId);
+    VALUE_COLORS.forEach((color, i) => {
+      const el = document.createElement('div');
+      el.className = 'cat-btn';
+      el.innerHTML = `<span class="pc-token" style="background:${color};">${char.symbol}<b>${i+1}</b></span>`;
+      el.onclick = () => placeCat(i + 1);
+      host.appendChild(el);
+    });
+    const eraseBtn = document.createElement('div');
+    eraseBtn.className = 'cat-btn erase-btn';
+    eraseBtn.textContent = '✖️';
+    eraseBtn.onclick = () => eraseCell();
+    host.appendChild(eraseBtn);
+  }
+
+  function renderHome() {
+    const host = document.getElementById('homeStatsPuzzleMosaique');
+    host.innerHTML = '';
+    [{ v: sdk.stats.get('puzzlesSolved'), l: '🧩 Résolus' }, { v: sdk.stats.get('bestTime_normal') ? formatTime(sdk.stats.get('bestTime_normal')*1000) : '—', l: '⏱ Record Normal' }]
+      .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.style.flex = '1';
+        el.innerHTML = `<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
+    document.getElementById('resumeBtnPC').style.display = sdk.save.hasSave() ? '' : 'none';
+    renderCharacterPicker();
+  }
+
+  function renderCharacterPicker() {
+    const host = document.getElementById('characterPicker');
+    if (!host) return;
+    host.innerHTML = '';
+    CHARACTERS.forEach((c) => {
+      const el = document.createElement('div');
+      el.className = 'char-card' + (c.id === selectedCharacterId ? ' sel' : '');
+      el.innerHTML = `<div class="char-symbol">${c.symbol}</div><div class="char-name">${c.name}</div>`;
+      el.onclick = () => selectCharacter(c.id);
+      host.appendChild(el);
+    });
+  }
+
+  function renderAchievements() {
+    const list = document.getElementById('achListPC');
+    list.innerHTML = '';
+    ACHIEVEMENTS.forEach((a) => {
+      const unlocked = sdk.achievements.isUnlocked(a.id);
+      const el = document.createElement('div');
+      el.className = 'achCard' + (unlocked ? ' unlocked' : '');
+      el.innerHTML = `<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`;
+      list.appendChild(el);
+    });
+  }
+  function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
+
+  async function confirmQuit() {
+    if (state && !state.over) {
+      const ok = await sdk.dialog.confirm('Quitter le puzzle ?', 'Ta progression est sauvegardée automatiquement.', 'Quitter', 'Annuler');
+      if (!ok) return;
+    }
+    goHome();
+  }
+
+  function init() {
+    loadPreferredCharacter();
+    renderHome();
+    renderPalette();
+    selectDifficulty('normal');
+  }
+
+  return {
+    init, goHome, selectDifficulty, selectCharacter, startNewPuzzle, resumePuzzle, nextPuzzle, resultToHome, replaySame,
+    useHint, confirmQuit, showStats,
+  };
+}
+
+
+// ── games/puzzle-mosaique/game.js ──
+
+
+
+
+const sdk = createSDK('puzzle-mosaique');
+const toastEl = UI.toastHost();
+document.body.appendChild(toastEl);
+NotificationService.mount(toastEl);
+
+const game = createUI(sdk);
+game.init();
+
+window.goHome = game.goHome;
+window.selectDifficulty = game.selectDifficulty;
+window.selectCharacter = game.selectCharacter;
+window.startNewPuzzle = game.startNewPuzzle;
+window.resumePuzzle = game.resumePuzzle;
+window.nextPuzzle = game.nextPuzzle;
+window.resultToHome = game.resultToHome;
+window.replaySame = game.replaySame;
+window.useHint = game.useHint;
+window.confirmQuit = game.confirmQuit;
+window.showStats = game.showStats;
+
+</script>
+</body>
+</html>

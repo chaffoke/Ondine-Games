@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Mahjong Solitaire × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;--c1:#38bdf8;--c2:#7dd3fc;--cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);--text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;--sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:20px;cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:22px;max-width:320px;width:100%;box-shadow:var(--sh2);}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(24px,7vw,34px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+#sg{align-items:center;padding:8px;gap:6px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;}
+.hud-badge{font-family:'Fredoka One',cursive;font-size:12px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;}
+.board-wrap{flex:1;width:100%;overflow:auto;display:flex;align-items:center;justify-content:center;}
+.board{position:relative;}
+.tile{position:absolute;width:32px;height:42px;border-radius:5px;background:linear-gradient(160deg,#f5f0e6,#e2dcc8);
+  border:1px solid rgba(0,0,0,.25);box-shadow:0 2px 0 rgba(0,0,0,.35),0 4px 8px rgba(0,0,0,.3);
+  display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:transform .12s,box-shadow .12s;}
+.tile.blocked{filter:brightness(.55) saturate(.6);cursor:default;}
+.tile.selected{transform:translateY(-6px);box-shadow:0 0 0 2px var(--co),0 8px 14px rgba(0,0,0,.4);}
+.tile.matched{animation:tileMatch .3s ease forwards;}
+@keyframes tileMatch{to{transform:scale(0);opacity:0;}}
+.tile.hint{animation:hintPulse .6s ease infinite;}
+@keyframes hintPulse{0%,100%{box-shadow:0 0 0 2px var(--cg);}50%{box-shadow:0 0 10px 3px var(--cg);}}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:340px;}
+
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+</style>
+</head>
+<body>
+
+<div id="toastHost" class="ondine-toast"></div>
+
+<!-- ═══════ HOME ═══════ -->
+<div class="screen" id="sh">
+  <div class="logo">MAHJONG SOLITAIRE</div>
+  <div class="logo-sub">× Ondine</div>
+  <div class="hbtns" style="margin-top:10px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🀄 Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showRules()">ⓘ Comment jouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
+  </div>
+  <div class="hstats" id="homeStats"></div>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════ GAME ═══════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div class="icon-btn" onclick="confirmLeaveGame()">🏠</div>
+    <div class="hud-badge" id="tilesLeftBadge"></div>
+    <div class="hud-badge" id="timerBadge">⏱ 0s</div>
+  </div>
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+  <div class="game-footer">
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="giveHint()">💡 Indice</button>
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="reshuffleRemaining()">🔀 Mélanger</button>
+  </div>
+</div>
+
+<!-- ═══════ RESULT ═══════ -->
+<div class="screen hidden" id="sres">
+  <div class="res-icon" id="resIcon">🏆</div>
+  <div class="res-title" id="resTitle"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔄 Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;">Succès</div>
+    <div class="ach-list" id="achList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// GÉOMÉTRIE ET GÉNÉRATION — validées par simulation complète avant
+// intégration (voir historique de développement). Pyramide à étages
+// simplifiée (documentée) plutôt que la "tortue" traditionnelle
+// exacte à 144 tuiles — même principe de jeu (couverture par
+// au-dessus, blocage par les deux côtés), juste une géométrie plus
+// simple à générer correctement. Chaque type de tuile n'a PAS de
+// comportement "joker" (contrairement aux fleurs/saisons du Mahjong
+// traditionnel) — seule l'égalité stricte compte, simplification
+// assumée pour réduire la complexité.
+// ═══════════════════════════════════════════════════════════════
+function key(l,r,c) { return `${l},${r},${c}`; }
+function parseKey(k) { return k.split(',').map(Number); }
+function isFree(present, posKey) {
+  const [l,r,c] = parseKey(posKey);
+  if (present.has(key(l+1,r,c))) return false;
+  const leftBlocked = present.has(key(l,r,c-1));
+  const rightBlocked = present.has(key(l,r,c+1));
+  return !(leftBlocked && rightBlocked);
+}
+function shuffleArr(arr) {
+  for (let i=arr.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+function generateRemovalOrder(positions, maxAttempts=20) {
+  for (let attempt=0; attempt<maxAttempts; attempt++) {
+    let present = new Set(positions);
+    let remaining = [...positions];
+    const pairs = [];
+    let ok = true;
+    while (remaining.length > 0) {
+      const freeNow = remaining.filter(p => isFree(present, p));
+      if (freeNow.length < 2) { ok = false; break; }
+      shuffleArr(freeNow);
+      const a = freeNow[0], b = freeNow[1];
+      pairs.push([a,b]);
+      present.delete(a); present.delete(b);
+      remaining = remaining.filter(p => p!==a && p!==b);
+    }
+    if (ok) return pairs;
+  }
+  return null;
+}
+function buildLayerPyramid() {
+  const layers = [ { rows: 6, cols: 12 }, { rows: 4, cols: 10 }, { rows: 2, cols: 8 } ];
+  const positions = [];
+  layers.forEach((L, li) => {
+    const offR = Math.floor((6 - L.rows) / 2);
+    const offC = Math.floor((12 - L.cols) / 2);
+    for (let r=0;r<L.rows;r++) for (let c=0;c<L.cols;c++) positions.push(key(li, r+offR, c+offC));
+  });
+  return positions;
+}
+// Le pool doit contenir EXACTEMENT une entrée par paire (pas une entrée
+// par type réutilisée pour 2 paires) : sinon, un type qui n'a plus que
+// 2 tuiles restantes (1 paire, par ex. après un mélange partiel en cours
+// de partie) casse l'alignement pool/paires. Bug réel trouvé et corrigé
+// pendant les tests — voir buildPoolFromTypeCounts,
+// qui construisent justement un pool à raison d'une entrée par paire.
+function assignTileTypes(pairs, typePool) {
+  const assignment = {};
+  pairs.forEach(([a,b], i) => {
+    const type = typePool[i];
+    assignment[a] = type; assignment[b] = type;
+  });
+  return assignment;
+}
+
+// Vraies tuiles Mahjong Unicode (Caractères, Cercles, Bambous, Vents, Dragons)
+const TILE_TYPES = [
+  '🀇','🀈','🀉','🀊','🀋','🀌','🀍','🀎','🀏', // caractères 1-9
+  '🀙','🀚','🀛','🀜','🀝','🀞','🀟','🀠','🀡', // cercles 1-9
+  '🀐','🀑','🀒','🀓','🀔','🀕','🀖','🀗','🀘', // bambous 1-9
+  '🀀','🀁','🀂','🀃', // vents E S O N
+  '🀄','🀅','🀆', // dragons rouge vert blanc
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'mahjong_ondine_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats: {}, achievements: [] }, loadStore());
+function statGet(k, d=0) { return k in STORE.stats ? STORE.stats[k] : d; }
+function statInc(k, n=1) { STORE.stats[k] = (STORE.stats[k]||0)+n; saveStore(STORE); return STORE.stats[k]; }
+function statSetMin(k, v) { if (!(k in STORE.stats) || v < STORE.stats[k]) { STORE.stats[k] = v; saveStore(STORE); } }
+function achUnlock(id, name, icon) {
+  if (STORE.achievements.includes(id)) return;
+  STORE.achievements.push(id); saveStore(STORE);
+  playSound('unlock'); toast(`${icon} Succès : ${name}`);
+}
+const ACHIEVEMENTS = [
+  { id:'first_win', name:'Premier Nettoyage', desc:'Vider le plateau une première fois', icon:'🎯' },
+  { id:'no_hint', name:'Œil de Lynx', desc:"Gagner sans utiliser d'indice", icon:'👁️' },
+  { id:'fast', name:'Éclair', desc:'Gagner en moins de 3 minutes', icon:'⚡' },
+  { id:'wins_10', name:'10 victoires', desc:'Gagner 10 parties', icon:'🏅' },
+  { id:'no_shuffle', name:'Sans Filet', desc:'Gagner sans jamais mélanger', icon:'🎋' },
+];
+
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toastHost');
+  t.textContent = msg; t.classList.remove('ondine-toast-show'); void t.offsetWidth; t.classList.add('ondine-toast-show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('ondine-toast-show'), 2000);
+}
+let audioCtx = null;
+function tone(freq, dur, type='sine', vol=.12) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime+dur);
+    osc.start(); osc.stop(audioCtx.currentTime+dur);
+  } catch(e) {}
+}
+function playSound(name) {
+  const P = {
+    select: () => tone(600,.06,'sine',.1),
+    match: () => [660,880].forEach((f,i)=>setTimeout(()=>tone(f,.12,'sine',.14),i*70)),
+    error: () => tone(220,.15,'sawtooth',.1),
+    win: () => [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.16),i*100)),
+    unlock: () => [660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,.14,'sine',.14),i*80)),
+  };
+  (P[name]||(()=>{}))();
+}
+function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let G = null;
+let timerInterval = null;
+const TILE_W = 32, TILE_H = 42, STEP_X = 30, STEP_Y = 39, LAYER_OFFSET = 7;
+// Stratégie responsive propre (JS+CSS synchronisés, pas un hack CSS isolé) :
+// un seul facteur d'échelle appliqué À LA FOIS aux constantes de position
+// (STEP_X/STEP_Y/LAYER_OFFSET) ET à la taille visuelle (TILE_W/TILE_H) —
+// les deux doivent toujours varier ensemble, sinon les tuiles se
+// chevauchent ou laissent des trous (elles sont positionnées en absolu).
+function getScale() { return window.innerWidth >= 900 ? 1.55 : 1; }
+
+function startGame() {
+  const positions = buildLayerPyramid();
+  const pairs = generateRemovalOrder(positions);
+  // 128 tuiles / 4 par type = exactement 32 types nécessaires. TILE_TYPES en
+  // propose 34 (jeu complet vents+dragons) — on n'en prend que 32 pour un
+  // alignement parfait pool/paires (sinon 2 types se retrouveraient utilisés
+  // de façon incohérente, ni tout à fait présents ni tout à fait absents).
+  const usedTypes = shuffleArr([...TILE_TYPES]).slice(0, positions.length / 4);
+  const typePool = shuffleArr(usedTypes.flatMap(t => [t, t])); // chaque type couvre 2 paires (4 tuiles) -> une entrée de pool par paire
+  const assignment = assignTileTypes(pairs, typePool);
+  const tiles = {};
+  positions.forEach(p => { tiles[p] = { type: assignment[p], removed: false }; });
+  G = { positions, tiles, selected: null, elapsed: 0, over: false, usedHint: false, usedShuffle: false };
+  showScreen('sg');
+  renderBoard();
+  startTimer();
+}
+function goHome() { stopTimer(); updateHomeStats(); showScreen('sh'); }
+// Re-rendu si la fenêtre change de largeur en cours de partie (ex: rotation
+// tablette, redimensionnement navigateur) — sans cela, l'échelle resterait
+// figée sur celle du chargement initial.
+let lastScaleBucket = null;
+window.addEventListener('resize', () => {
+  const bucket = window.innerWidth >= 900 ? 'desktop' : 'mobile';
+  if (bucket !== lastScaleBucket) { lastScaleBucket = bucket; if (G && !G.over) renderBoard(); }
+});
+async function confirmLeaveGame() {
+  if (G && !G.over) {
+    const ok = await confirmDialog('Quitter la partie ?', 'La partie en cours sera perdue.', 'Quitter', 'Continuer');
+    if (!ok) return;
+  }
+  goHome();
+}
+function startTimer() {
+  stopTimer();
+  timerInterval = setInterval(() => { G.elapsed++; document.getElementById('timerBadge').textContent = `⏱ ${G.elapsed}s`; }, 1000);
+}
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+
+function presentSet() {
+  const s = new Set();
+  for (const p of G.positions) if (!G.tiles[p].removed) s.add(p);
+  return s;
+}
+function findAnyValidPair() {
+  const present = presentSet();
+  const freeTiles = [...present].filter(p => isFree(present, p));
+  for (let i=0;i<freeTiles.length;i++) for (let j=i+1;j<freeTiles.length;j++) {
+    if (G.tiles[freeTiles[i]].type === G.tiles[freeTiles[j]].type) return [freeTiles[i], freeTiles[j]];
+  }
+  return null;
+}
+
+function selectTile(posKey) {
+  if (!G || G.over) return;
+  const tile = G.tiles[posKey];
+  if (tile.removed) return;
+  const present = presentSet();
+  if (!isFree(present, posKey)) { playSound('error'); toast('Cette tuile est bloquée'); return; }
+
+  if (G.selected === posKey) { G.selected = null; renderBoard(); return; }
+  if (!G.selected) { G.selected = posKey; playSound('select'); renderBoard(); return; }
+
+  const a = G.selected, b = posKey;
+  if (G.tiles[a].type === G.tiles[b].type) {
+    G.tiles[a].removed = true; G.tiles[b].removed = true;
+    G.selected = null;
+    playSound('match'); vibrate(15);
+    renderBoard(true, [a,b]);
+    checkGameState();
+  } else {
+    playSound('error'); toast('Les tuiles ne correspondent pas');
+    G.selected = posKey;
+    renderBoard();
+  }
+}
+
+function checkGameState() {
+  const remaining = G.positions.filter(p => !G.tiles[p].removed);
+  if (remaining.length === 0) { endGame(true); return; }
+  if (!findAnyValidPair()) toast('😅 Plus aucun coup possible — mélange les tuiles restantes');
+}
+
+function giveHint() {
+  if (!G || G.over) return;
+  const pair = findAnyValidPair();
+  if (!pair) { toast('Aucun coup disponible — mélange les tuiles'); return; }
+  G.usedHint = true;
+  const els = pair.map(p => document.querySelector(`[data-pos="${p}"]`));
+  els.forEach(el => el && el.classList.add('hint'));
+  setTimeout(() => els.forEach(el => el && el.classList.remove('hint')), 1500);
+}
+
+function reshuffleRemaining() {
+  if (!G || G.over) return;
+  const remaining = G.positions.filter(p => !G.tiles[p].removed);
+  if (remaining.length < 2) return;
+  const pairs = generateRemovalOrder(remaining);
+  if (!pairs) { toast('Impossible de mélanger, réessaie'); return; }
+  // pool avec EXACTEMENT une entrée par paire, reconstruit à partir du
+  // nombre RÉEL de tuiles restantes par type (un type peut n'avoir plus
+  // que 2 tuiles = 1 paire à ce stade, pas forcément 4) — voir le bug
+  // trouvé et corrigé pendant les tests d'assignTileTypes.
+  const remainingTypes = remaining.map(p => G.tiles[p].type);
+  const pool = shuffleArr(buildPoolFromTypeCounts(remainingTypes));
+  const assignment = assignTileTypes(pairs, pool);
+  Object.keys(assignment).forEach(p => { G.tiles[p].type = assignment[p]; });
+  G.usedShuffle = true;
+  toast('🔀 Tuiles mélangées');
+  renderBoard();
+}
+function buildPoolFromTypeCounts(types) {
+  const seen = {}; const pool = [];
+  types.forEach(t => { seen[t] = (seen[t]||0)+1; });
+  Object.keys(seen).forEach(t => { for (let i=0;i<seen[t]/2;i++) pool.push(t); });
+  return pool;
+}
+
+function endGame(won) {
+  G.over = true;
+  stopTimer();
+  statInc('games');
+  if (won) {
+    statInc('wins');
+    statSetMin('bestTime', G.elapsed);
+    playSound('win'); vibrate([20,40,20]);
+    achUnlock('first_win','Premier Nettoyage','🎯');
+    if (!G.usedHint) achUnlock('no_hint','Œil de Lynx','👁️');
+    if (!G.usedShuffle) achUnlock('no_shuffle','Sans Filet','🎋');
+    if (G.elapsed < 180) achUnlock('fast','Éclair','⚡');
+    if (statGet('wins') >= 10) achUnlock('wins_10','10 victoires','🏅');
+  }
+  setTimeout(() => showResult(won), 400);
+}
+function showResult(won) {
+  document.getElementById('resIcon').textContent = won ? '🏆' : '🀄';
+  document.getElementById('resTitle').textContent = won ? 'Plateau vidé !' : 'Partie terminée';
+  document.getElementById('resSub').textContent = won ? `Temps : ${G.elapsed}s` : '';
+  document.getElementById('sres').classList.remove('hidden'); /* audit UX fin de partie : overlay sans masquer le plateau/la grille en dessous */
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderBoard(animateMatch, matchedPair) {
+  const board = document.getElementById('board');
+  const remaining = G.positions.filter(p => !G.tiles[p].removed);
+  document.getElementById('tilesLeftBadge').textContent = `🀫 ${remaining.length} restantes`;
+
+  if (!animateMatch) {
+    board.innerHTML = '';
+    const present = presentSet();
+    // trier par calque croissant pour un empilement visuel correct (z-index)
+    const sorted = [...G.positions].sort((a,b) => parseKey(a)[0]-parseKey(b)[0]);
+    const scale = getScale();
+    const tw = TILE_W*scale, th = TILE_H*scale, sx = STEP_X*scale, sy = STEP_Y*scale, lo = LAYER_OFFSET*scale;
+    let maxX=0, maxY=0;
+    sorted.forEach(p => {
+      const tile = G.tiles[p];
+      if (tile.removed) return;
+      const [l,r,c] = parseKey(p);
+      const el = document.createElement('div');
+      el.className = 'tile' + (isFree(present,p) ? '' : ' blocked') + (G.selected===p ? ' selected' : '');
+      el.textContent = tile.type;
+      el.dataset.pos = p;
+      const x = c*sx + l*lo;
+      const y = r*sy - l*lo;
+      el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.zIndex = l+1;
+      el.style.width = tw + 'px'; el.style.height = th + 'px'; el.style.fontSize = (20*scale) + 'px';
+      el.onclick = () => selectTile(p);
+      board.appendChild(el);
+      maxX = Math.max(maxX, x+tw); maxY = Math.max(maxY, y+th);
+    });
+    board.style.width = (maxX+20)+'px'; board.style.height = (maxY+20)+'px';
+  } else {
+    matchedPair.forEach(p => {
+      const el = document.querySelector(`[data-pos="${p}"]`);
+      if (el) { el.classList.add('matched'); setTimeout(() => el.remove(), 300); }
+    });
+    document.querySelectorAll('.tile').forEach(el => {
+      const p = el.dataset.pos;
+      if (matchedPair.includes(p)) return;
+      const present = presentSet();
+      el.classList.toggle('blocked', !isFree(present, p));
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION / STATS / RULES
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id==='sstats') renderStatsScreen();
+}
+function updateHomeStats() {
+  const host = document.getElementById('homeStats'); host.innerHTML = '';
+  [{v:statGet('games'),l:'🀄 Parties'},{v:statGet('wins'),l:'🏆 Victoires'},{v:statGet('bestTime','—'),l:'⏱ Record'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.style.flex='1';
+      el.innerHTML = `<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
+}
+function renderStatsScreen() {
+  const grid = document.getElementById('statsGrid'); grid.innerHTML = '';
+  [{v:statGet('games'),l:'Parties'},{v:statGet('wins'),l:'Victoires'},{v:statGet('bestTime','—'),l:'Meilleur temps (s)'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; grid.appendChild(el); });
+  const list = document.getElementById('achList'); list.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = STORE.achievements.includes(a.id);
+    const el = document.createElement('div'); el.className='achCard'+(unlocked?' unlocked':'');
+    el.innerHTML = `<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`;
+    list.appendChild(el);
+  });
+}
+function showRules() {
+  const overlay = document.getElementById('modalOverlay');
+  overlay.innerHTML = `<div class="modal-box"><div class="modal-title">🀄 Comment jouer</div>
+    <div class="modal-body">Retire toutes les tuiles du plateau en les associant deux par deux.<br><br>
+    Une tuile est <b>libre</b> si rien ne la recouvre par-dessus, et si au moins un de ses deux côtés (gauche ou droite) est dégagé.<br><br>
+    Tape deux tuiles libres identiques pour les retirer. Utilise 💡 si tu es bloqué, ou 🔀 pour mélanger les tuiles restantes.</div>
+    <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdClose">Compris !</button></div></div>`;
+  overlay.classList.remove('hidden');
+  document.getElementById('mdClose').onclick = () => overlay.classList.add('hidden');
+}
+function confirmDialog(title, message, confirmLabel, cancelLabel) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.innerHTML = `<div class="modal-box"><div class="modal-title">${title}</div><div class="modal-body">${message}</div>
+      <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdConfirm">${confirmLabel}</button>
+      <button class="ondine-btn ondine-btn-secondary" id="mdCancel">${cancelLabel}</button></div></div>`;
+    overlay.classList.remove('hidden');
+    document.getElementById('mdConfirm').onclick = () => { overlay.classList.add('hidden'); resolve(true); };
+    document.getElementById('mdCancel').onclick = () => { overlay.classList.add('hidden'); resolve(false); };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+updateHomeStats();
+window.startGame=startGame; window.goHome=goHome; window.showScreen=showScreen;
+window.confirmLeaveGame=confirmLeaveGame; window.giveHint=giveHint; window.reshuffleRemaining=reshuffleRemaining;
+window.showRules=showRules; window.selectTile=selectTile;
+</script>
+</body>
+</html>

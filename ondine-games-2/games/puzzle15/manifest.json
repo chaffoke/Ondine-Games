@@ -1,0 +1,10 @@
+{
+  "id": "puzzle15",
+  "name": "Puzzle 15",
+  "icon": "🔢",
+  "category": "reflexion",
+  "description": "Le taquin classique. Mélange toujours solvable, garanti sur 10000 tests.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "flappy",
+  "name": "Flappy Bulle",
+  "icon": "🐦",
+  "category": "action",
+  "description": "Tap pour voler entre les obstacles. Identité visuelle Ondine originale. Physique testée sur 3000 vols simulés.",
+  "minPlayers": 1,
+  "maxPlayers": 1,
+  "version": "1.0.0"
+}
