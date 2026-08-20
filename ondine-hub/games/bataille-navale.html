@@ -303,6 +303,7 @@ body {
 </div>
 
 <div class="screen hidden" id="splace">
+  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">🏠</div>
   <div id="placeLabel"></div>
   <div class="navgrid" id="placeGrid"></div>
   <div style="display:flex;gap:8px;">
@@ -329,6 +330,34 @@ body {
 
 <script>
 const CoreBundle = (function() {
+// ── data/characters.js ──
+// ═══════════════════════════════════════════════════════════════
+// core/data/characters.js
+// Bibliothèque de personnages partagée entre les jeux Ondine Games
+// qui proposent un choix d'animal cosmétique (Puzzle Mosaïque,
+// Labyrinthe, et les futurs jeux qui en auraient besoin).
+// Extensible : ajouter un objet à ce tableau suffit à faire
+// apparaître un nouveau personnage dans TOUS les jeux qui
+// consomment cette liste — aucune duplication de logique par animal.
+// ═══════════════════════════════════════════════════════════════
+const CHARACTERS = [
+  { id: 'cat',    name: 'Chat',      symbol: '🐱' },
+  { id: 'dog',    name: 'Chien',     symbol: '🐶' },
+  { id: 'rat',    name: 'Rat',       symbol: '🐭' },
+  { id: 'fox',    name: 'Renard',    symbol: '🦊' },
+  { id: 'rabbit', name: 'Lapin',     symbol: '🐰' },
+  { id: 'panda',  name: 'Panda',     symbol: '🐼' },
+  { id: 'frog',   name: 'Grenouille',symbol: '🐸' },
+  { id: 'koala',  name: 'Koala',     symbol: '🐨' },
+];
+
+const DEFAULT_CHARACTER_ID = 'cat';
+
+function getCharacter(id) {
+  return CHARACTERS.find(c => c.id === id) || CHARACTERS.find(c => c.id === DEFAULT_CHARACTER_ID);
+}
+
+
 // ── storage/keys.js ──
 // ═══════════════════════════════════════════════════════════════
 // core/storage/keys.js
@@ -1427,7 +1456,7 @@ const GameRegistry = {
 };
 
 
-return { readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
+return { getCharacter, CHARACTERS, DEFAULT_CHARACTER_ID, readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
 })();
 
 // ── jeu (imports résolus par concaténation) ──

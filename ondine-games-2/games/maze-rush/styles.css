@@ -28,7 +28,7 @@
 .lv-lock{position:absolute;font-size:12px;}
 
 /* ── Jeu ── */
-#sg{padding:8px;gap:6px;align-items:center;}
+#sg{padding:8px;gap:6px;align-items:center;overflow-y:auto;}
 .mz-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:460px;flex-wrap:wrap;gap:4px;}
 .mz-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
 #hudCombo{color:var(--co);min-width:36px;}

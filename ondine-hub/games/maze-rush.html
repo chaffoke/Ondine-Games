@@ -2265,6 +2265,28 @@ function createUI(sdk) {
     loadProfile();
     renderHome();
     selectDifficulty('normal');
+    attachSwipeControls();
+  }
+
+  /** Glisser le doigt pour diriger, comme Snake — même seuil (20px) et
+   *  même logique (direction dominante horizontale/verticale). Attaché
+   *  UNE SEULE FOIS ici : #mazeCanvas est un élément DOM statique (jamais
+   *  recréé entre les niveaux/Rejouer), donc pas de risque d'accumuler
+   *  des écouteurs en double au fil des parties. */
+  function attachSwipeControls() {
+    const canvasEl = document.getElementById('mazeCanvas');
+    let touchStartX = 0, touchStartY = 0;
+    canvasEl.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      touchStartX = t.clientX; touchStartY = t.clientY;
+    }, { passive: true });
+    canvasEl.addEventListener('touchend', (e) => {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
+      if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return; // tap simple, pas un glissement
+      if (Math.abs(dx) > Math.abs(dy)) setDesiredDir(dx > 0 ? 'E' : 'W');
+      else setDesiredDir(dy > 0 ? 'S' : 'N');
+    }, { passive: true });
   }
 
   return {

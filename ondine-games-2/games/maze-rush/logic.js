@@ -141,7 +141,7 @@ export function nextStepToward(maze, from, to) {
   // cible, au lieu de s'arrêter au premier pas depuis la position actuelle
   // — ce qui envoyait l'entité vers une case sans rapport avec sa position.)
   const step = prev[cur];
-  return { x: step % width, y: Math.floor(step / width) };
+  return [step % width, Math.floor(step / width)];
 }
 
 
@@ -305,7 +305,15 @@ function decideHunter(maze, enemyCell, playerCell, playerDir) {
 /** Point d'entrée unique (architecture commune demandée : pas de
  *  code dupliqué par ennemi, un seul `decideEnemyDirection`). */
 export function decideEnemyDirection(maze, enemy, player, rng = Math.random) {
-  const enemyCell = cellOf(enemy.pos);
+  // IMPORTANT : `enemy.pos` est la position de SPAWN, jamais mise à jour —
+  // la position réelle en mouvement est `enemy.moveState.pos`. Bug réel
+  // trouvé en testant les 3 comportements individuellement : en utilisant
+  // `enemy.pos` ici, chaque ennemi calculait son chemin depuis sa case de
+  // départ pour toujours, se figeant dès que ce chemin périmé recommandait
+  // une direction devenue invalide depuis sa position réelle. Un test
+  // global (violations de mur) ne pouvait pas le détecter : un ennemi
+  // immobile ne viole jamais aucun mur.
+  const enemyCell = cellOf(enemy.moveState ? enemy.moveState.pos : enemy.pos);
   const playerCell = cellOf(player.pos);
   if (enemy.behavior === 'patrol') {
     const result = decidePatrol(maze, enemyCell, enemy.patrolTarget, rng);

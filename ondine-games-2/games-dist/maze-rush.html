@@ -280,7 +280,7 @@ body {
 .lv-lock{position:absolute;font-size:12px;}
 
 /* ── Jeu ── */
-#sg{padding:8px;gap:6px;align-items:center;}
+#sg{padding:8px;gap:6px;align-items:center;overflow-y:auto;}
 .mz-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:460px;flex-wrap:wrap;gap:4px;}
 .mz-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
 #hudCombo{color:var(--co);min-width:36px;}
@@ -1682,7 +1682,7 @@ function nextStepToward(maze, from, to) {
   // cible, au lieu de s'arrêter au premier pas depuis la position actuelle
   // — ce qui envoyait l'entité vers une case sans rapport avec sa position.)
   const step = prev[cur];
-  return { x: step % width, y: Math.floor(step / width) };
+  return [step % width, Math.floor(step / width)];
 }
 
 
@@ -1846,7 +1846,15 @@ function decideHunter(maze, enemyCell, playerCell, playerDir) {
 /** Point d'entrée unique (architecture commune demandée : pas de
  *  code dupliqué par ennemi, un seul `decideEnemyDirection`). */
 function decideEnemyDirection(maze, enemy, player, rng = Math.random) {
-  const enemyCell = cellOf(enemy.pos);
+  // IMPORTANT : `enemy.pos` est la position de SPAWN, jamais mise à jour —
+  // la position réelle en mouvement est `enemy.moveState.pos`. Bug réel
+  // trouvé en testant les 3 comportements individuellement : en utilisant
+  // `enemy.pos` ici, chaque ennemi calculait son chemin depuis sa case de
+  // départ pour toujours, se figeant dès que ce chemin périmé recommandait
+  // une direction devenue invalide depuis sa position réelle. Un test
+  // global (violations de mur) ne pouvait pas le détecter : un ennemi
+  // immobile ne viole jamais aucun mur.
+  const enemyCell = cellOf(enemy.moveState ? enemy.moveState.pos : enemy.pos);
   const playerCell = cellOf(player.pos);
   if (enemy.behavior === 'patrol') {
     const result = decidePatrol(maze, enemyCell, enemy.patrolTarget, rng);
@@ -2257,6 +2265,28 @@ function createUI(sdk) {
     loadProfile();
     renderHome();
     selectDifficulty('normal');
+    attachSwipeControls();
+  }
+
+  /** Glisser le doigt pour diriger, comme Snake — même seuil (20px) et
+   *  même logique (direction dominante horizontale/verticale). Attaché
+   *  UNE SEULE FOIS ici : #mazeCanvas est un élément DOM statique (jamais
+   *  recréé entre les niveaux/Rejouer), donc pas de risque d'accumuler
+   *  des écouteurs en double au fil des parties. */
+  function attachSwipeControls() {
+    const canvasEl = document.getElementById('mazeCanvas');
+    let touchStartX = 0, touchStartY = 0;
+    canvasEl.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      touchStartX = t.clientX; touchStartY = t.clientY;
+    }, { passive: true });
+    canvasEl.addEventListener('touchend', (e) => {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
+      if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return; // tap simple, pas un glissement
+      if (Math.abs(dx) > Math.abs(dy)) setDesiredDir(dx > 0 ? 'E' : 'W');
+      else setDesiredDir(dy > 0 ? 'S' : 'N');
+    }, { passive: true });
   }
 
   return {
