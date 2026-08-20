@@ -7,6 +7,11 @@
 <meta name="theme-color" content="#06081e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ondine Games">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -143,6 +148,25 @@ const GAMES = [
   { id:'421', name:'421', icon:'🎲', desc:'Le classique du comptoir', path:'games/421.html', cat:'des', color:'#34d399' },
   { id:'shutthebox', name:'Shut the Box', icon:'📦', desc:'Ferme toutes les cases', path:'games/shutthebox.html', cat:'des', color:'#7dd3fc' },
   { id:'rhythmhero', name:'Rhythm Hero', icon:'🎵', desc:'Suis le rythme', path:'games/rhythmhero.html', cat:'action', color:'#f472b6' },
+  { id:'2048', name:'2048', icon:'🔢', desc:'Fusionne les tuiles jusqu’à 2048', path:'games/2048.html', cat:'reflexion', color:'#fbbf24' },
+  { id:'bataille-navale', name:'Bataille Navale', icon:'🚢', desc:'Coule la flotte adverse', path:'games/bataille-navale.html', cat:'plateau', color:'#38bdf8' },
+  { id:'belote', name:'Belote', icon:'🃏', desc:'Le classique des jeux de cartes français', path:'games/belote.html', cat:'cartes', color:'#f87171' },
+  { id:'blackjack', name:'Blackjack', icon:'🂡', desc:'Approche-toi de 21 sans le dépasser', path:'games/blackjack.html', cat:'cartes', color:'#34d399' },
+  { id:'checkers', name:'Dames Internationales', icon:'⚪', desc:'Variante internationale sur grand plateau', path:'games/checkers.html', cat:'plateau', color:'#a78bfa' },
+  { id:'chess', name:'Échecs', icon:'♟️', desc:'Le jeu de stratégie classique', path:'games/chess.html', cat:'plateau', color:'#94a3b8' },
+  { id:'flappy', name:'Flappy Bulle', icon:'🫧', desc:'Franchis les obstacles sans tomber', path:'games/flappy.html', cat:'action', color:'#22d3ee' },
+  { id:'game-of-goose', name:'Jeu de l’Oie', icon:'🦢', desc:'Avance sur le plateau au fil des dés', path:'games/game-of-goose.html', cat:'plateau', color:'#fb923c' },
+  { id:'memory', name:'Memory', icon:'🧠', desc:'Retrouve toutes les paires', path:'games/memory.html', cat:'reflexion', color:'#c084fc' },
+  { id:'mille-bornes', name:'Road Trip', icon:'🚗', desc:'Course de bornes en famille', path:'games/mille-bornes.html', cat:'cartes', color:'#f472b6' },
+  { id:'morpion', name:'Morpion', icon:'❌', desc:'Aligne 3 symboles avant l’IA', path:'games/morpion.html', cat:'plateau', color:'#60a5fa' },
+  { id:'puzzle15', name:'Puzzle 15', icon:'🧩', desc:'Remets les 15 tuiles dans l’ordre', path:'games/puzzle15.html', cat:'reflexion', color:'#fbbf24' },
+  { id:'quarto', name:'Quarto', icon:'⬜', desc:'Aligne 4 pièces partageant un trait', path:'games/quarto.html', cat:'plateau', color:'#f87171' },
+  { id:'racing', name:'Ondine Racing', icon:'🏎️', desc:'Course arcade, boost et stratégie', path:'games/racing.html', cat:'action', color:'#818cf8' },
+  { id:'rami', name:'Rami', icon:'🀄', desc:'Forme des combinaisons de cartes', path:'games/rami.html', cat:'cartes', color:'#34d399' },
+  { id:'simon', name:'Simon', icon:'🎵', desc:'Mémorise et reproduis la séquence', path:'games/simon.html', cat:'reflexion', color:'#f472b6' },
+  { id:'snake', name:'Snake', icon:'🐍', desc:'Grandis sans te mordre la queue', path:'games/snake.html', cat:'action', color:'#4ade80' },
+  { id:'spider', name:'Spider Solitaire', icon:'🕷️', desc:'Solitaire à deux couleurs', path:'games/spider.html', cat:'cartes', color:'#a78bfa' },
+  { id:'tetris', name:'Tetris', icon:'🟦', desc:'Empile les pièces, complète les lignes', path:'games/tetris.html', cat:'action', color:'#38bdf8' },
   { id:'maze-rush', name:'Maze Rush', icon:'🌀', desc:'Labyrinthe arcade, choisis ton personnage', path:'games/maze-rush.html', cat:'action', color:'#818cf8' },
   { id:'puzzle-mosaique', name:'Puzzle Mosaïque', icon:'🧩', desc:'Sudoku irrégulier 8×8, choisis ton personnage', path:'games/puzzle-mosaique.html', cat:'reflexion', color:'#fbbf24' },
 ];
@@ -249,6 +273,14 @@ renderTabs();
 renderRecent();
 renderGrid();
 window.toggleFav=toggleFav; window.toggleFavOnly=toggleFavOnly; window.setCategory=setCategory; window.renderGrid=renderGrid;
+
+// Enregistrement du Service Worker — uniquement pour le critère
+// d'installabilité Android/Chrome. Échoue silencieusement en file://
+// (usage local/développement) où les Service Workers ne sont de toute
+// façon jamais disponibles — ne doit jamais bloquer le Hub.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('service-worker.js').catch(() => {});
+}
 </script>
 </body>
 </html>

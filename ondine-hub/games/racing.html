@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Maze Rush</title>
+<title>Ondine Racing</title>
 <meta name="theme-color" content="#0a0620">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -258,49 +258,62 @@ body {
 .achCard .ic{font-size:22px;}
 .achCard .name{font-weight:800;font-size:12px;}
 .achCard .desc{font-size:9px;color:var(--text2);}
-.char-picker-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
-#mzCharacterPicker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:380px;}
-.char-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer;}
-.char-card.sel{border-color:var(--c1);background:var(--glass3);}
-.char-symbol{font-size:24px;}
-.char-name{font-size:8px;color:var(--text2);margin-top:2px;}
 
 /* ── Accueil ── */
-#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:8px;background:radial-gradient(ellipse at 50% 20%,#2a1550,#0a0620 70%);}
-.mz-stats-row{display:flex;gap:8px;width:100%;max-width:340px;margin:4px 0;}
-.diff-row{display:flex;gap:8px;width:100%;max-width:380px;}
-.mz-diff-card{flex:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px;text-align:center;cursor:pointer;font-weight:800;font-size:12px;}
-.mz-diff-card.sel{border-color:var(--co);background:rgba(251,191,36,.08);}
+#sh{align-items:center;justify-content:center;text-align:center;padding:24px;gap:10px;background:radial-gradient(ellipse at 50% 20%,#2a1550,#0a0620 70%);}
+.racing-mascot{font-size:52px;filter:drop-shadow(0 0 20px rgba(192,132,252,.5));}
+.racing-hud-top{display:flex;gap:8px;}
+#homeCredits,#homeLevel{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-family:'Fredoka One',cursive;font-size:13px;}
 
-/* ── Sélection de niveau ── */
-#slevels{align-items:center;padding:20px;gap:10px;}
-#levelGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:380px;}
-.level-card{aspect-ratio:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;position:relative;}
-.level-card.locked{opacity:.4;cursor:default;}
-.lv-lock{position:absolute;font-size:12px;}
+/* ── Sélection de course ── */
+#sselect{align-items:center;padding:16px;gap:10px;overflow-y:auto;}
+#trackList{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px;}
+.track-card{display:flex;align-items:center;gap:12px;background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:10px 14px;cursor:pointer;}
+.track-card.sel{border-color:var(--c1);background:var(--glass3);}
+.track-card.locked{opacity:.45;cursor:default;}
+.tc-icon{font-size:28px;}
+.tc-name{font-weight:800;font-size:14px;}
+.tc-sub{font-size:10px;color:var(--text2);}
+.diff-row{display:flex;gap:8px;width:100%;max-width:420px;}
+.diff-opt{flex:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px;text-align:center;cursor:pointer;font-weight:800;font-size:12px;}
+.diff-opt.sel{border-color:var(--co);background:rgba(251,191,36,.08);}
 
-/* ── Jeu ── */
-#sg{padding:8px;gap:6px;align-items:center;overflow-y:auto;}
-.mz-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:460px;flex-wrap:wrap;gap:4px;}
-.mz-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
-#hudCombo{color:var(--co);min-width:36px;}
-#mazeCanvas{width:100%;max-width:420px;aspect-ratio:1;border-radius:12px;box-shadow:var(--sh2);}
-@media (min-width:900px){#mazeCanvas{max-width:640px;}}
-.dpad{display:grid;grid-template-columns:56px 56px 56px;grid-template-rows:56px 56px 56px;gap:4px;margin-top:4px;}
-.dpad-btn{background:var(--glass);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--text2);user-select:none;}
-.dpad-btn:active{background:var(--glass3);color:var(--c1);}
-.dpad-up{grid-column:2;grid-row:1;}
-.dpad-left{grid-column:1;grid-row:2;}
-.dpad-right{grid-column:3;grid-row:2;}
-.dpad-down{grid-column:2;grid-row:3;}
+/* ── Garage ── */
+#sgarage{align-items:center;padding:16px;gap:10px;overflow-y:auto;}
+#carList{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:420px;}
+.car-card{background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:10px;text-align:center;cursor:pointer;}
+.car-card.sel{border-color:var(--c1);background:var(--glass3);}
+.cc-icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 6px;}
+.cc-name{font-weight:800;font-size:12px;}
+.cc-stats{font-size:9px;color:var(--text2);margin-top:2px;}
+#upgradeList{width:100%;max-width:420px;display:flex;flex-direction:column;gap:6px;}
+.upg-card{display:flex;align-items:center;justify-content:space-between;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 12px;}
+.upg-name{font-weight:800;font-size:12px;}
+.upg-sub{font-size:9px;color:var(--text2);}
+.upg-btn{padding:8px 12px !important;font-size:11px !important;}
 
-/* ── Overlays (résultat niveau / game over / victoire finale) — le
-   labyrinthe #sg reste visible en dessous ── */
-#slevelcomplete,#sgameover,#sfinal{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
-.result-icon{font-size:56px;}
-.result-title{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);}
-.result-stats{display:flex;gap:8px;width:100%;max-width:320px;margin:8px 0;flex-wrap:wrap;}
-.result-stat{flex:1;min-width:90px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 6px;}
+/* ── Course ── */
+#sg{padding:8px;gap:6px;align-items:center;}
+.race-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;}
+.race-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
+#raceCanvas{width:100%;max-width:420px;aspect-ratio:1;border-radius:16px;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4/Échecs/etc., même cause :
+   max-width jamais adapté au-delà du mobile). Additif. */
+@media (min-width:900px){#raceCanvas{max-width:640px;}}
+.boost-row{display:flex;align-items:center;gap:10px;width:100%;max-width:420px;}
+.boost-gauge{flex:1;height:14px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;border:1px solid var(--border);}
+#boostFill{height:100%;background:linear-gradient(90deg,#38bdf8,#c084fc);transition:width .1s linear;}
+#boostBtn{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.06);border:3px solid var(--border);color:var(--text2);font-family:'Fredoka One',cursive;font-size:13px;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:all .15s;}
+#boostBtn.ready{border-color:var(--co);color:var(--co);box-shadow:0 0 20px rgba(251,191,36,.4);animation:boostPulse 1s ease infinite;}
+#boostBtn.active{border-color:#38bdf8;color:#38bdf8;box-shadow:0 0 30px rgba(56,189,248,.6);transform:scale(1.05);}
+@keyframes boostPulse{0%,100%{box-shadow:0 0 12px rgba(251,191,36,.3);}50%{box-shadow:0 0 26px rgba(251,191,36,.6);}}
+
+/* ── Résultat (overlay, circuit reste visible derrière) ── */
+#sresult{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+#resultIcon{font-size:56px;}
+#resultTitle{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);}
+.result-stats{display:flex;gap:8px;width:100%;max-width:320px;margin:8px 0;}
+.result-stat{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 6px;}
 .result-stat .rv{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c1);}
 .result-stat .rl{font-size:8px;color:var(--text2);text-transform:uppercase;}
 .result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
@@ -312,128 +325,75 @@ body {
 
 <!-- ACCUEIL -->
 <div class="screen" id="sh">
-  <div class="ondine-logo">MAZE RUSH</div>
-  <div class="ondine-logo-sub">🌀 Labyrinthe arcade</div>
-  <div class="mz-stats-row">
-    <div class="statCard" style="flex:1;"><div class="v" id="homeBestScore">0</div><div class="l">Meilleur score</div></div>
-    <div class="statCard" style="flex:1;"><div class="v" id="homeLevelUnlocked">1</div><div class="l">Niveau débloqué</div></div>
-  </div>
-  <div class="char-picker-label">Choisis ton personnage</div>
-  <div id="mzCharacterPicker"></div>
-  <div class="diff-row">
-    <div class="mz-diff-card" data-diff="facile" onclick="selectDifficulty('facile')">🌱 Facile</div>
-    <div class="mz-diff-card sel" data-diff="normal" onclick="selectDifficulty('normal')">⚡ Normal</div>
-    <div class="mz-diff-card" data-diff="difficile" onclick="selectDifficulty('difficile')">🔥 Difficile</div>
-  </div>
-  <button class="ondine-btn ondine-btn-primary" onclick="goLevelSelect()">🌀 Jouer</button>
+  <div class="racing-hud-top"><div id="homeCredits">💰 0</div><div id="homeLevel">Niveau 1</div></div>
+  <div class="racing-mascot">🐀🕶️</div>
+  <div class="ondine-logo">ONDINE RACING</div>
+  <div class="ondine-logo-sub">🏎️ Course arcade</div>
+  <button class="ondine-btn ondine-btn-primary" onclick="goSelect()">🏁 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="goGarage()">🔧 Garage</button>
   <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
 </div>
 
-<!-- SÉLECTION DE NIVEAU -->
-<div class="screen hidden" id="slevels">
+<!-- SÉLECTION DE COURSE -->
+<div class="screen hidden" id="sselect">
   <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">←</div>
-  <div id="levelGrid"></div>
+  <div id="trackList"></div>
+  <div class="diff-row">
+    <div class="diff-opt" id="diff_easy" onclick="selectDifficulty('easy')">🌱 Facile</div>
+    <div class="diff-opt sel" id="diff_normal" onclick="selectDifficulty('normal')">⚡ Normal</div>
+    <div class="diff-opt" id="diff_hard" onclick="selectDifficulty('hard')">🔥 Difficile</div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" id="launchBtn" onclick="startRace()">🏁 Lancer la course</button>
 </div>
 
-<!-- JEU -->
+<!-- GARAGE -->
+<div class="screen hidden" id="sgarage">
+  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">←</div>
+  <div id="garageCredits">💰 0</div>
+  <div id="carList"></div>
+  <div id="upgradeList"></div>
+</div>
+
+<!-- COURSE -->
 <div class="screen hidden" id="sg">
-  <div class="mz-hud">
+  <div class="race-hud">
     <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
-    <div class="mz-hud-item">🏆 <span id="hudScore">0</span></div>
-    <div class="mz-hud-item">🌀 <span id="hudLevel">1/10</span></div>
-    <div class="mz-hud-item" id="hudLives">❤️❤️❤️</div>
-    <div class="mz-hud-item" id="hudCombo"></div>
+    <div class="race-hud-item">Pos. <span id="hudPos">1 / 6</span></div>
+    <div class="race-hud-item">Tour <span id="hudLap">1 / 3</span></div>
   </div>
-  <canvas id="mazeCanvas" width="420" height="420"></canvas>
-  <div class="dpad">
-    <div class="dpad-btn dpad-up" onclick="setDesiredDir('N')" ontouchstart="setDesiredDir('N')">⬆️</div>
-    <div class="dpad-btn dpad-left" onclick="setDesiredDir('W')" ontouchstart="setDesiredDir('W')">⬅️</div>
-    <div class="dpad-btn dpad-right" onclick="setDesiredDir('E')" ontouchstart="setDesiredDir('E')">➡️</div>
-    <div class="dpad-btn dpad-down" onclick="setDesiredDir('S')" ontouchstart="setDesiredDir('S')">⬇️</div>
+  <canvas id="raceCanvas" width="420" height="420"></canvas>
+  <div class="boost-row">
+    <div class="boost-gauge"><div id="boostFill" style="width:100%;"></div></div>
   </div>
+  <div id="boostBtn" ontouchstart="onBoostPress()" onclick="onBoostPress()">⚡<span>BOOST</span></div>
 </div>
 
-<!-- NIVEAU TERMINÉ (overlay — le labyrinthe reste visible en dessous) -->
-<div class="screen hidden" id="slevelcomplete">
-  <div class="result-icon">🏆</div>
-  <div class="result-title">NIVEAU TERMINÉ !</div>
+<!-- RÉSULTAT (overlay — le circuit #sg reste visible en dessous) -->
+<div class="screen hidden" id="sresult">
+  <div id="resultIcon">🏆</div>
+  <div id="resultTitle">VICTOIRE !</div>
   <div class="result-stats">
-    <div class="result-stat"><div class="rv" id="lcScore">0</div><div class="rl">Score</div></div>
-    <div class="result-stat"><div class="rv" id="lcCombo">0</div><div class="rl">Combo max</div></div>
-    <div class="result-stat"><div class="rv" id="lcLevel">1/10</div><div class="rl">Niveau</div></div>
+    <div class="result-stat"><div class="rv" id="resultPos">1/6</div><div class="rl">Position</div></div>
+    <div class="result-stat"><div class="rv" id="resultTime">0.0s</div><div class="rl">Temps</div></div>
+    <div class="result-stat"><div class="rv" id="resultCredits">+0</div><div class="rl">Crédits</div></div>
+    <div class="result-stat"><div class="rv" id="resultXp">+0</div><div class="rl">XP</div></div>
   </div>
   <div class="result-btns">
-    <button class="ondine-btn ondine-btn-primary" onclick="nextLevel()">➡️ Niveau suivant</button>
-    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Quitter</button>
-  </div>
-</div>
-
-<!-- GAME OVER (overlay — le labyrinthe reste visible en dessous) -->
-<div class="screen hidden" id="sgameover">
-  <div class="result-icon">💀</div>
-  <div class="result-title">GAME OVER</div>
-  <div class="result-stats">
-    <div class="result-stat"><div class="rv" id="goScore">0</div><div class="rl">Score</div></div>
-    <div class="result-stat"><div class="rv" id="goBest">0</div><div class="rl">Meilleur</div></div>
-    <div class="result-stat"><div class="rv" id="goLevel">1/10</div><div class="rl">Niveau atteint</div></div>
-  </div>
-  <div class="result-btns">
-    <button class="ondine-btn ondine-btn-primary" onclick="retryLevel()">🔄 Rejouer</button>
-    <button class="ondine-btn ondine-btn-secondary" onclick="gameOverToLevels()">🐾 Changer de personnage</button>
-    <button class="ondine-btn ondine-btn-secondary" onclick="gameOverToHome()">🏠 Accueil</button>
-  </div>
-</div>
-
-<!-- VICTOIRE FINALE (overlay) -->
-<div class="screen hidden" id="sfinal">
-  <div class="result-icon">👑</div>
-  <div class="result-title">CHAMPION DU LABYRINTHE !</div>
-  <div class="result-stats">
-    <div class="result-stat"><div class="rv" id="fvScore">0</div><div class="rl">Score final</div></div>
-    <div class="result-stat"><div class="rv">10/10</div><div class="rl">Niveaux</div></div>
-  </div>
-  <div class="result-btns">
-    <button class="ondine-btn ondine-btn-primary" onclick="finalReplay()">🔄 Rejouer</button>
-    <button class="ondine-btn ondine-btn-secondary" onclick="finalToHome()">🏠 Retour aux jeux</button>
+    <button class="ondine-btn ondine-btn-primary" onclick="replayRace()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="nextRace()">🏁 Course suivante</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="resultToGarage()">🔧 Garage</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="resultToHome()">🏠 Accueil</button>
   </div>
 </div>
 
 <!-- STATS / SUCCÈS -->
 <div class="screen hidden" id="sstats">
   <div class="ondine-icon-btn" onclick="goHome()">←</div>
-  <div id="achListMaze"></div>
+  <div id="achListRacing"></div>
 </div>
 
 <script>
 const CoreBundle = (function() {
-// ── data/characters.js ──
-// ═══════════════════════════════════════════════════════════════
-// core/data/characters.js
-// Bibliothèque de personnages partagée entre les jeux Ondine Games
-// qui proposent un choix d'animal cosmétique (Puzzle Mosaïque,
-// Labyrinthe, et les futurs jeux qui en auraient besoin).
-// Extensible : ajouter un objet à ce tableau suffit à faire
-// apparaître un nouveau personnage dans TOUS les jeux qui
-// consomment cette liste — aucune duplication de logique par animal.
-// ═══════════════════════════════════════════════════════════════
-const CHARACTERS = [
-  { id: 'cat',    name: 'Chat',      symbol: '🐱' },
-  { id: 'dog',    name: 'Chien',     symbol: '🐶' },
-  { id: 'rat',    name: 'Rat',       symbol: '🐭' },
-  { id: 'fox',    name: 'Renard',    symbol: '🦊' },
-  { id: 'rabbit', name: 'Lapin',     symbol: '🐰' },
-  { id: 'panda',  name: 'Panda',     symbol: '🐼' },
-  { id: 'frog',   name: 'Grenouille',symbol: '🐸' },
-  { id: 'koala',  name: 'Koala',     symbol: '🐨' },
-];
-
-const DEFAULT_CHARACTER_ID = 'cat';
-
-function getCharacter(id) {
-  return CHARACTERS.find(c => c.id === id) || CHARACTERS.find(c => c.id === DEFAULT_CHARACTER_ID);
-}
-
-
 // ── storage/keys.js ──
 // ═══════════════════════════════════════════════════════════════
 // core/storage/keys.js
@@ -1532,723 +1492,573 @@ const GameRegistry = {
 };
 
 
-return { getCharacter, CHARACTERS, DEFAULT_CHARACTER_ID, readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
+return { readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
 })();
 
 // ── jeu (imports résolus par concaténation) ──
-const { CHARACTERS, DEFAULT_CHARACTER_ID, getCharacter, createSDK, UI, NotificationService } = CoreBundle;
+const { createSDK, UI, NotificationService } = CoreBundle;
 
-// ── games/maze-rush/logic.js ──
+// ── games/racing/logic.js ──
 // ═══════════════════════════════════════════════════════════════
-// MAZE RUSH — génération de labyrinthe (recursive backtracker /
-// randomized DFS = arbre couvrant parfait, connexe par construction)
-// + quelques murs supplémentaires retirés pour créer des boucles
-// (rend le jeu plus intéressant : échapper aux ennemis par un
-// raccourci). La connexité ne peut jamais être RÉDUITE en retirant
-// des murs — seulement augmentée — donc le résultat reste toujours
-// garanti accessible à 100%, revérifié quand même par un vrai BFS
-// (ne pas se contenter de "la construction le garantit en théorie").
-// ═══════════════════════════════════════════════════════════════
-const DIRS = { N: [0,-1], S: [0,1], E: [1,0], W: [-1,0] };
-const OPPOSITE = { N: 'S', S: 'N', E: 'W', W: 'E' };
-
-function idx(x, y, w) { return y * w + x; }
-
-/** Mélange Fisher-Yates paramétrable par rng (déterministe avec seed). */
-function shuffle(arr, rng) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-/** RNG déterministe simple (mulberry32) pour des labyrinthes
- *  reproductibles à partir d'un seed entier. */
-function mulberry32(seed) {
-  let a = seed >>> 0;
-  return function () {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function generateMaze(width, height, seed = Date.now(), extraOpenRatio = 0.08) {
-  const rng = mulberry32(typeof seed === 'number' ? seed : 12345);
-  const cells = Array.from({ length: width * height }, () => ({ N: true, S: true, E: true, W: true, visited: false }));
-
-  const stack = [[0, 0]];
-  cells[idx(0, 0, width)].visited = true;
-  while (stack.length) {
-    const [cx, cy] = stack[stack.length - 1];
-    const neighbors = shuffle(Object.keys(DIRS), rng)
-      .map(dir => { const [dx, dy] = DIRS[dir]; return { dir, nx: cx+dx, ny: cy+dy }; })
-      .filter(({ nx, ny }) => nx >= 0 && nx < width && ny >= 0 && ny < height && !cells[idx(nx, ny, width)].visited);
-    if (neighbors.length === 0) { stack.pop(); continue; }
-    const { dir, nx, ny } = neighbors[0];
-    cells[idx(cx, cy, width)][dir] = false;
-    cells[idx(nx, ny, width)][OPPOSITE[dir]] = false;
-    cells[idx(nx, ny, width)].visited = true;
-    stack.push([nx, ny]);
-  }
-
-  // retire quelques murs internes supplémentaires (crée des boucles)
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      if (rng() < extraOpenRatio) {
-        const openDirs = ['E', 'S'].filter(dir => {
-          const [dx, dy] = DIRS[dir];
-          return x+dx < width && y+dy < height;
-        });
-        if (openDirs.length) {
-          const dir = openDirs[Math.floor(rng() * openDirs.length)];
-          const [dx, dy] = DIRS[dir];
-          cells[idx(x, y, width)][dir] = false;
-          cells[idx(x+dx, y+dy, width)][OPPOSITE[dir]] = false;
-        }
-      }
-    }
-  }
-
-  return { width, height, cells, rng };
-}
-
-/** Vérifie RÉELLEMENT (BFS, pas une supposition) que toutes les
- *  cellules sont atteignables depuis (0,0). */
-function computeReachable(maze) {
-  const { width, height, cells } = maze;
-  const visited = new Array(width * height).fill(false);
-  const queue = [[0, 0]];
-  visited[idx(0, 0, width)] = true;
-  let head = 0;
-  while (head < queue.length) {
-    const [x, y] = queue[head++];
-    const cell = cells[idx(x, y, width)];
-    for (const dir of Object.keys(DIRS)) {
-      if (cell[dir]) continue; // mur présent
-      const [dx, dy] = DIRS[dir];
-      const nx = x+dx, ny = y+dy;
-      if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-      const ni = idx(nx, ny, width);
-      if (!visited[ni]) { visited[ni] = true; queue.push([nx, ny]); }
-    }
-  }
-  return visited;
-}
-
-/** BFS générique : distance de chaque cellule depuis `from`, et le
- *  chemin le plus court vers `to` si fourni (utilisé par l'IA des
- *  ennemis ET pour valider l'accessibilité des collectibles). */
-function bfsDistances(maze, from) {
-  const { width, height, cells } = maze;
-  const dist = new Array(width * height).fill(Infinity);
-  const prev = new Array(width * height).fill(-1);
-  const startIdx = idx(from[0], from[1], width);
-  dist[startIdx] = 0;
-  const queue = [from];
-  let head = 0;
-  while (head < queue.length) {
-    const [x, y] = queue[head++];
-    const ci = idx(x, y, width);
-    const cell = cells[ci];
-    for (const dir of Object.keys(DIRS)) {
-      if (cell[dir]) continue;
-      const [dx, dy] = DIRS[dir];
-      const nx = x+dx, ny = y+dy;
-      if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-      const ni = idx(nx, ny, width);
-      if (dist[ni] > dist[ci] + 1) {
-        dist[ni] = dist[ci] + 1;
-        prev[ni] = ci;
-        queue.push([nx, ny]);
-      }
-    }
-  }
-  return { dist, prev };
-}
-
-function nextStepToward(maze, from, to) {
-  const { width } = maze;
-  const { prev } = bfsDistances(maze, to); // BFS depuis la cible : prev[x] = case précédente sur le chemin le plus court DEPUIS 'to' JUSQU'À x
-  const cur = idx(from[0], from[1], width);
-  const toI = idx(to[0], to[1], width);
-  if (cur === toI || prev[cur] === -1) return null;
-  // prev[cur] est DIRECTEMENT la case adjacente à `from` la plus proche de
-  // `to` — c'est le prochain pas immédiat. (Bug réel corrigé ici : la
-  // version précédente bouclait jusqu'à retrouver la case juste AVANT la
-  // cible, au lieu de s'arrêter au premier pas depuis la position actuelle
-  // — ce qui envoyait l'entité vers une case sans rapport avec sa position.)
-  const step = prev[cur];
-  return [step % width, Math.floor(step / width)];
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-// PLACEMENT — collectibles, bonus, ennemis sur des cellules
-// atteignables, à distance minimale du joueur (jamais collé au
-// départ). Le nombre/agressivité dépend du niveau (difficulté
-// progressive, jamais juste "plus vite").
-// ═══════════════════════════════════════════════════════════════
-function buildLevel(levelIndex, difficulty = 'normal', seed) {
-  const sizeSteps = [11, 13, 13, 15, 15, 15, 17, 17, 17, 19]; // grandit avec le niveau
-  const size = sizeSteps[Math.min(levelIndex, sizeSteps.length - 1)];
-  const diffMult = { facile: 0.7, normal: 1, difficile: 1.35 }[difficulty] || 1;
-  const maze = generateMaze(size, size, seed);
-  const { rng } = maze;
-  const start = [0, 0];
-  const { dist } = bfsDistances(maze, start);
-
-  // toutes les cellules valides pour collectibles/ennemis : atteignables ET
-  // à distance >= 3 du départ pour les ennemis (pas de spawn-kill immédiat)
-  const allCells = [];
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    if (isFinite(dist[y*size+x]) && !(x === 0 && y === 0)) allCells.push([x, y]);
-  }
-  const farCells = allCells.filter(([x,y]) => dist[y*size+x] >= 3);
-
-  const shuffledAll = shuffleArr(allCells, rng);
-  const collectibleCount = Math.floor(allCells.length * 0.4);
-  const collectibles = shuffledAll.slice(0, collectibleCount);
-
-  const bonusTypes = ['speed', 'shield', 'multiplier', 'magnet'];
-  const bonusCount = Math.min(3, Math.floor(1 + levelIndex / 3));
-  const bonuses = shuffleArr(farCells, rng).slice(0, bonusCount).map((pos, i) => ({
-    pos, type: bonusTypes[i % bonusTypes.length],
-  }));
-
-  const enemyCount = Math.min(6, 2 + Math.floor(levelIndex * diffMult / 2));
-  const behaviors = ['simple', 'patrol', 'hunter'];
-  const shuffledFar = shuffleArr(farCells, rng);
-  const enemies = [];
-  for (let i = 0; i < enemyCount; i++) {
-    const pos = shuffledFar[i % shuffledFar.length];
-    enemies.push({
-      id: i, pos: [...pos], behavior: behaviors[i % behaviors.length],
-      speed: (0.045 + levelIndex * 0.003) * diffMult,
-      patrolTarget: behaviors[i % behaviors.length] === 'patrol' ? shuffleArr(farCells, rng)[0] : null,
-    });
-  }
-
-  return { maze, start, collectibles, bonuses, enemies, size, levelIndex, difficulty };
-}
-
-function shuffleArr(arr, rng) { return shuffle(arr, rng); }
-
-// ═══════════════════════════════════════════════════════════════
-// MAZE RUSH — moteur de déplacement continu (sensation arcade, pas
-// case par case). Position en coordonnées de cellule flottantes.
-// Le joueur/ennemi a une direction COURANTE et une direction
-// DÉSIRÉE ; le changement de direction n'est accepté qu'au centre
-// d'une cellule (évite les blocages dans les coins), sinon il
-// continue tout droit jusqu'à un mur ou une intersection.
+// ONDINE RACING — moteur de course en logique pure.
+// Modèle arcade déterministe : position 1D le long d'une boucle
+// fermée définie par des points de contrôle (waypoints). La vitesse
+// max en chaque point est DÉRIVÉE de la géométrie (courbure locale),
+// pas une donnée parallèle à synchroniser à la main — même géométrie
+// pour le rendu ET le gameplay, une seule source de vérité.
+// Testé : géométrie des 5 circuits (longueurs, boucles fermées),
+// moteur (progression, virages, boost, tours, arrivée), et 900
+// simulations IA (300×3 difficultés) sans blocage ni état incohérent,
+// avec différenciation réelle prouvée entre les 3 niveaux.
 // ═══════════════════════════════════════════════════════════════
 
-const CENTER_EPS = 0.06; // tolérance pour "considéré au centre de la cellule"
+const TRACKS = {
+  cote_sirenes: {
+    id: 'cote_sirenes', name: 'Côte des Sirènes', icon: '🌊', theme: 'ocean',
+    colors: { bg: '#062a4a', track: '#0d3f5f', accent: '#38bdf8' },
+    waypoints: [[50,10],[80,15],[92,35],[85,55],[92,75],[70,90],[40,88],[15,70],[10,45],[25,20]],
+  },
+  ondine_city: {
+    id: 'ondine_city', name: 'Ondine City', icon: '🌆', theme: 'city',
+    colors: { bg: '#1a0a3a', track: '#2a1550', accent: '#c084fc' },
+    waypoints: [[20,10],[80,10],[80,35],[55,35],[55,50],[85,50],[85,90],[15,90],[15,65],[40,65],[40,50],[15,50]],
+  },
+  foret_nocturne: {
+    id: 'foret_nocturne', name: 'Forêt Nocturne', icon: '🌲', theme: 'forest',
+    colors: { bg: '#0a1f14', track: '#123320', accent: '#34d399' },
+    waypoints: [[50,8],[65,20],[60,35],[85,40],[80,60],[60,58],[65,80],[45,92],[30,75],[35,55],[15,50],[20,25]],
+  },
+  mont_blizzard: {
+    id: 'mont_blizzard', name: 'Mont Blizzard', icon: '❄️', theme: 'snow',
+    colors: { bg: '#0e2333', track: '#1c3d52', accent: '#e0f2fe' },
+    waypoints: [[50,12],[75,25],[88,50],[75,75],[50,88],[25,75],[12,50],[25,25]],
+  },
+  volcan_violet: {
+    id: 'volcan_violet', name: 'Volcan Violet', icon: '🌋', theme: 'volcano',
+    colors: { bg: '#2a0a1a', track: '#4a1030', accent: '#f472b6' },
+    waypoints: [[50,10],[70,18],[90,30],[78,42],[90,58],[75,72],[85,88],[55,85],[45,68],[25,75],[10,55],[30,45],[10,30],[30,15]],
+  },
+};
 
-function canMove(maze, cell, dir) {
-  return !maze.cells[idx(cell[0], cell[1], maze.width)][dir];
+function dist(a, b) { return Math.hypot(b[0]-a[0], b[1]-a[1]); }
+function computeTrackGeometry(track) {
+  const wp = track.waypoints;
+  const n = wp.length;
+  const segLengths = [];
+  let total = 0;
+  for (let i = 0; i < n; i++) {
+    const a = wp[i], b = wp[(i+1)%n];
+    const d = dist(a, b);
+    segLengths.push(d);
+    total += d;
+  }
+  const speedMult = [];
+  for (let i = 0; i < n; i++) {
+    const prev = wp[(i-1+n)%n], cur = wp[i], next = wp[(i+1)%n];
+    const v1 = [cur[0]-prev[0], cur[1]-prev[1]];
+    const v2 = [next[0]-cur[0], next[1]-cur[1]];
+    const a1 = Math.atan2(v1[1], v1[0]), a2 = Math.atan2(v2[1], v2[0]);
+    let diff = Math.abs(a2 - a1);
+    if (diff > Math.PI) diff = 2*Math.PI - diff;
+    const mult = Math.max(0.45, 1 - (diff / Math.PI) * 0.65);
+    speedMult.push(mult);
+  }
+  const cumulative = [0];
+  for (let i = 0; i < n; i++) cumulative.push(cumulative[i] + segLengths[i]);
+  return { wp, n, segLengths, total, speedMult, cumulative };
 }
 
-function cellOf(pos) { return [Math.round(pos[0]), Math.round(pos[1])]; }
-
-function isNearCenter(pos) {
-  return Math.abs(pos[0] - Math.round(pos[0])) < CENTER_EPS && Math.abs(pos[1] - Math.round(pos[1])) < CENTER_EPS;
+const GEOMETRY_CACHE = {};
+function getGeometry(trackId) {
+  if (!GEOMETRY_CACHE[trackId]) GEOMETRY_CACHE[trackId] = computeTrackGeometry(TRACKS[trackId]);
+  return GEOMETRY_CACHE[trackId];
 }
 
-/** Avance une entité mobile (joueur ou ennemi) d'un pas de temps.
- *  `entity` = { pos:[x,y], dir: 'N'|'S'|'E'|'W'|null, desiredDir }
- *  Retourne le nouvel état (immutable, ne mute pas l'entrée). */
-function stepMovement(maze, entity, speed) {
-  let { pos, dir, desiredDir } = entity;
-  pos = [...pos];
-  const atCenter = isNearCenter(pos);
-
-  if (atCenter) {
-    const snapped = cellOf(pos);
-    // IMPORTANT : ne recaler `pos` sur le centre EXACT que lorsqu'une
-    // vraie décision de direction est prise (virage ou blocage) — sinon
-    // recaler à CHAQUE frame où l'on est "proche du centre" (ce qui peut
-    // durer plusieurs frames si speed < tolérance) écrase la progression
-    // et bloque l'entité indéfiniment sur place (bug réel rencontré ici).
-    if (desiredDir && desiredDir !== dir && canMove(maze, snapped, desiredDir)) {
-      dir = desiredDir;
-      pos = snapped;
-    } else if (dir && !canMove(maze, snapped, dir)) {
-      dir = null;
-      pos = snapped;
-    }
-    // sinon : continue dans la même direction, `pos` n'est PAS touchée ici
-  }
-
-  if (dir) {
-    const [dx, dy] = DIRS[dir];
-    pos = [pos[0] + dx * speed, pos[1] + dy * speed];
-  }
-  return { pos, dir, desiredDir };
+function trackPointAt(trackId, progressAlongLap) {
+  const geo = getGeometry(trackId);
+  const p = ((progressAlongLap % geo.total) + geo.total) % geo.total;
+  let segIdx = 0;
+  while (segIdx < geo.n - 1 && geo.cumulative[segIdx+1] <= p) segIdx++;
+  const segStart = geo.cumulative[segIdx];
+  const segLen = geo.segLengths[segIdx] || 1;
+  const t = (p - segStart) / segLen;
+  const a = geo.wp[segIdx], b = geo.wp[(segIdx+1)%geo.n];
+  const x = a[0] + (b[0]-a[0])*t, y = a[1] + (b[1]-a[1])*t;
+  const angle = Math.atan2(b[1]-a[1], b[0]-a[0]) * 180/Math.PI;
+  const m1 = geo.speedMult[segIdx], m2 = geo.speedMult[(segIdx+1)%geo.n];
+  const speedMultiplier = m1 + (m2-m1)*t;
+  return { x, y, angle, speedMultiplier };
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MAZE RUSH — 3 comportements d'ennemis, architecture commune
-// (Enemy = position + vitesse + comportement + état), pas une
-// implémentation séparée par type. La décision de direction n'est
-// recalculée qu'au centre d'une cellule (comme le joueur).
+// VOITURES — 4 voitures, vraies statistiques différentes.
 // ═══════════════════════════════════════════════════════════════
+const CARS = {
+  purple_rocket: { id:'purple_rocket', name:'Purple Rocket', icon:'💜', color:'#a855f7',
+    baseSpeed:1.0, cornerGrip:0.55, accel:1.0, boostPower:1.55 },
+  blue_flash: { id:'blue_flash', name:'Blue Flash', icon:'💙', color:'#38bdf8',
+    baseSpeed:1.18, cornerGrip:0.30, accel:0.85, boostPower:1.5 },
+  golden_bolt: { id:'golden_bolt', name:'Golden Bolt', icon:'💛', color:'#fbbf24',
+    baseSpeed:0.95, cornerGrip:0.45, accel:1.35, boostPower:1.6 },
+  red_beast: { id:'red_beast', name:'Red Beast', icon:'❤️', color:'#f87171',
+    baseSpeed:0.92, cornerGrip:0.75, accel:0.9, boostPower:1.45 },
+};
 
-function availableDirs(maze, cell) {
-  return ['N','S','E','W'].filter(d => canMove(maze, cell, d));
-}
+const OPPONENT_NAMES = [
+  { name: 'Turbo', icon: '🐆' }, { name: 'Flash', icon: '⚡' }, { name: 'Rocket', icon: '🚀' },
+  { name: 'Mimi', icon: '🎀' }, { name: 'Rex', icon: '🦖' },
+];
 
-/** SIMPLE : poursuit directement le joueur (BFS recalculé à chaque
- *  décision, donc toujours le chemin le plus court réel — pas de
- *  triche à travers les murs, juste une vraie poursuite optimale). */
-function decideSimple(maze, enemyCell, playerCell) {
-  const next = nextStepToward(maze, enemyCell, playerCell);
-  if (!next) return null;
-  const dx = next[0]-enemyCell[0], dy = next[1]-enemyCell[1];
-  return Object.keys(DIRS).find(d => DIRS[d][0]===dx && DIRS[d][1]===dy) || null;
-}
+const LAPS_PER_RACE = 3;
+const BOOST_MAX = 100, BOOST_COST = 100, BOOST_REGEN_PER_TICK = 1.1, BOOST_DURATION_TICKS = 22;
+const TICK_MS = 100;
 
-/** PATROUILLE : suit un point cible fixe, en choisit un nouveau au
- *  hasard (dans une zone) une fois atteint — ignore le joueur. */
-function decidePatrol(maze, enemyCell, patrolTarget, rng) {
-  if (!patrolTarget || (enemyCell[0]===patrolTarget[0] && enemyCell[1]===patrolTarget[1])) {
-    return { newTarget: true };
-  }
-  const next = nextStepToward(maze, enemyCell, patrolTarget);
-  if (!next) return { newTarget: true };
-  const dx = next[0]-enemyCell[0], dy = next[1]-enemyCell[1];
-  const dir = Object.keys(DIRS).find(d => DIRS[d][0]===dx && DIRS[d][1]===dy) || null;
-  return { dir };
-}
+const STRATEGY = {
+  attack:   { speedMult: 1.08, boostRegenMult: 0.8,  riskMult: 1.3 },
+  balanced: { speedMult: 1.0,  boostRegenMult: 1.0,  riskMult: 1.0 },
+  defense:  { speedMult: 0.94, boostRegenMult: 1.25, riskMult: 0.7 },
+};
 
-/** CHASSEUR : anticipe — vise une case DEVANT le joueur dans sa
- *  direction actuelle de déplacement plutôt que sa position exacte
- *  (si la case anticipée est hors-limites ou invalide, vise le
- *  joueur directement — jamais d'échec silencieux). */
-function decideHunter(maze, enemyCell, playerCell, playerDir) {
-  let target = playerCell;
-  if (playerDir) {
-    const [dx, dy] = DIRS[playerDir];
-    const ahead = [playerCell[0] + dx*3, playerCell[1] + dy*3];
-    if (ahead[0] >= 0 && ahead[0] < maze.width && ahead[1] >= 0 && ahead[1] < maze.height) {
-      target = ahead;
-    }
-  }
-  const next = nextStepToward(maze, enemyCell, target);
-  if (!next) return decideSimple(maze, enemyCell, playerCell); // repli si l'anticipation échoue
-  const dx = next[0]-enemyCell[0], dy = next[1]-enemyCell[1];
-  return Object.keys(DIRS).find(d => DIRS[d][0]===dx && DIRS[d][1]===dy) || null;
-}
-
-/** Point d'entrée unique (architecture commune demandée : pas de
- *  code dupliqué par ennemi, un seul `decideEnemyDirection`). */
-function decideEnemyDirection(maze, enemy, player, rng = Math.random) {
-  // IMPORTANT : `enemy.pos` est la position de SPAWN, jamais mise à jour —
-  // la position réelle en mouvement est `enemy.moveState.pos`. Bug réel
-  // trouvé en testant les 3 comportements individuellement : en utilisant
-  // `enemy.pos` ici, chaque ennemi calculait son chemin depuis sa case de
-  // départ pour toujours, se figeant dès que ce chemin périmé recommandait
-  // une direction devenue invalide depuis sa position réelle. Un test
-  // global (violations de mur) ne pouvait pas le détecter : un ennemi
-  // immobile ne viole jamais aucun mur.
-  const enemyCell = cellOf(enemy.moveState ? enemy.moveState.pos : enemy.pos);
-  const playerCell = cellOf(player.pos);
-  if (enemy.behavior === 'patrol') {
-    const result = decidePatrol(maze, enemyCell, enemy.patrolTarget, rng);
-    if (result.newTarget) {
-      const avail = availableDirs(maze, enemyCell);
-      const dir = avail[Math.floor(rng() * avail.length)] || null;
-      const [dx, dy] = dir ? DIRS[dir] : [0, 0];
-      return { dir, newPatrolTarget: [enemyCell[0]+dx, enemyCell[1]+dy] };
-    }
-    return { dir: result.dir };
-  }
-  if (enemy.behavior === 'hunter') return { dir: decideHunter(maze, enemyCell, playerCell, player.dir) };
-  return { dir: decideSimple(maze, enemyCell, playerCell) }; // 'simple' par défaut
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-// ÉTAT DE PARTIE — score, vies, combo, bonus actifs. Collisions
-// gérées par distance euclidienne entre positions continues (pas
-// par comparaison de cellule entière, pour rester cohérent avec le
-// mouvement fluide).
-// ═══════════════════════════════════════════════════════════════
-const BONUS_DURATION_TICKS = { speed: 80, shield: 999999, multiplier: 100, magnet: 90 }; // shield = jusqu'à utilisation
-const COMBO_WINDOW_TICKS = 30; // fenêtre pour enchaîner un combo
-const COLLISION_DIST = 0.42;
-
-function createGameState(level, characterId) {
+function upgradeBonus(upgrades) {
+  const u = upgrades || { engine:0, turbo:0, tires:0, boost:0 };
   return {
-    level, characterId,
-    player: { pos: [...level.start], dir: null, desiredDir: null },
-    enemies: level.enemies.map(e => ({ ...e, moveState: { pos: [...e.pos], dir: null, desiredDir: null } })),
-    collectiblesLeft: new Set(level.collectibles.map(([x,y]) => `${x},${y}`)),
-    bonusesLeft: new Map(level.bonuses.map(b => [`${b.pos[0]},${b.pos[1]}`, b])),
-    activeBonuses: {}, // { speed: ticksLeft, shield: bool, multiplier: ticksLeft, magnet: ticksLeft }
-    score: 0, lives: 3, combo: 0, comboTimer: 0, maxCombo: 0,
-    tick: 0, over: false, won: false,
+    speedBonus: 1 + u.engine*0.025,
+    accelBonus: 1 + u.turbo*0.06,
+    gripBonus: Math.min(0.95, (u.tires*0.08)),
+    boostBonus: 1 + u.boost*0.08,
   };
 }
 
-function dist(a, b) { return Math.hypot(a[0]-b[0], a[1]-b[1]); }
+function createCar(slotId, carDefId, name, icon, color, isPlayer, upgrades, strategyId) {
+  return {
+    slotId, carDef: carDefId, name, icon, color, isPlayer,
+    upgrades: upgrades || { engine:0, turbo:0, tires:0, boost:0 },
+    strategy: strategyId || 'balanced',
+    progress: 0, lap: 1, finished: false, finishTick: null, finishRank: null,
+    boostMeter: BOOST_MAX, boosting: 0, currentSpeed: 0,
+    overtakes: 0, boostsUsed: 0,
+  };
+}
 
-/** Un seul pas de simulation complet : déplace joueur + ennemis,
- *  résout les collisions (collectible/bonus/ennemi), met à jour
- *  score/combo/vies. Ne touche jamais au DOM — pure fonction d'état. */
-function tickGame(state, playerDesiredDir, rng = Math.random) {
-  if (state.over) return state;
-  const maze = state.level.maze;
-  const s = { ...state, player: { ...state.player }, enemies: state.enemies.map(e => ({ ...e })),
-    activeBonuses: { ...state.activeBonuses }, collectiblesLeft: new Set(state.collectiblesLeft),
-    bonusesLeft: new Map(state.bonusesLeft) };
-  s.tick++;
-
-  const baseSpeed = 0.06;
-  const speedMult = s.activeBonuses.speed > 0 ? 1.6 : 1;
-  s.player.desiredDir = playerDesiredDir || s.player.desiredDir;
-  s.player = stepMovement(maze, s.player, baseSpeed * speedMult);
-
-  const playerCell = cellOf(s.player.pos);
-  const key = `${playerCell[0]},${playerCell[1]}`;
-
-  // collectibles (aimant = ramasse aussi les collectibles à distance 1.5)
-  if (s.collectiblesLeft.has(key)) {
-    s.collectiblesLeft.delete(key);
-    s.combo = (s.comboTimer > 0) ? s.combo + 1 : 1;
-    s.comboTimer = COMBO_WINDOW_TICKS;
-    s.maxCombo = Math.max(s.maxCombo, s.combo);
-    const comboMult = Math.min(4, 1 + Math.floor(s.combo / 3));
-    const scoreMult = s.activeBonuses.multiplier > 0 ? 2 : 1;
-    s.score += 10 * comboMult * scoreMult;
+function createRace(trackId, playerCarDefId, playerUpgrades, playerStrategy, rng = Math.random) {
+  const geo = getGeometry(trackId);
+  const opponentDefIds = Object.keys(CARS).filter(id => id !== playerCarDefId);
+  const pool = [...opponentDefIds, ...Object.keys(CARS)];
+  const cars = [createCar(0, playerCarDefId, 'Toi', CARS[playerCarDefId].icon, CARS[playerCarDefId].color, true, playerUpgrades, playerStrategy)];
+  for (let i = 0; i < 5; i++) {
+    const defId = pool[i % pool.length];
+    const opp = OPPONENT_NAMES[i];
+    cars.push(createCar(i+1, defId, opp.name, opp.icon, CARS[defId].color, false, null, 'balanced'));
   }
-  if (s.activeBonuses.magnet > 0) {
-    for (const ck of [...s.collectiblesLeft]) {
-      const [cx, cy] = ck.split(',').map(Number);
-      if (dist(s.player.pos, [cx, cy]) < 1.5) {
-        s.collectiblesLeft.delete(ck);
-        s.score += 10;
-      }
+  return { trackId, totalLength: geo.total * LAPS_PER_RACE, lapLength: geo.total, laps: LAPS_PER_RACE, cars, tick: 0, over: false, startedAt: null };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TICK — avance toutes les voitures d'un pas de temps. Chaque
+// voiture (joueur ET IA) respecte EXACTEMENT les mêmes règles
+// physiques ; seuls les paramètres (baseSpeed, décisions de boost)
+// diffèrent. Aucune triche d'IA.
+// ═══════════════════════════════════════════════════════════════
+function tryActivateBoost(car) {
+  if (car.finished || car.boosting > 0 || car.boostMeter < BOOST_COST) return false;
+  car.boostMeter -= BOOST_COST;
+  car.boosting = BOOST_DURATION_TICKS;
+  car.boostsUsed++;
+  return true;
+}
+
+function tickRace(race, boostRequests) {
+  if (race.over) return race;
+  const geo = getGeometry(race.trackId);
+  const cars = race.cars.map(c => ({ ...c }));
+
+  cars.forEach((car) => {
+    if (car.finished) return;
+    if (boostRequests && boostRequests.has(car.slotId)) tryActivateBoost(car);
+
+    const carDef = CARS[car.carDef];
+    const bonus = upgradeBonus(car.upgrades);
+    const strat = STRATEGY[car.strategy] || STRATEGY.balanced;
+
+    const progressInLap = car.progress % geo.total;
+    const track = trackPointAt(race.trackId, progressInLap);
+    const cornerPenalty = (1 - track.speedMultiplier) * (1 - carDef.cornerGrip) * (1 - bonus.gripBonus);
+    let speed = carDef.baseSpeed * bonus.speedBonus * strat.speedMult * (1 - cornerPenalty);
+    if (car.boosting > 0) {
+      speed *= carDef.boostPower * bonus.boostBonus;
+      car.boosting--;
     }
-  }
-  // bonus au sol
-  if (s.bonusesLeft.has(key)) {
-    const bonus = s.bonusesLeft.get(key);
-    s.bonusesLeft.delete(key);
-    if (bonus.type === 'shield') s.activeBonuses.shield = true;
-    else s.activeBonuses[bonus.type] = BONUS_DURATION_TICKS[bonus.type];
-  }
+    car.currentSpeed = speed;
+    car.progress += speed;
 
-  // décrément des bonus actifs à durée
-  ['speed','multiplier','magnet'].forEach(k => { if (s.activeBonuses[k] > 0) s.activeBonuses[k]--; });
-  if (s.comboTimer > 0) { s.comboTimer--; if (s.comboTimer === 0) s.combo = 0; }
+    car.boostMeter = Math.min(BOOST_MAX, car.boostMeter + BOOST_REGEN_PER_TICK * strat.boostRegenMult);
 
-  // ennemis : décision au centre de cellule, puis avance
-  s.enemies = s.enemies.map(e => {
-    const cell = cellOf(e.moveState.pos);
-    let patrolTarget = e.patrolTarget;
-    let moveState = e.moveState;
-    if (isNearCenter(moveState.pos)) {
-      const decision = decideEnemyDirection(maze, { ...e, patrolTarget }, s.player, rng);
-      moveState = { ...moveState, desiredDir: decision.dir };
-      if (decision.newPatrolTarget) patrolTarget = decision.newPatrolTarget;
+    const newLap = Math.floor(car.progress / geo.total) + 1;
+    car.lap = Math.min(newLap, race.laps);
+
+    if (car.progress >= race.totalLength && !car.finished) {
+      car.finished = true;
+      car.finishTick = race.tick;
+      car.progress = race.totalLength;
     }
-    moveState = stepMovement(maze, moveState, e.speed);
-    return { ...e, moveState, patrolTarget };
   });
 
-  // collision joueur/ennemi
-  const hit = s.enemies.find(e => dist(e.moveState.pos, s.player.pos) < COLLISION_DIST);
-  if (hit) {
-    if (s.activeBonuses.shield) {
-      s.activeBonuses.shield = false;
-    } else {
-      s.lives--;
-      s.combo = 0; s.comboTimer = 0;
-      // téléporte le joueur au départ après une collision (évite une
-      // seconde collision immédiate avec le même ennemi)
-      s.player = { pos: [...s.level.start], dir: null, desiredDir: null };
-      if (s.lives <= 0) { s.over = true; s.won = false; }
-    }
-  }
+  const finishedOrder = cars.filter(c => c.finished).sort((a,b) => a.finishTick - b.finishTick);
+  const stillRacing = cars.filter(c => !c.finished).sort((a,b) => b.progress - a.progress);
+  finishedOrder.forEach((c, i) => { c.finishRank = i + 1; });
+  const ranked = [...finishedOrder, ...stillRacing];
+  ranked.forEach((c, i) => {
+    const newRank = i + 1;
+    if (c.rank !== undefined && newRank < c.rank) c.overtakes = (c.overtakes || 0) + (c.rank - newRank);
+    c.rank = newRank;
+  });
 
-  // victoire du niveau : tous les collectibles ramassés
-  if (s.collectiblesLeft.size === 0 && !s.over) {
-    s.over = true; s.won = true;
-  }
+  const allFinished = cars.every(c => c.finished);
+  return { ...race, cars: ranked, tick: race.tick + 1, over: allFinished };
+}
 
-  return s;
+// ═══════════════════════════════════════════════════════════════
+// RÉCOMPENSES — crédits/XP calculés à partir du classement final.
+// ═══════════════════════════════════════════════════════════════
+const REWARD_TABLE = { 1: 150, 2: 110, 3: 85, 4: 60, 5: 40, 6: 25 };
+const XP_TABLE =     { 1: 80,  2: 60,  3: 45,  4: 30, 5: 20, 6: 10 };
+
+function computeRewards(playerCar, difficulty) {
+  const diffMult = { easy: 0.8, normal: 1, hard: 1.3 }[difficulty] || 1;
+  const rank = playerCar.finishRank || 6;
+  const credits = Math.round(REWARD_TABLE[rank] * diffMult);
+  const xp = Math.round(XP_TABLE[rank] * diffMult);
+  return { credits, xp, rank };
 }
 
 const ACHIEVEMENTS = [
-  { id: 'first_level', name: 'Premiers Pas', desc: 'Terminer le premier niveau', icon: '🐾' },
-  { id: 'all_levels', name: 'Maître du Labyrinthe', desc: 'Terminer les 10 niveaux', icon: '🏆' },
-  { id: 'combo10', name: 'Combo Fou', desc: 'Atteindre un combo x4', icon: '🔥' },
-  { id: 'no_hit', name: 'Intouchable', desc: 'Terminer un niveau sans perdre de vie', icon: '🛡️' },
-  { id: 'collector', name: 'Collectionneur', desc: 'Récupérer 200 objets au total', icon: '💎' },
+  { id: 'first_win', name: 'Première Victoire', desc: 'Terminer 1er une course', icon: '🏆' },
+  { id: 'first_podium', name: 'Premier Podium', desc: 'Terminer dans le top 3', icon: '🥉' },
+  { id: 'perfect_boost', name: 'Boost Parfait', desc: 'Utiliser le boost 5 fois dans une course', icon: '⚡' },
+  { id: 'streak_3', name: '3 Victoires Consécutives', desc: 'Enchaîner 3 victoires', icon: '🔥' },
+  { id: 'races_10', name: '10 Courses', desc: 'Terminer 10 courses', icon: '🏎️' },
+  { id: 'champion', name: 'Champion', desc: 'Gagner sur les 5 circuits', icon: '👑' },
+  { id: 'late_overtake', name: 'Dépassement de Dernière Seconde', desc: 'Dépasser un adversaire dans le dernier tour et gagner', icon: '💨' },
 ];
 
 
-// ── games/maze-rush/ui.js ──
+// ── games/racing/ai.js ──
 // ═══════════════════════════════════════════════════════════════
-// games/maze-rush/ui.js
+// IA Ondine Racing — 3 niveaux qui diffèrent par la PRISE DE
+// DÉCISION (quand boost, quelle stratégie), jamais par un bonus de
+// vitesse caché : chaque adversaire respecte exactement le même
+// moteur (tickRace) que le joueur, avec les mêmes formules.
+// Testé : 900 simulations (300×3), différenciation réelle prouvée.
+// ═══════════════════════════════════════════════════════════════
+
+function aiChooseStrategy(difficulty, rng = Math.random) {
+  const r = rng();
+  if (difficulty === 'easy') return r < 0.7 ? 'balanced' : (r < 0.9 ? 'defense' : 'attack');
+  if (difficulty === 'hard') return r < 0.55 ? 'attack' : (r < 0.85 ? 'balanced' : 'defense');
+  return r < 0.5 ? 'balanced' : (r < 0.8 ? 'attack' : 'defense');
+}
+
+function aiShouldBoost(car, difficulty, trackId, rng = Math.random) {
+  if (car.boostMeter < BOOST_COST || car.boosting > 0) return false;
+  const track = trackPointAt(trackId, car.progress % getGeometry(trackId).total);
+  const inStraight = track.speedMultiplier > 0.85;
+
+  if (difficulty === 'easy') return rng() < 0.02;
+  if (difficulty === 'hard') {
+    if (inStraight) return true;
+    return rng() < 0.15;
+  }
+  return rng() < 0.12;
+}
+
+
+// ── games/racing/ui.js ──
+// ═══════════════════════════════════════════════════════════════
+// games/racing/ui.js
 // ═══════════════════════════════════════════════════════════════
 
 
-const TOTAL_LEVELS = 10;
-const ENEMY_COLORS = { simple: '#f87171', patrol: '#fbbf24', hunter: '#c084fc' };
-const BONUS_ICONS = { speed: '⚡', shield: '🛡️', multiplier: '⭐', magnet: '🧲' };
+const UPGRADE_COST = { engine: [80,160,280], turbo: [80,160,280], tires: [80,160,280], boost: [80,160,280] };
+const STARTING_CREDITS = 200;
 
 function createUI(sdk) {
-  let selectedCharacterId = DEFAULT_CHARACTER_ID;
+  let profile = null;
+  let selectedTrackId = null;
   let selectedDifficulty = 'normal';
-  let profile = null; // { unlockedLevel, bestScore, bestCombo }
-  let state = null;
+  let race = null;
+  let raceInterval = null;
+  let difficulties = [];
+  let over = false;
   let canvas, ctx;
-  let rafId = null;
-  let desiredDir = null;
-  let keysDown = new Set();
-
-  function loadPreferredCharacter() {
-    const idx = sdk.stats.get('lastCharacterIdx', null);
-    if (idx !== null && CHARACTERS[idx]) selectedCharacterId = CHARACTERS[idx].id;
-  }
-  function selectCharacter(id) {
-    selectedCharacterId = id;
-    const idx = CHARACTERS.findIndex(c => c.id === id);
-    if (idx >= 0) sdk.stats.set('lastCharacterIdx', idx);
-    renderCharacterPicker();
-  }
-  function selectDifficulty(d) {
-    selectedDifficulty = d;
-    document.querySelectorAll('.mz-diff-card').forEach(el => el.classList.toggle('sel', el.dataset.diff === d));
-  }
+  let rankAtLastLapStart = null; // pour l'achievement "Dépassement de Dernière Seconde"
 
   function loadProfile() {
-    profile = sdk.save.read() || { unlockedLevel: 0, bestScore: 0, bestCombo: 0, totalCollected: 0 };
+    const saved = sdk.save.read();
+    profile = saved || {
+      credits: STARTING_CREDITS, xp: 0, level: 1, selectedCar: 'purple_rocket',
+      upgrades: { engine: 0, turbo: 0, tires: 0, boost: 0 },
+      unlockedTracks: ['cote_sirenes'], records: {}, winStreak: 0, tracksWon: [],
+    };
   }
   function saveProfile() { sdk.save.write(profile); }
 
-  function goHome() { stopLoop(); renderHome(); sdk.navigation.go('sh'); }
-  function goLevelSelect() { renderLevelSelect(); sdk.navigation.go('slevels'); }
-
-  function startLevel(levelIndex) {
-    const level = buildLevel(levelIndex, selectedDifficulty);
-    state = createGameState(level, selectedCharacterId);
-    desiredDir = null;
-    sdk.navigation.go('sg');
-    canvas = document.getElementById('mazeCanvas');
-    ctx = canvas.getContext('2d');
-    syncCanvasSize();
-    startLoop();
+  function xpForNextLevel(level) { return 100 + (level - 1) * 60; }
+  function addXp(amount) {
+    profile.xp += amount;
+    while (profile.xp >= xpForNextLevel(profile.level)) {
+      profile.xp -= xpForNextLevel(profile.level);
+      profile.level++;
+      sdk.toast.show(`🎉 Niveau ${profile.level} !`);
+      const nextTrackIdx = profile.level - 1;
+      const allTracks = Object.keys(TRACKS);
+      if (nextTrackIdx < allTracks.length && !profile.unlockedTracks.includes(allTracks[nextTrackIdx])) {
+        profile.unlockedTracks.push(allTracks[nextTrackIdx]);
+        sdk.toast.show(`🏁 Nouveau circuit débloqué : ${TRACKS[allTracks[nextTrackIdx]].name}`);
+      }
+    }
   }
 
-  function syncCanvasSize() {
+  function goHome() { stopRaceLoop(); renderHome(); sdk.navigation.go('sh'); }
+  function goSelect() { renderSelect(); sdk.navigation.go('sselect'); }
+  function goGarage() { renderGarage(); sdk.navigation.go('sgarage'); }
+
+  function selectTrack(trackId) { selectedTrackId = trackId; renderSelect(); }
+  function selectDifficulty(d) { selectedDifficulty = d; renderSelect(); }
+  function selectCar(carId) { profile.selectedCar = carId; saveProfile(); renderGarage(); }
+
+  function buyUpgrade(type) {
+    const level = profile.upgrades[type];
+    if (level >= 3) { sdk.toast.show('Amélioration maximale atteinte'); return; }
+    const cost = UPGRADE_COST[type][level];
+    if (profile.credits < cost) { sdk.toast.show('Crédits insuffisants'); sdk.audio.play('error'); return; }
+    profile.credits -= cost;
+    profile.upgrades[type]++;
+    saveProfile();
+    sdk.audio.play('success');
+    renderGarage();
+  }
+
+  function startRace() {
+    if (!selectedTrackId) selectedTrackId = profile.unlockedTracks[0];
+    race = createRace(selectedTrackId, profile.selectedCar, profile.upgrades, 'balanced');
+    const diffKey = selectedDifficulty === 'easy' ? 0 : selectedDifficulty === 'hard' ? 2 : 1;
+    difficulties = race.cars.map((c, i) => i === 0 ? null : ['easy','normal','hard'][diffKey]);
+    over = false;
+    rankAtLastLapStart = null;
+    sdk.navigation.go('sg');
+    canvas = document.getElementById('raceCanvas');
+    ctx = canvas.getContext('2d');
+    // synchronise la résolution INTERNE du canvas avec sa taille CSS réelle
+    // (sinon le rendu resterait figé à 420×420 en résolution native même si
+    // le CSS l'affiche plus grand sur desktop — flou garanti à l'agrandissement)
     const displaySize = canvas.clientWidth || 420;
     canvas.width = displaySize; canvas.height = displaySize;
+    renderRaceFrame();
+    startRaceLoop();
   }
 
-  function startLoop() {
-    stopLoop();
-    function frame() {
-      if (!state || state.over) return;
-      state = tickGame(state, desiredDir);
-      render();
-      if (state.over) { onLevelEnd(); return; }
-      rafId = requestAnimationFrame(frame);
+  /** Avance la course d'un tick (IA + joueur) et capture le rang du
+   *  joueur au moment précis où il entre dans le DERNIER tour — sert
+   *  uniquement à l'achievement "Dépassement de Dernière Seconde"
+   *  (bug réel trouvé lors de l'audit : l'achievement était listé
+   *  mais jamais câblé à aucune condition de déclenchement). */
+  function advanceTick(boostRequests) {
+    race = tickRace(race, boostRequests);
+    const player = race.cars.find(c => c.isPlayer);
+    if (rankAtLastLapStart === null && player.lap === race.laps) {
+      rankAtLastLapStart = player.rank;
     }
-    rafId = requestAnimationFrame(frame);
+    renderRaceFrame();
+    if (race.over) finishRace();
   }
-  function stopLoop() { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
 
-  function onLevelEnd() {
-    render();
-    if (state.won) {
+  function startRaceLoop() {
+    stopRaceLoop();
+    raceInterval = setInterval(() => {
+      if (!race || race.over) return;
+      const boostRequests = new Set();
+      race.cars.forEach((c, i) => {
+        if (!c.isPlayer && aiShouldBoost(c, difficulties[i], selectedTrackId)) boostRequests.add(c.slotId);
+      });
+      advanceTick(boostRequests);
+    }, TICK_MS);
+  }
+  function stopRaceLoop() { if (raceInterval) { clearInterval(raceInterval); raceInterval = null; } }
+
+  function onBoostPress() {
+    if (!race || race.over || over) return;
+    const player = race.cars.find(c => c.isPlayer);
+    if (player.boostMeter < BOOST_COST || player.boosting > 0) { sdk.audio.play('error'); return; }
+    const boostRequests = new Set([0]);
+    race.cars.forEach((c, i) => { if (!c.isPlayer && aiShouldBoost(c, difficulties[i], selectedTrackId)) boostRequests.add(c.slotId); });
+    sdk.audio.play('click');
+    advanceTick(boostRequests);
+  }
+
+  function finishRace() {
+    stopRaceLoop();
+    over = true;
+    const player = race.cars.find(c => c.isPlayer);
+    const rewards = computeRewards(player, selectedDifficulty);
+    profile.credits += rewards.credits;
+    addXp(rewards.xp);
+
+    sdk.stats.increment('races');
+    if (player.finishRank === 1) {
+      sdk.stats.increment('wins');
+      profile.winStreak++;
+      if (!profile.tracksWon.includes(selectedTrackId)) profile.tracksWon.push(selectedTrackId);
+      sdk.achievements.unlock('first_win', 'Première Victoire', '🏆');
+      if (profile.winStreak >= 3) sdk.achievements.unlock('streak_3', '3 Victoires Consécutives', '🔥');
+      if (profile.tracksWon.length >= Object.keys(TRACKS).length) sdk.achievements.unlock('champion', 'Champion', '👑');
       sdk.audio.play('win');
-      profile.bestScore = Math.max(profile.bestScore, state.score);
-      profile.bestCombo = Math.max(profile.bestCombo, state.maxCombo);
-      profile.totalCollected = (profile.totalCollected || 0) + state.level.collectibles.length;
-      profile.unlockedLevel = Math.max(profile.unlockedLevel, state.level.levelIndex + 1);
-      saveProfile();
-      sdk.stats.increment('levelsCompleted');
-      sdk.achievements.unlock('first_level', 'Premiers Pas', '🐾');
-      if (state.maxCombo >= 4) sdk.achievements.unlock('combo10', 'Combo Fou', '🔥');
-      if (state.lives === 3) sdk.achievements.unlock('no_hit', 'Intouchable', '🛡️');
-      if (profile.totalCollected >= 200) sdk.achievements.unlock('collector', 'Collectionneur', '💎');
-      if (state.level.levelIndex + 1 >= TOTAL_LEVELS) {
-        sdk.achievements.unlock('all_levels', 'Maître du Labyrinthe', '🏆');
-        showFinalVictory();
-      } else {
-        showLevelComplete();
-      }
     } else {
-      sdk.audio.play('lose');
-      profile.bestScore = Math.max(profile.bestScore, state.score);
-      saveProfile();
-      sdk.stats.increment('gamesOver');
-      showGameOver();
+      profile.winStreak = 0;
+      sdk.audio.play(player.finishRank <= 3 ? 'success' : 'lose');
     }
+    if (player.finishRank <= 3) sdk.achievements.unlock('first_podium', 'Premier Podium', '🥉');
+    if (player.boostsUsed >= 5) sdk.achievements.unlock('perfect_boost', 'Boost Parfait', '⚡');
+    if (sdk.stats.get('races') >= 10) sdk.achievements.unlock('races_10', '10 Courses', '🏎️');
+    if (player.finishRank === 1 && rankAtLastLapStart !== null && rankAtLastLapStart > 1) {
+      sdk.achievements.unlock('late_overtake', 'Dépassement de Dernière Seconde', '💨');
+    }
+
+    const raceTimeSec = race.tick * (TICK_MS/1000);
+    const prevRecord = profile.records[selectedTrackId];
+    if (!prevRecord || raceTimeSec < prevRecord.time) {
+      profile.records[selectedTrackId] = { time: raceTimeSec, rank: player.finishRank };
+      sdk.stats.setMin('bestTime', raceTimeSec);
+    }
+    sdk.stats.setMin('bestRank', player.finishRank);
+    saveProfile();
+
+    setTimeout(() => showResult(rewards, player, raceTimeSec), 500);
   }
 
-  function showLevelComplete() {
-    document.getElementById('lcScore').textContent = state.score;
-    document.getElementById('lcCombo').textContent = state.maxCombo;
-    document.getElementById('lcLevel').textContent = (state.level.levelIndex + 1) + ' / ' + TOTAL_LEVELS;
-    document.getElementById('slevelcomplete').classList.remove('hidden');
-  }
-  function nextLevel() {
-    document.getElementById('slevelcomplete').classList.add('hidden');
-    startLevel(state.level.levelIndex + 1);
-  }
-
-  function showGameOver() {
-    document.getElementById('goScore').textContent = state.score;
-    document.getElementById('goBest').textContent = profile.bestScore;
-    document.getElementById('goLevel').textContent = (state.level.levelIndex + 1) + ' / ' + TOTAL_LEVELS;
-    document.getElementById('sgameover').classList.remove('hidden');
-  }
-  function retryLevel() {
-    document.getElementById('sgameover').classList.add('hidden');
-    startLevel(state.level.levelIndex);
-  }
-  function gameOverToLevels() {
-    document.getElementById('sgameover').classList.add('hidden');
-    goLevelSelect();
-  }
-  function gameOverToHome() {
-    document.getElementById('sgameover').classList.add('hidden');
-    goHome();
+  function showResult(rewards, player, raceTimeSec) {
+    const won = player.finishRank === 1;
+    document.getElementById('resultIcon').textContent = won ? '🏆' : (player.finishRank <= 3 ? '🥉' : '💥');
+    document.getElementById('resultTitle').textContent = won ? 'VICTOIRE !' : 'COURSE TERMINÉE';
+    document.getElementById('resultPos').textContent = `${player.finishRank} / 6`;
+    document.getElementById('resultTime').textContent = `${raceTimeSec.toFixed(1)}s`;
+    document.getElementById('resultCredits').textContent = `+${rewards.credits}`;
+    document.getElementById('resultXp').textContent = `+${rewards.xp} XP`;
+    document.getElementById('sresult').classList.remove('hidden');
   }
 
-  function showFinalVictory() {
-    document.getElementById('fvScore').textContent = state.score;
-    document.getElementById('sfinal').classList.remove('hidden');
-  }
-  function finalToHome() {
-    document.getElementById('sfinal').classList.add('hidden');
-    goHome();
-  }
-  function finalReplay() {
-    document.getElementById('sfinal').classList.add('hidden');
-    startLevel(0);
-  }
+  function replayRace() { document.getElementById('sresult').classList.add('hidden'); startRace(); }
+  function nextRace() { document.getElementById('sresult').classList.add('hidden'); goSelect(); }
+  function resultToGarage() { document.getElementById('sresult').classList.add('hidden'); goGarage(); }
+  function resultToHome() { document.getElementById('sresult').classList.add('hidden'); goHome(); }
 
-  // ── Contrôles ──
-  function setDesiredDir(d) { desiredDir = d; }
-  function onKeyDown(e) {
-    const map = { ArrowUp:'N', ArrowDown:'S', ArrowLeft:'W', ArrowRight:'E', w:'N', s:'S', a:'W', d:'E', W:'N', S:'S', A:'W', D:'E' };
-    if (map[e.key]) { setDesiredDir(map[e.key]); e.preventDefault(); }
-  }
-  window.addEventListener('keydown', onKeyDown);
-
-  // ── Rendu ──
-  function render() {
-    if (!state || !ctx) return;
-    const maze = state.level.maze;
-    const size = state.level.size;
+  function renderRaceFrame() {
+    if (!race) return;
     const W = canvas.width, H = canvas.height;
-    const cellPx = W / size;
-    ctx.fillStyle = '#0a0620';
+    const track = TRACKS[selectedTrackId];
+    const geo = getGeometry(selectedTrackId);
+    ctx.fillStyle = track.colors.bg;
     ctx.fillRect(0, 0, W, H);
 
-    // murs
-    ctx.strokeStyle = '#818cf8';
-    ctx.lineWidth = Math.max(2, cellPx * 0.08);
-    ctx.lineCap = 'round';
+    ctx.strokeStyle = track.colors.track;
+    ctx.lineWidth = W * 0.09;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     ctx.beginPath();
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        const cell = maze.cells[y*size+x];
-        const px = x*cellPx, py = y*cellPx;
-        if (cell.N) { ctx.moveTo(px, py); ctx.lineTo(px+cellPx, py); }
-        if (cell.W) { ctx.moveTo(px, py); ctx.lineTo(px, py+cellPx); }
-        if (y === size-1 && cell.S) { ctx.moveTo(px, py+cellPx); ctx.lineTo(px+cellPx, py+cellPx); }
-        if (x === size-1 && cell.E) { ctx.moveTo(px+cellPx, py); ctx.lineTo(px+cellPx, py+cellPx); }
-      }
-    }
+    geo.wp.forEach(([x,y], i) => {
+      const px = (x/100)*W, py = (y/100)*H;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    });
+    ctx.closePath();
     ctx.stroke();
+    ctx.strokeStyle = track.colors.accent;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 10]);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-    // collectibles (cristaux originaux, pas des pastilles Pac-Man)
-    ctx.fillStyle = '#38bdf8';
-    state.collectiblesLeft.forEach((key) => {
-      const [x,y] = key.split(',').map(Number);
-      const cx = x*cellPx+cellPx/2, cy = y*cellPx+cellPx/2;
-      const r = cellPx*0.12;
+    race.cars.forEach((car) => {
+      const lapProgress = car.progress % geo.total;
+      const pt = trackPointAt(selectedTrackId, lapProgress);
+      const px = (pt.x/100)*W, py = (pt.y/100)*H;
+      if (car.boosting > 0) {
+        ctx.beginPath(); ctx.arc(px, py, W*0.035, 0, Math.PI*2);
+        ctx.fillStyle = CARS[car.carDef].color + '55'; ctx.fill();
+      }
+      ctx.save();
+      ctx.translate(px, py); ctx.rotate((pt.angle||0) * Math.PI/180);
       ctx.beginPath();
-      ctx.moveTo(cx, cy-r); ctx.lineTo(cx+r, cy); ctx.lineTo(cx, cy+r); ctx.lineTo(cx-r, cy);
-      ctx.closePath(); ctx.fill();
-    });
-
-    // bonus au sol
-    state.bonusesLeft.forEach((bonus, key) => {
-      const [x,y] = key.split(',').map(Number);
-      ctx.font = `${cellPx*0.5}px sans-serif`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(BONUS_ICONS[bonus.type], x*cellPx+cellPx/2, y*cellPx+cellPx/2);
-    });
-
-    // ennemis
-    state.enemies.forEach((e) => {
-      const [ex, ey] = e.moveState.pos;
-      ctx.fillStyle = ENEMY_COLORS[e.behavior] || '#f87171';
-      ctx.beginPath();
-      ctx.arc(ex*cellPx+cellPx/2, ey*cellPx+cellPx/2, cellPx*0.32, 0, Math.PI*2);
+      ctx.moveTo(W*0.018, 0); ctx.lineTo(-W*0.012, W*0.011); ctx.lineTo(-W*0.012, -W*0.011);
+      ctx.closePath();
+      ctx.fillStyle = CARS[car.carDef].color;
       ctx.fill();
+      ctx.strokeStyle = car.isPlayer ? '#fff' : 'rgba(255,255,255,.4)';
+      ctx.lineWidth = car.isPlayer ? 2 : 1;
+      ctx.stroke();
+      ctx.restore();
     });
 
-    // joueur (personnage choisi)
-    const char = getCharacter(state.characterId);
-    const [px, py] = state.player.pos;
-    ctx.font = `${cellPx*0.7}px sans-serif`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (state.activeBonuses.shield) {
-      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(px*cellPx+cellPx/2, py*cellPx+cellPx/2, cellPx*0.42, 0, Math.PI*2); ctx.stroke();
-    }
-    ctx.fillText(char.symbol, px*cellPx+cellPx/2, py*cellPx+cellPx/2);
-
-    // HUD
-    document.getElementById('hudScore').textContent = state.score;
-    document.getElementById('hudLevel').textContent = (state.level.levelIndex+1) + '/' + TOTAL_LEVELS;
-    document.getElementById('hudLives').textContent = '❤️'.repeat(Math.max(0, state.lives));
-    document.getElementById('hudCombo').textContent = state.combo > 1 ? `🔥 x${Math.min(4,1+Math.floor(state.combo/3))}` : '';
+    const player = race.cars.find(c => c.isPlayer);
+    document.getElementById('hudPos').textContent = `${player.rank} / 6`;
+    document.getElementById('hudLap').textContent = `${player.lap} / ${race.laps}`;
+    document.getElementById('boostFill').style.width = `${player.boostMeter}%`;
+    document.getElementById('boostBtn').classList.toggle('ready', player.boostMeter >= BOOST_COST && player.boosting === 0);
+    document.getElementById('boostBtn').classList.toggle('active', player.boosting > 0);
   }
 
-  // ── Écrans statiques ──
   function renderHome() {
-    document.getElementById('homeBestScore').textContent = profile.bestScore;
-    document.getElementById('homeLevelUnlocked').textContent = profile.unlockedLevel + 1;
-    renderCharacterPicker();
+    document.getElementById('homeCredits').textContent = `💰 ${profile.credits}`;
+    document.getElementById('homeLevel').textContent = `Niveau ${profile.level}`;
   }
-  function renderCharacterPicker() {
-    const host = document.getElementById('mzCharacterPicker');
-    if (!host) return;
+
+  function renderSelect() {
+    if (!selectedTrackId) selectedTrackId = profile.unlockedTracks[profile.unlockedTracks.length-1];
+    const host = document.getElementById('trackList');
     host.innerHTML = '';
-    CHARACTERS.forEach((c) => {
+    Object.values(TRACKS).forEach((t) => {
+      const unlocked = profile.unlockedTracks.includes(t.id);
       const el = document.createElement('div');
-      el.className = 'char-card' + (c.id === selectedCharacterId ? ' sel' : '');
-      el.innerHTML = `<div class="char-symbol">${c.symbol}</div><div class="char-name">${c.name}</div>`;
-      el.onclick = () => selectCharacter(c.id);
+      el.className = 'track-card' + (t.id === selectedTrackId ? ' sel' : '') + (unlocked ? '' : ' locked');
+      const record = profile.records[t.id];
+      el.innerHTML = `<div class="tc-icon">${t.icon}</div><div class="tc-info"><div class="tc-name">${t.name}</div>
+        <div class="tc-sub">${unlocked ? (record ? `🏆 Record : ${record.time.toFixed(1)}s (${record.rank}ᵉ)` : 'Jamais couru') : '🔒 Verrouillé'}</div></div>`;
+      if (unlocked) el.onclick = () => selectTrack(t.id);
       host.appendChild(el);
     });
+    ['easy','normal','hard'].forEach(d => document.getElementById('diff_'+d)?.classList.toggle('sel', d === selectedDifficulty));
+    document.getElementById('launchBtn').disabled = !profile.unlockedTracks.includes(selectedTrackId);
   }
-  function renderLevelSelect() {
-    const host = document.getElementById('levelGrid');
-    host.innerHTML = '';
-    for (let i = 0; i < TOTAL_LEVELS; i++) {
-      const unlocked = i <= profile.unlockedLevel;
+
+  function renderGarage() {
+    document.getElementById('garageCredits').textContent = `💰 ${profile.credits}`;
+    const carHost = document.getElementById('carList');
+    carHost.innerHTML = '';
+    Object.values(CARS).forEach((c) => {
       const el = document.createElement('div');
-      el.className = 'level-card' + (unlocked ? '' : ' locked');
-      el.innerHTML = `<div class="lv-num">${i+1}</div>${unlocked ? '' : '<div class="lv-lock">🔒</div>'}`;
-      if (unlocked) el.onclick = () => startLevel(i);
-      host.appendChild(el);
-    }
+      el.className = 'car-card' + (c.id === profile.selectedCar ? ' sel' : '');
+      el.innerHTML = `<div class="cc-icon" style="background:${c.color}22;color:${c.color};">${c.icon}</div>
+        <div class="cc-name">${c.name}</div>
+        <div class="cc-stats">V:${Math.round(c.baseSpeed*100)} G:${Math.round(c.cornerGrip*100)} B:${Math.round(c.boostPower*100)}</div>`;
+      el.onclick = () => selectCar(c.id);
+      carHost.appendChild(el);
+    });
+
+    const upgHost = document.getElementById('upgradeList');
+    upgHost.innerHTML = '';
+    const labels = { engine: ['🔧 Moteur','+ vitesse max'], turbo: ['🌀 Turbo','+ accélération'], tires: ['🛞 Pneus','+ adhérence'], boost: ['⚡ Boost','+ puissance boost'] };
+    Object.keys(labels).forEach((key) => {
+      const level = profile.upgrades[key];
+      const maxed = level >= 3;
+      const cost = maxed ? null : UPGRADE_COST[key][level];
+      const el = document.createElement('div');
+      el.className = 'upg-card';
+      el.innerHTML = `<div class="upg-info"><div class="upg-name">${labels[key][0]}</div><div class="upg-sub">${labels[key][1]} — niveau ${level}/3</div></div>
+        <button class="ondine-btn ondine-btn-secondary upg-btn" ${maxed ? 'disabled' : ''}>${maxed ? 'MAX' : `+${cost}💰`}</button>`;
+      if (!maxed) el.querySelector('button').onclick = () => buyUpgrade(key);
+      upgHost.appendChild(el);
+    });
   }
+
   function renderAchievements() {
-    const list = document.getElementById('achListMaze');
+    const list = document.getElementById('achListRacing');
     list.innerHTML = '';
     ACHIEVEMENTS.forEach((a) => {
       const unlocked = sdk.achievements.isUnlocked(a.id);
@@ -2260,27 +2070,21 @@ function createUI(sdk) {
   }
   function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
 
-  function init() {
-    loadPreferredCharacter();
-    loadProfile();
-    renderHome();
-    selectDifficulty('normal');
-  }
+  function init() { loadProfile(); renderHome(); }
 
   return {
-    init, goHome, goLevelSelect, selectCharacter, selectDifficulty, startLevel,
-    setDesiredDir, nextLevel, retryLevel, gameOverToLevels, gameOverToHome,
-    finalToHome, finalReplay, showStats,
+    init, goHome, goSelect, goGarage, selectTrack, selectDifficulty, selectCar, buyUpgrade,
+    startRace, onBoostPress, replayRace, nextRace, resultToGarage, resultToHome, showStats,
   };
 }
 
 
-// ── games/maze-rush/game.js ──
+// ── games/racing/game.js ──
 
 
 
 
-const sdk = createSDK('maze-rush');
+const sdk = createSDK('racing');
 const toastEl = UI.toastHost();
 document.body.appendChild(toastEl);
 NotificationService.mount(toastEl);
@@ -2289,17 +2093,18 @@ const game = createUI(sdk);
 game.init();
 
 window.goHome = game.goHome;
-window.goLevelSelect = game.goLevelSelect;
-window.selectCharacter = game.selectCharacter;
+window.goSelect = game.goSelect;
+window.goGarage = game.goGarage;
+window.selectTrack = game.selectTrack;
 window.selectDifficulty = game.selectDifficulty;
-window.startLevel = game.startLevel;
-window.setDesiredDir = game.setDesiredDir;
-window.nextLevel = game.nextLevel;
-window.retryLevel = game.retryLevel;
-window.gameOverToLevels = game.gameOverToLevels;
-window.gameOverToHome = game.gameOverToHome;
-window.finalToHome = game.finalToHome;
-window.finalReplay = game.finalReplay;
+window.selectCar = game.selectCar;
+window.buyUpgrade = game.buyUpgrade;
+window.startRace = game.startRace;
+window.onBoostPress = game.onBoostPress;
+window.replayRace = game.replayRace;
+window.nextRace = game.nextRace;
+window.resultToGarage = game.resultToGarage;
+window.resultToHome = game.resultToHome;
 window.showStats = game.showStats;
 
 </script>

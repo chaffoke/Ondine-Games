@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Road Trip × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;--c1:#38bdf8;--c2:#7dd3fc;--cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);--text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;--sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;min-height:100%;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:20px;cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-primary:disabled{opacity:.35;}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:22px;max-width:340px;width:100%;box-shadow:var(--sh2);max-height:80vh;overflow-y:auto;}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;line-height:1.6;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(28px,8vw,38px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+#sg{align-items:center;padding:10px;gap:8px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;}
+.hud-badge{font-family:'Fredoka One',cursive;font-size:12px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;}
+
+.tracks{width:100%;max-width:420px;display:flex;flex-direction:column;gap:6px;}
+.track{background:var(--glass);border:1.5px solid var(--border);border-radius:12px;padding:8px 10px;}
+.track.active{border-color:var(--co);background:rgba(251,191,36,.08);}
+.track.blocked{border-color:var(--cr);}
+.track-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:800;margin-bottom:5px;}
+.track-bar{height:8px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden;}
+.track-fill{height:100%;background:linear-gradient(90deg,var(--c1),var(--cg));border-radius:5px;transition:width .3s;}
+.track-status{font-size:9px;color:var(--cr);margin-top:3px;}
+
+.piles-row{display:flex;justify-content:center;gap:20px;padding:6px 0;}
+.pile{position:relative;width:52px;height:74px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;}
+.pile-stock{background:linear-gradient(145deg,#1e3a5f,#152a47);border:1.5px solid var(--border2);}
+.pile.dim{opacity:.4;cursor:default;}
+.pile-count{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text2);white-space:nowrap;}
+
+.hand-row{display:flex;gap:5px;overflow-x:auto;padding:8px 4px;scrollbar-width:none;width:100%;max-width:420px;}
+.hand-row::-webkit-scrollbar{display:none;}
+.rt-card{position:relative;flex-shrink:0;width:70px;height:88px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .12s;font-weight:800;text-align:center;gap:2px;border:1.5px solid rgba(0,0,0,.2);box-shadow:0 3px 8px rgba(0,0,0,.35);}
+.rt-card.sel{transform:translateY(-10px);box-shadow:0 0 0 2.5px var(--co),0 8px 14px rgba(0,0,0,.4);}
+.rt-card.distance{background:linear-gradient(145deg,#dbeafe,#bfdbfe);color:#1e3a8a;}
+.rt-card.attack{background:linear-gradient(145deg,#fecaca,#fca5a5);color:#7f1d1d;}
+.rt-card.defense{background:linear-gradient(145deg,#bbf7d0,#86efac);color:#14532d;}
+.rt-card.turbo{background:linear-gradient(145deg,#fde68a,#fcd34d);color:#78350f;}
+.rt-card .icon{font-size:20px;}
+.rt-card .label{font-size:9px;line-height:1.2;}
+.rt-card.disabled{opacity:.4;}
+
+.game-footer{display:flex;gap:6px;width:100%;max-width:340px;flex-wrap:wrap;}
+
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+</style>
+</head>
+<body>
+
+<div id="toastHost" class="ondine-toast"></div>
+
+<!-- ═══════ HOME ═══════ -->
+<div class="screen" id="sh">
+  <div class="logo">🚗 ROAD TRIP</div>
+  <div class="logo-sub">× Ondine</div>
+
+  <div class="section-title">Mode</div>
+  <div class="opt-grid">
+    <div class="opt-card sel" id="modeSolo" onclick="setMode('solo')"><div class="opt-icon">🤖</div><div class="opt-name">Solo vs IA</div></div>
+    <div class="opt-card" id="modeLocal" onclick="setMode('local')"><div class="opt-icon">👥</div><div class="opt-name">Local (2-4j)</div></div>
+  </div>
+
+  <div class="section-title" id="diffTitle">Difficulté IA</div>
+  <div class="opt-grid cols3" id="diffGrid">
+    <div class="opt-card sel" id="diffEasy" onclick="setDiff('easy')"><div class="opt-icon">🌱</div><div class="opt-name">Facile</div></div>
+    <div class="opt-card" id="diffNormal" onclick="setDiff('normal')"><div class="opt-icon">⚡</div><div class="opt-name">Normal</div></div>
+    <div class="opt-card" id="diffHard" onclick="setDiff('hard')"><div class="opt-icon">🔥</div><div class="opt-name">Difficile</div></div>
+  </div>
+
+  <div class="section-title" id="countTitle" style="display:none;">Nombre de joueurs</div>
+  <div class="opt-grid cols3" id="countGrid" style="display:none;"></div>
+
+  <div class="hbtns" style="margin-top:8px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🚗 Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" id="resumeBtn" onclick="resumeGame()" style="display:none;">▶ Reprendre la partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showRules()">ⓘ Règles du jeu</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
+  </div>
+
+  <div class="hstats" id="homeStats"></div>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════ GAME ═══════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div class="icon-btn" onclick="confirmLeaveGame()">🏠</div>
+    <div class="hud-badge" id="turnBadge"></div>
+    <div class="icon-btn" onclick="showRules()">ⓘ</div>
+  </div>
+  <div class="tracks" id="tracks"></div>
+  <div class="piles-row">
+    <div class="pile pile-stock" id="stockPile" onclick="onDraw()">🂠<div class="pile-count" id="stockCount"></div></div>
+  </div>
+  <div class="hand-row" id="handRow"></div>
+  <div class="game-footer">
+    <button class="ondine-btn ondine-btn-primary" style="flex:1;" id="btnDiscard" onclick="onDiscardSelected()" disabled>🗑️ Défausser cette carte</button>
+  </div>
+</div>
+
+<!-- ═══════ RESULT ═══════ -->
+<div class="screen hidden" id="sres">
+  <div class="res-icon" id="resIcon">🏆</div>
+  <div class="res-title" id="resTitle"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;">Succès</div>
+    <div class="ach-list" id="achList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// RÈGLES — "Road Trip", jeu de course à cartes 100% original
+// (thème et système Ondine Games — validé par 24 tests unitaires +
+// simulations complètes IA-vs-IA à 2/3/4 joueurs, 100% de parties
+// terminées).
+//
+//  - Distance cible : 400 km
+//  - Carte distance (25/50/75/100 km) : jouable seulement si NON bloqué
+//  - Carte attaque "panne sèche" : bloque un adversaire au choix
+//  - Carte défense "réparation" : lève SON PROPRE blocage (jouable
+//    seulement quand on est bloqué)
+//  - Carte turbo (+50 km) : toujours jouable, contourne le blocage
+//  - À son tour : piocher 1 carte, puis JOUER une carte ou en
+//    DÉFAUSSER une si aucune n'est utile
+// ═══════════════════════════════════════════════════════════════
+const TARGET_DISTANCE = 400;
+function buildDeck() {
+  const deck = []; let id = 0;
+  const push = (n,factory) => { for (let i=0;i<n;i++) deck.push({ ...factory(), id:`c${id++}` }); };
+  push(10, () => ({type:'distance',value:25}));
+  push(8,  () => ({type:'distance',value:50}));
+  push(6,  () => ({type:'distance',value:75}));
+  push(4,  () => ({type:'distance',value:100}));
+  push(6,  () => ({type:'attack'}));
+  push(8,  () => ({type:'defense'}));
+  push(4,  () => ({type:'turbo',value:50}));
+  return deck;
+}
+function shuffleArr(arr) { const a=[...arr]; for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function createGame(playerCount) {
+  const deck = shuffleArr(buildDeck());
+  const players = Array.from({length:playerCount}, () => ({ hand:[], distance:0, blocked:false }));
+  for (let i=0;i<6;i++) for (const p of players) p.hand.push(deck.pop());
+  return { deck, discard:[], players, current:0, phase:'draw', over:false, winner:null };
+}
+function isCardPlayable(state, playerIdx, card) {
+  const player = state.players[playerIdx];
+  if (card.type==='distance') return !player.blocked;
+  if (card.type==='attack') return true;
+  if (card.type==='defense') return player.blocked===true;
+  if (card.type==='turbo') return true;
+  return false;
+}
+function drawCard(state) {
+  if (state.phase !== 'draw') return false;
+  if (state.deck.length === 0) { if (state.discard.length<=1) return false; const top=state.discard.pop(); state.deck=shuffleArr(state.discard); state.discard=[top]; }
+  if (state.deck.length === 0) return false;
+  state.players[state.current].hand.push(state.deck.pop());
+  state.phase = 'play';
+  return true;
+}
+function playCard(state, cardId, targetIdx) {
+  const player = state.players[state.current];
+  const idx = player.hand.findIndex(c=>c.id===cardId);
+  if (idx===-1) return { ok:false };
+  const card = player.hand[idx];
+  if (!isCardPlayable(state, state.current, card)) return { ok:false };
+  if (card.type==='distance' || card.type==='turbo') {
+    player.hand.splice(idx,1); state.discard.push(card);
+    player.distance = Math.min(TARGET_DISTANCE, player.distance + card.value);
+    if (card.type==='turbo') player.blocked = false;
+    if (player.distance >= TARGET_DISTANCE) { state.over = true; state.winner = state.current; }
+  } else if (card.type==='attack') {
+    if (targetIdx===undefined || targetIdx===state.current || !state.players[targetIdx]) return { ok:false };
+    player.hand.splice(idx,1); state.discard.push(card);
+    state.players[targetIdx].blocked = true;
+  } else if (card.type==='defense') {
+    player.hand.splice(idx,1); state.discard.push(card);
+    player.blocked = false;
+  }
+  endTurnIfNotOver(state);
+  return { ok:true };
+}
+function discardCard(state, cardId) {
+  const player = state.players[state.current];
+  const idx = player.hand.findIndex(c=>c.id===cardId);
+  if (idx===-1) return false;
+  const [card] = player.hand.splice(idx,1);
+  state.discard.push(card);
+  endTurnIfNotOver(state);
+  return true;
+}
+function endTurnIfNotOver(state) { if (state.over) return; state.current = (state.current+1) % state.players.length; state.phase = 'draw'; }
+
+// ═══════════════════════════════════════════════════════════════
+// IA — 3 niveaux (testés en simulation complète)
+// ═══════════════════════════════════════════════════════════════
+function aiChooseAction(state, playerIdx, difficulty) {
+  const player = state.players[playerIdx];
+  const playable = player.hand.filter(c => isCardPlayable(state, playerIdx, c));
+  if (!playable.length) return { action:'discard', card: aiChooseDiscard(player.hand) };
+  const reparation = playable.find(c=>c.type==='defense');
+  if (reparation) return { action:'play', card:reparation };
+  const distanceCards = playable.filter(c=>c.type==='distance').sort((a,b)=>b.value-a.value);
+  if (distanceCards.length) return { action:'play', card:distanceCards[0] };
+  const turbo = playable.find(c=>c.type==='turbo');
+  if (turbo && player.blocked) return { action:'play', card:turbo };
+  const attack = playable.find(c=>c.type==='attack');
+  if (attack) {
+    const opponents = state.players.map((p,i)=>i).filter(i=>i!==playerIdx);
+    let targetIdx;
+    if (difficulty==='easy') targetIdx = opponents[Math.floor(Math.random()*opponents.length)];
+    else targetIdx = opponents.reduce((best,i)=> state.players[i].distance > state.players[best].distance ? i : best, opponents[0]);
+    return { action:'play', card:attack, targetIdx };
+  }
+  if (turbo) return { action:'play', card:turbo };
+  return { action:'discard', card: aiChooseDiscard(player.hand) };
+}
+function aiChooseDiscard(hand) { const attacks = hand.filter(c=>c.type==='attack'); if (attacks.length>2) return attacks[0]; return hand[0]; }
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'og_millebornes_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats:{}, achievements:[], save:null }, loadStore());
+function statGet(k,d=0) { return k in STORE.stats ? STORE.stats[k] : d; }
+function statInc(k,n=1) { STORE.stats[k]=(STORE.stats[k]||0)+n; saveStore(STORE); return STORE.stats[k]; }
+function achUnlock(id,name,icon) { if (STORE.achievements.includes(id)) return; STORE.achievements.push(id); saveStore(STORE); playSound('unlock'); toast(`${icon} Succès : ${name}`); }
+const ACHIEVEMENTS = [
+  { id:'first_win', name:'Première Arrivée', desc:'Gagner sa première course', icon:'🏁' },
+  { id:'no_block', name:'Route Libre', desc:'Gagner sans jamais être bloqué', icon:'🟢' },
+  { id:'comeback', name:'Retour Fulgurant', desc:'Gagner après avoir été bloqué au moins 2 fois', icon:'🔥' },
+  { id:'turbo_master', name:'Pied au Plancher', desc:'Jouer 3 cartes turbo dans la même partie', icon:'⚡' },
+  { id:'wins_5', name:'5 Victoires', desc:'Gagner 5 courses', icon:'🏅' },
+  { id:'champion', name:'Champion Road Trip', desc:'Gagner 15 courses', icon:'👑' },
+];
+
+let toastTimer = null;
+function toast(msg) { const t=document.getElementById('toastHost'); t.textContent=msg; t.classList.remove('ondine-toast-show'); void t.offsetWidth; t.classList.add('ondine-toast-show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('ondine-toast-show'),2200); }
+let audioCtx = null;
+function tone(freq,dur,type='sine',vol=.12) { try { if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type=type; osc.frequency.value=freq; gain.gain.setValueAtTime(vol,audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur); osc.start(); osc.stop(audioCtx.currentTime+dur); } catch(e){} }
+function playSound(name) { const P={ draw:()=>tone(450,.06,'sine',.1), drive:()=>[500,650].forEach((f,i)=>setTimeout(()=>tone(f,.1,'sine',.12),i*60)), attack:()=>tone(220,.15,'sawtooth',.12), defense:()=>tone(700,.12,'sine',.12), turbo:()=>[500,700,900].forEach((f,i)=>setTimeout(()=>tone(f,.1,'sine',.13),i*50)), discard:()=>tone(300,.08,'triangle',.09), win:()=>[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.16),i*100)), error:()=>tone(220,.15,'sawtooth',.1), unlock:()=>[660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,.14,'sine',.14),i*80)) }; (P[name]||(()=>{}))(); }
+function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let CONFIG = { mode:'solo', difficulty:'easy', playerCount:2 };
+let G = null;
+let selectedId = null;
+let blockedCount = 0;
+let turboCount = 0;
+
+function setMode(m) {
+  CONFIG.mode = m;
+  document.getElementById('modeSolo').classList.toggle('sel', m==='solo');
+  document.getElementById('modeLocal').classList.toggle('sel', m==='local');
+  document.getElementById('diffTitle').style.display = m==='solo' ? '' : 'none';
+  document.getElementById('diffGrid').style.display = m==='solo' ? '' : 'none';
+  document.getElementById('countTitle').style.display = m==='local' ? '' : 'none';
+  document.getElementById('countGrid').style.display = m==='local' ? '' : 'none';
+  if (m==='local') renderCountGrid();
+}
+function renderCountGrid() {
+  const grid = document.getElementById('countGrid'); grid.innerHTML='';
+  [2,3,4].forEach(n => { const el=document.createElement('div'); el.className='opt-card'+(n===CONFIG.playerCount?' sel':'');
+    el.innerHTML = `<div class="opt-icon">👤</div><div class="opt-name">${n}j</div>`; el.onclick=()=>{ CONFIG.playerCount=n; renderCountGrid(); }; grid.appendChild(el); });
+}
+function setDiff(d) { CONFIG.difficulty=d; ['Easy','Normal','Hard'].forEach(k=>document.getElementById('diff'+k).classList.toggle('sel', k.toLowerCase()===d)); }
+
+function startGame() {
+  const n = CONFIG.mode==='solo' ? 2 : CONFIG.playerCount;
+  G = createGame(n);
+  selectedId = null; blockedCount = 0; turboCount = 0;
+  STORE.save = null; saveStore(STORE);
+  showScreen('sg');
+  renderAll();
+  maybeAiTurn();
+}
+function resumeGame() {
+  if (!STORE.save) { toast('Aucune partie sauvegardée'); return; }
+  G = STORE.save.G; CONFIG = STORE.save.CONFIG; selectedId=null;
+  showScreen('sg'); renderAll(); toast('▶ Partie reprise');
+  maybeAiTurn();
+}
+function persistSave() { STORE.save = { G, CONFIG }; saveStore(STORE); }
+function goHome() { updateHomeStats(); showScreen('sh'); document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none'; }
+async function confirmLeaveGame() { if (G && !G.over) { const ok = await confirmDialog('Quitter la partie ?', 'Ta partie sera sauvegardée.', 'Quitter', 'Continuer'); if (!ok) return; persistSave(); } goHome(); }
+
+function isHumanTurn() { return CONFIG.mode==='local' || G.current===0; }
+
+function onDraw() {
+  if (!G || G.over || G.phase!=='draw' || !isHumanTurn()) return;
+  const ok = drawCard(G);
+  if (ok) { playSound('draw'); vibrate(10); renderAll(); }
+  else toast('Pioche épuisée');
+}
+function onCardTap(cardId) {
+  if (!isHumanTurn() || G.phase!=='play') return;
+  selectedId = selectedId===cardId ? null : cardId;
+  const player = G.players[G.current];
+  const card = player.hand.find(c=>c.id===cardId);
+  const btn = document.getElementById('btnDiscard');
+  btn.disabled = !selectedId;
+  if (selectedId && card && card.type==='attack' && CONFIG.playerCount > 2 && isCardPlayable(G,G.current,card)) {
+    promptAttackTarget(card);
+    return;
+  }
+  if (selectedId && card && isCardPlayable(G, G.current, card)) { playSelectedCard(card); return; }
+  renderHand();
+}
+function playSelectedCard(card, targetIdx) {
+  const result = playCard(G, card.id, targetIdx);
+  if (!result.ok) { playSound('error'); toast('Carte non jouable actuellement'); selectedId=null; renderHand(); return; }
+  if (card.type==='distance') playSound('drive');
+  else if (card.type==='attack') { playSound('attack'); if (G.players.some(p=>p.blocked)) blockedCount++; }
+  else if (card.type==='defense') playSound('defense');
+  else if (card.type==='turbo') { playSound('turbo'); turboCount++; if (turboCount>=3) achUnlock('turbo_master','Pied au Plancher','⚡'); }
+  vibrate(15);
+  selectedId = null;
+  if (G.over) { setTimeout(endGame, 400); return; }
+  renderAll();
+  persistSave();
+  maybeAiTurn();
+}
+function promptAttackTarget(card) {
+  const overlay = document.getElementById('modalOverlay');
+  const opponents = G.players.map((p,i)=>i).filter(i=>i!==G.current);
+  overlay.innerHTML = `<div class="modal-box"><div class="modal-title">🛑 Choisir la cible</div><div class="modal-body">Qui bloquer avec cette panne sèche ?</div>
+    <div class="modal-actions">${opponents.map(i=>`<button class="ondine-btn ondine-btn-secondary" data-i="${i}">Joueur ${i+1}</button>`).join('')}</div></div>`;
+  overlay.classList.remove('hidden');
+  overlay.querySelectorAll('[data-i]').forEach(btn => btn.onclick = () => { overlay.classList.add('hidden'); playSelectedCard(card, parseInt(btn.dataset.i)); });
+}
+function onDiscardSelected() {
+  if (!selectedId || !isHumanTurn() || G.phase!=='play') return;
+  const ok = discardCard(G, selectedId);
+  if (ok) { playSound('discard'); vibrate(10); selectedId=null; document.getElementById('btnDiscard').disabled=true; renderAll(); persistSave(); maybeAiTurn(); }
+}
+
+function maybeAiTurn() {
+  if (!G || G.over) return;
+  if (CONFIG.mode!=='solo' || G.current!==1) return;
+  setTimeout(() => {
+    const ok = drawCard(G);
+    if (!ok) return;
+    renderAll();
+    setTimeout(() => {
+      const action = aiChooseAction(G, 1, CONFIG.difficulty);
+      if (action.action==='play') { playCard(G, action.card.id, action.targetIdx); playSound(action.card.type==='distance'?'drive':action.card.type==='attack'?'attack':action.card.type==='defense'?'defense':'turbo'); }
+      else { discardCard(G, action.card.id); playSound('discard'); }
+      if (G.over) { setTimeout(endGame, 400); return; }
+      renderAll();
+      persistSave();
+    }, 550);
+  }, 450);
+}
+
+function endGame() {
+  statInc('games');
+  if (CONFIG.mode==='solo') {
+    if (G.winner===0) {
+      statInc('wins'); playSound('win'); vibrate([20,40,20]);
+      achUnlock('first_win','Première Arrivée','🏁');
+      if (blockedCount===0) achUnlock('no_block','Route Libre','🟢');
+      if (blockedCount>=2) achUnlock('comeback','Retour Fulgurant','🔥');
+      if (statGet('wins')>=5) achUnlock('wins_5','5 Victoires','🏅');
+      if (statGet('wins')>=15) achUnlock('champion','Champion Road Trip','👑');
+    } else { statInc('losses'); playSound('win'); }
+  } else { playSound('win'); }
+  STORE.save = null; saveStore(STORE);
+  showResult();
+}
+function showResult() {
+  const winnerLabel = CONFIG.mode==='solo' ? (G.winner===0?'Toi':"L'IA") : `Joueur ${G.winner+1}`;
+  document.getElementById('resIcon').textContent = (CONFIG.mode==='solo' && G.winner!==0) ? '🤖' : '🏆';
+  document.getElementById('resTitle').textContent = `${winnerLabel} l\u2019emporte !`;
+  document.getElementById('resSub').textContent = `${TARGET_DISTANCE} km parcourus en premier`;
+  document.getElementById('sres').classList.remove('hidden'); /* audit UX fin de partie : overlay sans masquer le plateau/la main en dessous */
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+const CARD_ICON = { distance:'🚗', attack:'🛑', defense:'🔧', turbo:'⚡' };
+const CARD_LABEL = { distance:'km', attack:'Panne sèche', defense:'Réparation', turbo:'Turbo +50' };
+function renderAll() { renderHand(); renderHud(); renderTracks(); }
+function renderHud() { document.getElementById('turnBadge').textContent = G.over ? 'Course terminée' : (isHumanTurn() ? (G.phase==='draw'?'Pioche une carte':'Joue ou défausse') : "L'IA joue…"); document.getElementById('stockCount').textContent = `${G.deck.length} cartes`; const canDraw = isHumanTurn() && G.phase==='draw' && !G.over; document.getElementById('stockPile').classList.toggle('dim', !canDraw); }
+function renderTracks() {
+  const host = document.getElementById('tracks'); host.innerHTML = '';
+  G.players.forEach((p,i) => {
+    const el = document.createElement('div'); el.className = 'track' + (i===G.current?' active':'') + (p.blocked?' blocked':'');
+    const pct = Math.round(p.distance/TARGET_DISTANCE*100);
+    const label = CONFIG.mode==='solo' ? (i===0?'Toi':'IA 🤖') : `Joueur ${i+1}`;
+    el.innerHTML = `<div class="track-top"><span>${label}</span><span>${p.distance} / ${TARGET_DISTANCE} km</span></div>
+      <div class="track-bar"><div class="track-fill" style="width:${pct}%"></div></div>
+      ${p.blocked ? '<div class="track-status">🛑 Bloqué — a besoin d\u2019une réparation ou d\u2019un turbo</div>' : ''}`;
+    host.appendChild(el);
+  });
+}
+function renderHand() {
+  const row = document.getElementById('handRow'); row.innerHTML = '';
+  if (!G) return;
+  const player = G.players[G.current];
+  const canAct = isHumanTurn() && G.phase==='play' && !G.over;
+  player.hand.forEach(card => {
+    const playable = isCardPlayable(G, G.current, card);
+    const el = document.createElement('div');
+    el.className = `rt-card ${card.type}` + (selectedId===card.id?' sel':'') + (!playable?' disabled':'');
+    el.innerHTML = `<div class="icon">${CARD_ICON[card.type]}</div><div class="label">${card.type==='distance'?card.value+' km':CARD_LABEL[card.type]}</div>`;
+    el.onclick = () => { if (canAct) onCardTap(card.id); };
+    row.appendChild(el);
+  });
+  document.getElementById('btnDiscard').disabled = !selectedId;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION / STATS / RULES
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if (id==='sstats') renderStatsScreen(); }
+function updateHomeStats() {
+  const host = document.getElementById('homeStats'); host.innerHTML='';
+  [{v:statGet('games'),l:'🎮 Parties'},{v:statGet('wins'),l:'🏆 Victoires'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.style.flex='1'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
+}
+function renderStatsScreen() {
+  const grid = document.getElementById('statsGrid'); grid.innerHTML='';
+  [{v:statGet('games'),l:'Parties'},{v:statGet('wins'),l:'Victoires'},{v:statGet('losses'),l:'Défaites'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; grid.appendChild(el); });
+  const list = document.getElementById('achList'); list.innerHTML='';
+  ACHIEVEMENTS.forEach(a => { const unlocked=STORE.achievements.includes(a.id); const el=document.createElement('div'); el.className='achCard'+(unlocked?' unlocked':''); el.innerHTML=`<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`; list.appendChild(el); });
+}
+function showRules() {
+  const overlay = document.getElementById('modalOverlay');
+  overlay.innerHTML = `<div class="modal-box"><div class="modal-title">🚗 Règles de Road Trip</div>
+    <div class="modal-body">Sois le premier à parcourir ${TARGET_DISTANCE} km !<br><br>
+    <b>🚗 Carte distance</b> : avance (25 à 100 km) — jouable seulement si tu n'es PAS bloqué.<br>
+    <b>🛑 Panne sèche</b> : bloque un adversaire de ton choix.<br>
+    <b>🔧 Réparation</b> : lève TON blocage — jouable seulement si tu es bloqué.<br>
+    <b>⚡ Turbo</b> : +50 km, toujours jouable, contourne le blocage !<br><br>
+    À ton tour : pioche 1 carte, puis joue-en une ou défausse une carte inutile.</div>
+    <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdClose">Compris !</button></div></div>`;
+  overlay.classList.remove('hidden');
+  document.getElementById('mdClose').onclick = () => overlay.classList.add('hidden');
+}
+function confirmDialog(title,message,confirmLabel,cancelLabel) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.innerHTML = `<div class="modal-box"><div class="modal-title">${title}</div><div class="modal-body">${message}</div>
+      <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdConfirm">${confirmLabel}</button>
+      <button class="ondine-btn ondine-btn-secondary" id="mdCancel">${cancelLabel}</button></div></div>`;
+    overlay.classList.remove('hidden');
+    document.getElementById('mdConfirm').onclick = () => { overlay.classList.add('hidden'); resolve(true); };
+    document.getElementById('mdCancel').onclick = () => { overlay.classList.add('hidden'); resolve(false); };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+updateHomeStats();
+document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none';
+window.setMode=setMode; window.setDiff=setDiff; window.startGame=startGame; window.resumeGame=resumeGame;
+window.goHome=goHome; window.showScreen=showScreen; window.confirmLeaveGame=confirmLeaveGame;
+window.onDraw=onDraw; window.onDiscardSelected=onDiscardSelected; window.showRules=showRules;
+</script>
+</body>
+</html>

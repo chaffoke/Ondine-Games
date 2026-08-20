@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Spider Solitaire × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;--c1:#38bdf8;--c2:#7dd3fc;--cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);--text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;--sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;min-height:100%;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:20px;cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:22px;max-width:340px;width:100%;box-shadow:var(--sh2);max-height:80vh;overflow-y:auto;}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;line-height:1.6;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+.icon-btn{width:34px;height:34px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;flex-shrink:0;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(24px,7vw,34px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:12px 6px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:18px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:11px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+#sg{align-items:center;padding:8px;gap:6px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:460px;}
+.hud-badge{font-family:'Fredoka One',cursive;font-size:11px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 9px;}
+.hud-row{display:flex;gap:6px;}
+
+.board-wrap{flex:1;width:100%;overflow:auto;display:flex;justify-content:center;position:relative;}
+.board-wrap::after{content:'';position:sticky;top:0;right:0;float:right;width:18px;height:100%;margin-left:-18px;background:linear-gradient(90deg,transparent,rgba(6,8,30,.85));pointer-events:none;}
+.board{display:flex;gap:4px;padding:6px 4px;min-width:min-content;}
+.stock-col{display:flex;flex-direction:column;gap:6px;align-items:center;padding-right:4px;}
+.stock-pile{width:38px;height:52px;border-radius:6px;background:linear-gradient(145deg,#1e3a5f,#152a47);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;position:relative;}
+.stock-pile.dim{opacity:.35;cursor:default;}
+.stock-pile .badge{position:absolute;bottom:-4px;right:-4px;background:var(--co);color:#000;font-size:8px;font-weight:800;border-radius:8px;padding:1px 4px;}
+
+.column{width:40px;min-height:120px;display:flex;flex-direction:column;position:relative;}
+.spider-card{width:40px;height:54px;border-radius:6px;position:absolute;left:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;cursor:pointer;transition:box-shadow .15s;border:1px solid rgba(0,0,0,.25);}
+.spider-card.up{background:linear-gradient(145deg,#f5f0e6,#e2dcc8);box-shadow:0 2px 4px rgba(0,0,0,.3);}
+.spider-card.down{background:linear-gradient(145deg,#1e3a5f,#152a47);border-color:var(--border2);}
+.spider-card.sel{box-shadow:0 0 0 2.5px var(--co),0 4px 10px rgba(0,0,0,.4);z-index:50!important;}
+.spider-card .rank{font-size:12px;line-height:1.1;}
+.spider-card .suit{font-size:13px;line-height:1.1;}
+.empty-col-slot{width:40px;height:54px;border-radius:6px;border:1.5px dashed var(--border2);}
+
+.game-footer{display:flex;gap:6px;width:100%;max-width:400px;flex-wrap:wrap;justify-content:center;}
+
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+</style>
+</head>
+<body>
+
+<div id="toastHost" class="ondine-toast"></div>
+
+<!-- ═══════ HOME ═══════ -->
+<div class="screen" id="sh">
+  <div class="logo">SPIDER SOLITAIRE</div>
+  <div class="logo-sub">× Ondine</div>
+
+  <div class="section-title">Difficulté</div>
+  <div class="opt-grid" id="diffGrid">
+    <div class="opt-card sel" id="diffOne" onclick="setDiff(1)"><div class="opt-icon">🟢</div><div class="opt-name">1 couleur</div></div>
+    <div class="opt-card" id="diffTwo" onclick="setDiff(2)"><div class="opt-icon">🟡</div><div class="opt-name">2 couleurs</div></div>
+    <div class="opt-card" id="diffFour" onclick="setDiff(4)"><div class="opt-icon">🔴</div><div class="opt-name">4 couleurs</div></div>
+  </div>
+
+  <div class="hbtns" style="margin-top:8px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🕷️ Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" id="resumeBtn" onclick="resumeGame()" style="display:none;">▶ Reprendre la partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showRules()">ⓘ Règles du jeu</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
+  </div>
+
+  <div class="hstats" id="homeStats"></div>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════ GAME ═══════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div class="icon-btn" onclick="confirmLeaveGame()">🏠</div>
+    <div class="hud-row">
+      <div class="hud-badge" id="movesBadge"></div>
+      <div class="hud-badge" id="timerBadge"></div>
+      <div class="hud-badge" id="seqBadge"></div>
+    </div>
+    <div class="hud-row">
+      <div class="icon-btn" onclick="undoMove()">↩️</div>
+      <div class="icon-btn" onclick="giveHint()">💡</div>
+      <div class="icon-btn" onclick="showRules()">ⓘ</div>
+    </div>
+  </div>
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+  <div class="game-footer">
+    <button class="ondine-btn ondine-btn-secondary" onclick="confirmNewGame()">🔄 Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="confirmAbandon()">🏳️ Abandonner</button>
+  </div>
+</div>
+
+<!-- ═══════ RESULT ═══════ -->
+<div class="screen hidden" id="sres">
+  <div class="res-icon" id="resIcon">🏆</div>
+  <div class="res-title" id="resTitle"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;">Succès</div>
+    <div class="ach-list" id="achList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// LOGIQUE — validée par tests isolés (17 assertions : déplacement de
+// groupe, dépose, détection de suite complète, blocage de la pioche).
+// ═══════════════════════════════════════════════════════════════
+const SUITS = ['♠','♥','♦','♣'];
+const RANK_LABEL = {1:'A',11:'J',12:'Q',13:'K'};
+const RED_SUITS = ['♥','♦'];
+function buildTwoDeckShoe(suitCount) {
+  const activeSuits = SUITS.slice(0, suitCount);
+  const cards = []; let id = 0;
+  for (let copy=0; copy<8; copy++) { const suit = activeSuits[copy % activeSuits.length]; for (let rank=1; rank<=13; rank++) cards.push({ rank, suit, id:`c${id++}`, faceUp:false }); }
+  return cards;
+}
+function shuffleArr(arr) { const a=[...arr]; for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function isDescendingSameSuit(cards) { for (let i=1;i<cards.length;i++) if (cards[i].suit!==cards[0].suit || cards[i].rank!==cards[i-1].rank-1) return false; return true; }
+function canMoveGroup(column, startIdx) { const group = column.slice(startIdx); if (!group.length) return false; if (!group.every(c=>c.faceUp)) return false; return isDescendingSameSuit(group); }
+function canDropOn(targetColumn, movingGroup) { if (targetColumn.length===0) return true; const top = targetColumn[targetColumn.length-1]; if (!top.faceUp) return false; return top.rank === movingGroup[0].rank+1; }
+function detectCompletedSequence(column) {
+  if (column.length < 13) return null;
+  const tail = column.slice(-13);
+  if (!tail.every(c=>c.faceUp)) return null;
+  if (tail[0].rank !== 13) return null;
+  if (!isDescendingSameSuit(tail)) return null;
+  if (tail[tail.length-1].rank !== 1) return null;
+  return tail;
+}
+function canDealFromStock(columns) { return columns.every(col => col.length > 0); }
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'og_spider_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats:{}, achievements:[], save:null }, loadStore());
+function statGet(k,d=0) { return k in STORE.stats ? STORE.stats[k] : d; }
+function statInc(k,n=1) { STORE.stats[k]=(STORE.stats[k]||0)+n; saveStore(STORE); return STORE.stats[k]; }
+function statSetMin(k,v) { if (!(k in STORE.stats) || v<STORE.stats[k]) { STORE.stats[k]=v; saveStore(STORE); } }
+function achUnlock(id,name,icon) { if (STORE.achievements.includes(id)) return; STORE.achievements.push(id); saveStore(STORE); playSound('unlock'); toast(`${icon} Succès : ${name}`); }
+const ACHIEVEMENTS = [
+  { id:'first_seq', name:'Première Araignée', desc:'Retirer sa première suite complète', icon:'🕷️' },
+  { id:'no_undo', name:'Sans Annuler', desc:'Gagner sans utiliser Annuler', icon:'🎯' },
+  { id:'fast', name:'Rapide', desc:'Gagner en moins de 5 minutes', icon:'⚡' },
+  { id:'two_colors', name:'Deux Couleurs', desc:'Gagner en difficulté 2 couleurs', icon:'🟡' },
+  { id:'four_colors', name:'Quatre Couleurs', desc:'Gagner en difficulté 4 couleurs', icon:'🔴' },
+  { id:'master', name:'Maître Spider', desc:'Gagner 10 parties', icon:'👑' },
+];
+
+let toastTimer = null;
+function toast(msg) { const t=document.getElementById('toastHost'); t.textContent=msg; t.classList.remove('ondine-toast-show'); void t.offsetWidth; t.classList.add('ondine-toast-show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('ondine-toast-show'),2000); }
+let audioCtx = null;
+function tone(freq,dur,type='sine',vol=.12) { try { if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type=type; osc.frequency.value=freq; gain.gain.setValueAtTime(vol,audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur); osc.start(); osc.stop(audioCtx.currentTime+dur); } catch(e){} }
+function playSound(name) { const P={ move:()=>tone(450,.06,'sine',.1), flip:()=>tone(550,.05,'sine',.08), seq:()=>[660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,.15,'sine',.15),i*90)), deal:()=>tone(350,.05,'triangle',.08), win:()=>[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.16),i*100)), error:()=>tone(220,.15,'sawtooth',.1), unlock:()=>[660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,.14,'sine',.14),i*80)) }; (P[name]||(()=>{}))(); }
+function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let CONFIG = { difficulty: 1 };
+let G = null;
+let selected = null; // { colIdx, cardIdx }
+let history = [];
+let timerInterval = null;
+let usedUndo = false;
+
+function setDiff(d) { CONFIG.difficulty = d; ['One','Two','Four'].forEach((k,i) => document.getElementById('diff'+k).classList.toggle('sel', [1,2,4][i]===d)); }
+
+function startGame() {
+  const shoe = shuffleArr(buildTwoDeckShoe(CONFIG.difficulty));
+  const columns = Array.from({length:10}, () => []);
+  // 4 premières colonnes: 6 cartes, 6 dernières: 5 cartes (total 54 distribuées, 50 restent au talon)
+  let idx = 0;
+  columns.forEach((col, i) => { const n = i<4?6:5; for (let k=0;k<n;k++) col.push(shoe[idx++]); col[col.length-1].faceUp = true; });
+  const stock = shoe.slice(idx);
+  G = { columns, stock, moves:0, sequencesCleared:0, over:false, won:false };
+  selected = null; history = []; usedUndo = false;
+  STORE.save = null; saveStore(STORE);
+  showScreen('sg');
+  renderAll();
+  startTimer();
+}
+function resumeGame() {
+  if (!STORE.save) { toast('Aucune partie sauvegardée'); return; }
+  G = STORE.save.G; CONFIG = STORE.save.CONFIG; selected=null; history=[];
+  showScreen('sg'); renderAll(); startTimer(); toast('▶ Partie reprise');
+}
+function persistSave() { STORE.save = { G, CONFIG, elapsed }; saveStore(STORE); }
+function goHome() { stopTimer(); updateHomeStats(); showScreen('sh'); document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none'; }
+async function confirmLeaveGame() { if (G && !G.over) persistSave(); goHome(); }
+async function confirmNewGame() { const ok = await confirmDialog('Nouvelle partie ?', 'La partie en cours sera abandonnée.', 'Nouvelle partie', 'Annuler'); if (ok) startGame(); }
+async function confirmAbandon() { const ok = await confirmDialog('Abandonner ?', 'Cette partie sera comptée comme non gagnée.', 'Abandonner', 'Continuer'); if (ok) { statInc('games'); STORE.save=null; saveStore(STORE); goHome(); } }
+
+let elapsed = 0;
+function startTimer() { stopTimer(); timerInterval = setInterval(() => { elapsed++; document.getElementById('timerBadge').textContent = `⏱ ${elapsed}s`; }, 1000); }
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval=null; } }
+
+function snapshotForUndo() { return JSON.parse(JSON.stringify({ columns:G.columns, stock:G.stock, moves:G.moves, sequencesCleared:G.sequencesCleared })); }
+function pushHistory() { history.push(snapshotForUndo()); if (history.length>50) history.shift(); }
+function undoMove() {
+  if (!history.length) { toast('Rien à annuler'); return; }
+  const prev = history.pop();
+  G.columns = prev.columns; G.stock = prev.stock; G.moves = prev.moves; G.sequencesCleared = prev.sequencesCleared;
+  selected = null; usedUndo = true;
+  renderAll();
+}
+
+function onCardClick(colIdx, cardIdx) {
+  if (!G || G.over) return;
+  const col = G.columns[colIdx];
+  const card = col[cardIdx];
+  if (!card.faceUp) return;
+
+  if (!selected) {
+    if (!canMoveGroup(col, cardIdx)) { playSound('error'); toast('Ce groupe de cartes n\u2019est pas déplaçable ensemble'); return; }
+    selected = { colIdx, cardIdx };
+    renderBoard();
+    return;
+  }
+  if (selected.colIdx === colIdx && selected.cardIdx === cardIdx) { selected = null; renderBoard(); return; }
+
+  const movingGroup = G.columns[selected.colIdx].slice(selected.cardIdx);
+  const targetCol = G.columns[colIdx];
+  if (canDropOn(targetCol, movingGroup)) {
+    pushHistory();
+    G.columns[selected.colIdx] = G.columns[selected.colIdx].slice(0, selected.cardIdx);
+    targetCol.push(...movingGroup);
+    G.moves++;
+    playSound('move'); vibrate(10);
+    const revealed = flipTopCardIfNeeded(selected.colIdx);
+    if (revealed) playSound('flip');
+    selected = null;
+    checkSequences();
+    renderAll();
+    persistSave();
+    checkWin();
+  } else {
+    // repositionner la sélection sur cette nouvelle pile si elle est elle-même déplaçable
+    if (canMoveGroup(col, cardIdx)) { selected = { colIdx, cardIdx }; renderBoard(); }
+    else { playSound('error'); selected = null; renderBoard(); }
+  }
+}
+function flipTopCardIfNeeded(colIdx) {
+  const col = G.columns[colIdx];
+  if (col.length && !col[col.length-1].faceUp) { col[col.length-1].faceUp = true; return true; }
+  return false;
+}
+function checkSequences() {
+  G.columns.forEach((col, i) => {
+    const seq = detectCompletedSequence(col);
+    if (seq) {
+      G.columns[i] = col.slice(0, col.length-13);
+      G.sequencesCleared++;
+      playSound('seq'); vibrate([15,30,15]);
+      achUnlock('first_seq','Première Araignée','🕷️');
+      flipTopCardIfNeeded(i);
+    }
+  });
+}
+function onDealStock() {
+  if (!G || G.over) return;
+  if (!canDealFromStock(G.columns)) { playSound('error'); toast('Impossible de distribuer : une colonne est vide'); return; }
+  if (G.stock.length < 10) { playSound('error'); toast('Plus assez de cartes dans le talon'); return; }
+  pushHistory();
+  G.columns.forEach(col => { const card = G.stock.pop(); card.faceUp = true; col.push(card); });
+  G.moves++;
+  playSound('deal'); vibrate(10);
+  checkSequences();
+  renderAll();
+  persistSave();
+  checkWin();
+}
+function checkWin() {
+  if (G.sequencesCleared === 8) {
+    G.over = true; G.won = true;
+    stopTimer();
+    statInc('games'); statInc('wins');
+    statSetMin('bestTime', elapsed); statSetMin('bestMoves', G.moves);
+    playSound('win'); vibrate([20,40,20]);
+    if (!usedUndo) achUnlock('no_undo','Sans Annuler','🎯');
+    if (elapsed < 300) achUnlock('fast','Rapide','⚡');
+    if (CONFIG.difficulty === 2) achUnlock('two_colors','Deux Couleurs','🟡');
+    if (CONFIG.difficulty === 4) achUnlock('four_colors','Quatre Couleurs','🔴');
+    if (statGet('wins') >= 10) achUnlock('master','Maître Spider','👑');
+    STORE.save = null; saveStore(STORE);
+    setTimeout(showResult, 500);
+  }
+}
+function showResult() {
+  document.getElementById('resIcon').textContent = '🏆';
+  document.getElementById('resTitle').textContent = 'Plateau nettoyé !';
+  document.getElementById('resSub').textContent = `${G.moves} coups · ${elapsed}s · ${G.sequencesCleared}/8 suites`;
+  document.getElementById('sres').classList.remove('hidden'); /* audit UX fin de partie : overlay sans masquer le plateau/la main en dessous */
+}
+function giveHint() {
+  if (!G || G.over) return;
+  for (let i=0;i<10;i++) {
+    const col = G.columns[i];
+    for (let j=0;j<col.length;j++) {
+      if (!col[j].faceUp || !canMoveGroup(col,j)) continue;
+      const group = col.slice(j);
+      for (let t=0;t<10;t++) { if (t===i) continue; if (canDropOn(G.columns[t], group)) { toast(`💡 Déplace la pile depuis la colonne ${i+1} vers la colonne ${t+1}`); return; } }
+    }
+  }
+  if (G.stock.length >= 10) toast('💡 Aucun déplacement évident — distribue une nouvelle rangée');
+  else toast('💡 Aucun coup évident pour le moment');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function renderAll() { renderBoard(); renderHud(); }
+function renderHud() {
+  document.getElementById('movesBadge').textContent = `${G.moves} coups`;
+  document.getElementById('seqBadge').textContent = `${G.sequencesCleared}/8 suites`;
+}
+function renderBoard() {
+  const board = document.getElementById('board'); board.innerHTML = '';
+  const stockCol = document.createElement('div'); stockCol.className='stock-col';
+  const canDeal = canDealFromStock(G.columns) && G.stock.length >= 10;
+  const pile = document.createElement('div'); pile.className='stock-pile'+(canDeal?'':' dim'); pile.innerHTML = `🂠<div class="badge">${Math.floor(G.stock.length/10)}</div>`;
+  pile.onclick = onDealStock;
+  stockCol.appendChild(pile);
+  board.appendChild(stockCol);
+
+  G.columns.forEach((col, ci) => {
+    const colEl = document.createElement('div'); colEl.className='column';
+    if (!col.length) { const slot=document.createElement('div'); slot.className='empty-col-slot'; colEl.appendChild(slot); }
+    col.forEach((card, cj) => {
+      const el = document.createElement('div');
+      const isSel = selected && selected.colIdx===ci && cj>=selected.cardIdx;
+      el.className = 'spider-card ' + (card.faceUp?'up':'down') + (isSel?' sel':'');
+      el.style.top = (cj*20) + 'px';
+      el.style.zIndex = cj;
+      if (card.faceUp) el.innerHTML = `<div class="rank" style="color:${RED_SUITS.includes(card.suit)?'#dc2626':'#111'}">${RANK_LABEL[card.rank]||card.rank}</div><div class="suit" style="color:${RED_SUITS.includes(card.suit)?'#dc2626':'#111'}">${card.suit}</div>`;
+      el.onclick = () => onCardClick(ci, cj);
+      colEl.appendChild(el);
+    });
+    colEl.style.minHeight = (Math.max(col.length,1)*20 + 54) + 'px';
+    board.appendChild(colEl);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION / STATS / RULES
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if (id==='sstats') renderStatsScreen(); }
+function updateHomeStats() {
+  const host = document.getElementById('homeStats'); host.innerHTML = '';
+  [{v:statGet('games'),l:'🎮 Parties'},{v:statGet('wins'),l:'🏆 Victoires'},{v:statGet('bestTime','—'),l:'⏱ Record'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.style.flex='1'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
+}
+function renderStatsScreen() {
+  const grid = document.getElementById('statsGrid'); grid.innerHTML = '';
+  [{v:statGet('games'),l:'Parties'},{v:statGet('wins'),l:'Victoires'},{v:statGet('bestTime','—'),l:'Meilleur temps (s)'},{v:statGet('bestMoves','—'),l:'Meilleurs coups'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; grid.appendChild(el); });
+  const list = document.getElementById('achList'); list.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => { const unlocked=STORE.achievements.includes(a.id); const el=document.createElement('div'); el.className='achCard'+(unlocked?' unlocked':''); el.innerHTML=`<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`; list.appendChild(el); });
+}
+function showRules() {
+  const overlay = document.getElementById('modalOverlay');
+  overlay.innerHTML = `<div class="modal-box"><div class="modal-title">🕷️ Règles du Spider</div>
+    <div class="modal-body">10 colonnes, 2 jeux de cartes (104 cartes).<br><br>
+    Déplace des cartes pour former des suites Roi→As de MÊME COULEUR. Une suite complète est automatiquement retirée.<br><br>
+    Un groupe de cartes n'est déplaçable ensemble que s'il forme déjà une suite décroissante de même couleur. Sinon, déplace les cartes une par une.<br><br>
+    Tape la pioche (en haut à gauche) pour distribuer une nouvelle rangée — impossible si une colonne est vide.</div>
+    <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdClose">Compris !</button></div></div>`;
+  overlay.classList.remove('hidden');
+  document.getElementById('mdClose').onclick = () => overlay.classList.add('hidden');
+}
+function confirmDialog(title,message,confirmLabel,cancelLabel) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.innerHTML = `<div class="modal-box"><div class="modal-title">${title}</div><div class="modal-body">${message}</div>
+      <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdConfirm">${confirmLabel}</button>
+      <button class="ondine-btn ondine-btn-secondary" id="mdCancel">${cancelLabel}</button></div></div>`;
+    overlay.classList.remove('hidden');
+    document.getElementById('mdConfirm').onclick = () => { overlay.classList.add('hidden'); resolve(true); };
+    document.getElementById('mdCancel').onclick = () => { overlay.classList.add('hidden'); resolve(false); };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+updateHomeStats();
+document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none';
+window.setDiff=setDiff; window.startGame=startGame; window.resumeGame=resumeGame; window.goHome=goHome;
+window.showScreen=showScreen; window.confirmLeaveGame=confirmLeaveGame; window.confirmNewGame=confirmNewGame;
+window.confirmAbandon=confirmAbandon; window.undoMove=undoMove; window.giveHint=giveHint; window.showRules=showRules;
+window.onDealStock=onDealStock;
+</script>
+</body>
+</html>

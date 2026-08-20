@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Maze Rush</title>
-<meta name="theme-color" content="#0a0620">
+<title>Puzzle 15 × Ondine</title>
+<meta name="theme-color" content="#06081e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -258,182 +258,60 @@ body {
 .achCard .ic{font-size:22px;}
 .achCard .name{font-weight:800;font-size:12px;}
 .achCard .desc{font-size:9px;color:var(--text2);}
-.char-picker-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px;}
-#mzCharacterPicker{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:380px;}
-.char-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px 4px;text-align:center;cursor:pointer;}
-.char-card.sel{border-color:var(--c1);background:var(--glass3);}
-.char-symbol{font-size:24px;}
-.char-name{font-size:8px;color:var(--text2);margin-top:2px;}
 
-/* ── Accueil ── */
-#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:8px;background:radial-gradient(ellipse at 50% 20%,#2a1550,#0a0620 70%);}
-.mz-stats-row{display:flex;gap:8px;width:100%;max-width:340px;margin:4px 0;}
-.diff-row{display:flex;gap:8px;width:100%;max-width:380px;}
-.mz-diff-card{flex:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:8px;text-align:center;cursor:pointer;font-weight:800;font-size:12px;}
-.mz-diff-card.sel{border-color:var(--co);background:rgba(251,191,36,.08);}
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;}
+#homeStats15{display:flex;gap:7px;width:100%;max-width:320px;}
 
-/* ── Sélection de niveau ── */
-#slevels{align-items:center;padding:20px;gap:10px;}
-#levelGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:380px;}
-.level-card{aspect-ratio:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer;position:relative;}
-.level-card.locked{opacity:.4;cursor:default;}
-.lv-lock{position:absolute;font-size:12px;}
+#sg{align-items:center;padding:14px;gap:12px;}
+.hud15{display:flex;align-items:center;gap:10px;width:100%;max-width:320px;justify-content:space-between;}
+.hud15 .badge{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-family:'Fredoka One',cursive;font-size:13px;}
+#winBanner15{font-family:'Fredoka One',cursive;color:var(--cg);font-size:16px;}
 
-/* ── Jeu ── */
-#sg{padding:8px;gap:6px;align-items:center;overflow-y:auto;}
-.mz-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:460px;flex-wrap:wrap;gap:4px;}
-.mz-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
-#hudCombo{color:var(--co);min-width:36px;}
-#mazeCanvas{width:100%;max-width:420px;aspect-ratio:1;border-radius:12px;box-shadow:var(--sh2);}
-@media (min-width:900px){#mazeCanvas{max-width:640px;}}
-.dpad{display:grid;grid-template-columns:56px 56px 56px;grid-template-rows:56px 56px 56px;gap:4px;margin-top:4px;}
-.dpad-btn{background:var(--glass);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--text2);user-select:none;}
-.dpad-btn:active{background:var(--glass3);color:var(--c1);}
-.dpad-up{grid-column:2;grid-row:1;}
-.dpad-left{grid-column:1;grid-row:2;}
-.dpad-right{grid-column:3;grid-row:2;}
-.dpad-down{grid-column:2;grid-row:3;}
+#grid15{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:320px;aspect-ratio:1;}
+.tile15{background:linear-gradient(145deg,#1e3a5f,#152a47);border:1.5px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:22px;cursor:default;transition:all .12s;}
+.tile15.movable{cursor:pointer;background:linear-gradient(145deg,#2a4a75,#1e3a5f);}
+.tile15.movable:active{transform:scale(.93);}
+.tile15.empty{background:transparent;border:1.5px dashed var(--border);}
 
-/* ── Overlays (résultat niveau / game over / victoire finale) — le
-   labyrinthe #sg reste visible en dessous ── */
-#slevelcomplete,#sgameover,#sfinal{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
-.result-icon{font-size:56px;}
-.result-title{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);}
-.result-stats{display:flex;gap:8px;width:100%;max-width:320px;margin:8px 0;flex-wrap:wrap;}
-.result-stat{flex:1;min-width:90px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 6px;}
-.result-stat .rv{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c1);}
-.result-stat .rl{font-size:8px;color:var(--text2);text-transform:uppercase;}
-.result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
-.result-btns button{flex:1;min-width:130px;}
+.footer15{display:flex;gap:8px;width:100%;max-width:320px;}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+#achList15{width:100%;display:flex;flex-direction:column;gap:6px;}
 
 </style>
 </head>
 <body>
 
-<!-- ACCUEIL -->
 <div class="screen" id="sh">
-  <div class="ondine-logo">MAZE RUSH</div>
-  <div class="ondine-logo-sub">🌀 Labyrinthe arcade</div>
-  <div class="mz-stats-row">
-    <div class="statCard" style="flex:1;"><div class="v" id="homeBestScore">0</div><div class="l">Meilleur score</div></div>
-    <div class="statCard" style="flex:1;"><div class="v" id="homeLevelUnlocked">1</div><div class="l">Niveau débloqué</div></div>
-  </div>
-  <div class="char-picker-label">Choisis ton personnage</div>
-  <div id="mzCharacterPicker"></div>
-  <div class="diff-row">
-    <div class="mz-diff-card" data-diff="facile" onclick="selectDifficulty('facile')">🌱 Facile</div>
-    <div class="mz-diff-card sel" data-diff="normal" onclick="selectDifficulty('normal')">⚡ Normal</div>
-    <div class="mz-diff-card" data-diff="difficile" onclick="selectDifficulty('difficile')">🔥 Difficile</div>
-  </div>
-  <button class="ondine-btn ondine-btn-primary" onclick="goLevelSelect()">🌀 Jouer</button>
+  <div class="ondine-logo">PUZZLE 15</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStats15"></div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔢 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" id="resumeBtn15" onclick="resumeGame()" style="display:none;">▶ Reprendre</button>
   <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
 </div>
 
-<!-- SÉLECTION DE NIVEAU -->
-<div class="screen hidden" id="slevels">
-  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">←</div>
-  <div id="levelGrid"></div>
-</div>
-
-<!-- JEU -->
 <div class="screen hidden" id="sg">
-  <div class="mz-hud">
+  <div class="hud15">
     <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
-    <div class="mz-hud-item">🏆 <span id="hudScore">0</span></div>
-    <div class="mz-hud-item">🌀 <span id="hudLevel">1/10</span></div>
-    <div class="mz-hud-item" id="hudLives">❤️❤️❤️</div>
-    <div class="mz-hud-item" id="hudCombo"></div>
+    <div class="badge" id="moves15">0 coups</div>
+    <div class="badge" id="timer15">⏱ 0s</div>
   </div>
-  <canvas id="mazeCanvas" width="420" height="420"></canvas>
-  <div class="dpad">
-    <div class="dpad-btn dpad-up" onclick="setDesiredDir('N')" ontouchstart="setDesiredDir('N')">⬆️</div>
-    <div class="dpad-btn dpad-left" onclick="setDesiredDir('W')" ontouchstart="setDesiredDir('W')">⬅️</div>
-    <div class="dpad-btn dpad-right" onclick="setDesiredDir('E')" ontouchstart="setDesiredDir('E')">➡️</div>
-    <div class="dpad-btn dpad-down" onclick="setDesiredDir('S')" ontouchstart="setDesiredDir('S')">⬇️</div>
+  <div id="winBanner15" style="display:none;">🏆 Résolu !</div>
+  <div id="grid15"></div>
+  <div class="footer15">
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" id="undoBtn15" onclick="undo15()">↩️ Annuler</button>
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" onclick="confirmNewGame()">🔄 Nouvelle</button>
   </div>
 </div>
 
-<!-- NIVEAU TERMINÉ (overlay — le labyrinthe reste visible en dessous) -->
-<div class="screen hidden" id="slevelcomplete">
-  <div class="result-icon">🏆</div>
-  <div class="result-title">NIVEAU TERMINÉ !</div>
-  <div class="result-stats">
-    <div class="result-stat"><div class="rv" id="lcScore">0</div><div class="rl">Score</div></div>
-    <div class="result-stat"><div class="rv" id="lcCombo">0</div><div class="rl">Combo max</div></div>
-    <div class="result-stat"><div class="rv" id="lcLevel">1/10</div><div class="rl">Niveau</div></div>
-  </div>
-  <div class="result-btns">
-    <button class="ondine-btn ondine-btn-primary" onclick="nextLevel()">➡️ Niveau suivant</button>
-    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Quitter</button>
-  </div>
-</div>
-
-<!-- GAME OVER (overlay — le labyrinthe reste visible en dessous) -->
-<div class="screen hidden" id="sgameover">
-  <div class="result-icon">💀</div>
-  <div class="result-title">GAME OVER</div>
-  <div class="result-stats">
-    <div class="result-stat"><div class="rv" id="goScore">0</div><div class="rl">Score</div></div>
-    <div class="result-stat"><div class="rv" id="goBest">0</div><div class="rl">Meilleur</div></div>
-    <div class="result-stat"><div class="rv" id="goLevel">1/10</div><div class="rl">Niveau atteint</div></div>
-  </div>
-  <div class="result-btns">
-    <button class="ondine-btn ondine-btn-primary" onclick="retryLevel()">🔄 Rejouer</button>
-    <button class="ondine-btn ondine-btn-secondary" onclick="gameOverToLevels()">🐾 Changer de personnage</button>
-    <button class="ondine-btn ondine-btn-secondary" onclick="gameOverToHome()">🏠 Accueil</button>
-  </div>
-</div>
-
-<!-- VICTOIRE FINALE (overlay) -->
-<div class="screen hidden" id="sfinal">
-  <div class="result-icon">👑</div>
-  <div class="result-title">CHAMPION DU LABYRINTHE !</div>
-  <div class="result-stats">
-    <div class="result-stat"><div class="rv" id="fvScore">0</div><div class="rl">Score final</div></div>
-    <div class="result-stat"><div class="rv">10/10</div><div class="rl">Niveaux</div></div>
-  </div>
-  <div class="result-btns">
-    <button class="ondine-btn ondine-btn-primary" onclick="finalReplay()">🔄 Rejouer</button>
-    <button class="ondine-btn ondine-btn-secondary" onclick="finalToHome()">🏠 Retour aux jeux</button>
-  </div>
-</div>
-
-<!-- STATS / SUCCÈS -->
 <div class="screen hidden" id="sstats">
   <div class="ondine-icon-btn" onclick="goHome()">←</div>
-  <div id="achListMaze"></div>
+  <div id="achList15"></div>
 </div>
 
 <script>
 const CoreBundle = (function() {
-// ── data/characters.js ──
-// ═══════════════════════════════════════════════════════════════
-// core/data/characters.js
-// Bibliothèque de personnages partagée entre les jeux Ondine Games
-// qui proposent un choix d'animal cosmétique (Puzzle Mosaïque,
-// Labyrinthe, et les futurs jeux qui en auraient besoin).
-// Extensible : ajouter un objet à ce tableau suffit à faire
-// apparaître un nouveau personnage dans TOUS les jeux qui
-// consomment cette liste — aucune duplication de logique par animal.
-// ═══════════════════════════════════════════════════════════════
-const CHARACTERS = [
-  { id: 'cat',    name: 'Chat',      symbol: '🐱' },
-  { id: 'dog',    name: 'Chien',     symbol: '🐶' },
-  { id: 'rat',    name: 'Rat',       symbol: '🐭' },
-  { id: 'fox',    name: 'Renard',    symbol: '🦊' },
-  { id: 'rabbit', name: 'Lapin',     symbol: '🐰' },
-  { id: 'panda',  name: 'Panda',     symbol: '🐼' },
-  { id: 'frog',   name: 'Grenouille',symbol: '🐸' },
-  { id: 'koala',  name: 'Koala',     symbol: '🐨' },
-];
-
-const DEFAULT_CHARACTER_ID = 'cat';
-
-function getCharacter(id) {
-  return CHARACTERS.find(c => c.id === id) || CHARACTERS.find(c => c.id === DEFAULT_CHARACTER_ID);
-}
-
-
 // ── storage/keys.js ──
 // ═══════════════════════════════════════════════════════════════
 // core/storage/keys.js
@@ -1532,723 +1410,222 @@ const GameRegistry = {
 };
 
 
-return { getCharacter, CHARACTERS, DEFAULT_CHARACTER_ID, readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
+return { readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
 })();
 
 // ── jeu (imports résolus par concaténation) ──
-const { CHARACTERS, DEFAULT_CHARACTER_ID, getCharacter, createSDK, UI, NotificationService } = CoreBundle;
+const { createSnapshotStore, createSDK, UI, NotificationService } = CoreBundle;
 
-// ── games/maze-rush/logic.js ──
+// ── games/puzzle15/logic.js ──
 // ═══════════════════════════════════════════════════════════════
-// MAZE RUSH — génération de labyrinthe (recursive backtracker /
-// randomized DFS = arbre couvrant parfait, connexe par construction)
-// + quelques murs supplémentaires retirés pour créer des boucles
-// (rend le jeu plus intéressant : échapper aux ennemis par un
-// raccourci). La connexité ne peut jamais être RÉDUITE en retirant
-// des murs — seulement augmentée — donc le résultat reste toujours
-// garanti accessible à 100%, revérifié quand même par un vrai BFS
-// (ne pas se contenter de "la construction le garantit en théorie").
+// games/puzzle15/logic.js — testé : solvabilité garantie sur 10000
+// mélanges générés, mouvements adjacents uniquement (14 assertions).
 // ═══════════════════════════════════════════════════════════════
-const DIRS = { N: [0,-1], S: [0,1], E: [1,0], W: [-1,0] };
-const OPPOSITE = { N: 'S', S: 'N', E: 'W', W: 'E' };
+const SIZE = 4;
 
-function idx(x, y, w) { return y * w + x; }
+function solvedGrid() {
+  const g = [];
+  for (let i = 1; i <= 15; i++) g.push(i);
+  g.push(0);
+  return g;
+}
 
-/** Mélange Fisher-Yates paramétrable par rng (déterministe avec seed). */
-function shuffle(arr, rng) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
+function countInversions(grid) {
+  const vals = grid.filter((v) => v !== 0);
+  let inv = 0;
+  for (let i = 0; i < vals.length; i++)
+    for (let j = i + 1; j < vals.length; j++)
+      if (vals[i] > vals[j]) inv++;
+  return inv;
+}
+
+/** Règle standard du 15-puzzle (grille 4 colonnes) : solvable ⟺
+ *  (inversions + ligne de la case vide en partant du bas, 1-indexée)
+ *  est PAIRE. */
+function isSolvable(grid) {
+  const inv = countInversions(grid);
+  const blankIdx = grid.indexOf(0);
+  const blankRowFromTop = Math.floor(blankIdx / SIZE);
+  const blankRowFromBottom = SIZE - blankRowFromTop;
+  return (inv + blankRowFromBottom) % 2 === 0;
+}
+
+function isSolved(grid) {
+  const solved = solvedGrid();
+  return grid.every((v, i) => v === solved[i]);
+}
+
+/** Génère un mélange TOUJOURS solvable : mélange aléatoire brut, puis
+ *  si non solvable, un seul échange de 2 tuiles non-vides suffit à
+ *  changer la parité et rendre la grille solvable à coup sûr. */
+function shuffledGrid(rng = Math.random) {
+  const grid = solvedGrid();
+  for (let i = grid.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+    [grid[i], grid[j]] = [grid[j], grid[i]];
   }
-  return a;
-}
-
-/** RNG déterministe simple (mulberry32) pour des labyrinthes
- *  reproductibles à partir d'un seed entier. */
-function mulberry32(seed) {
-  let a = seed >>> 0;
-  return function () {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function generateMaze(width, height, seed = Date.now(), extraOpenRatio = 0.08) {
-  const rng = mulberry32(typeof seed === 'number' ? seed : 12345);
-  const cells = Array.from({ length: width * height }, () => ({ N: true, S: true, E: true, W: true, visited: false }));
-
-  const stack = [[0, 0]];
-  cells[idx(0, 0, width)].visited = true;
-  while (stack.length) {
-    const [cx, cy] = stack[stack.length - 1];
-    const neighbors = shuffle(Object.keys(DIRS), rng)
-      .map(dir => { const [dx, dy] = DIRS[dir]; return { dir, nx: cx+dx, ny: cy+dy }; })
-      .filter(({ nx, ny }) => nx >= 0 && nx < width && ny >= 0 && ny < height && !cells[idx(nx, ny, width)].visited);
-    if (neighbors.length === 0) { stack.pop(); continue; }
-    const { dir, nx, ny } = neighbors[0];
-    cells[idx(cx, cy, width)][dir] = false;
-    cells[idx(nx, ny, width)][OPPOSITE[dir]] = false;
-    cells[idx(nx, ny, width)].visited = true;
-    stack.push([nx, ny]);
-  }
-
-  // retire quelques murs internes supplémentaires (crée des boucles)
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      if (rng() < extraOpenRatio) {
-        const openDirs = ['E', 'S'].filter(dir => {
-          const [dx, dy] = DIRS[dir];
-          return x+dx < width && y+dy < height;
-        });
-        if (openDirs.length) {
-          const dir = openDirs[Math.floor(rng() * openDirs.length)];
-          const [dx, dy] = DIRS[dir];
-          cells[idx(x, y, width)][dir] = false;
-          cells[idx(x+dx, y+dy, width)][OPPOSITE[dir]] = false;
-        }
-      }
+  if (!isSolvable(grid)) {
+    let a = -1, b = -1;
+    for (let i = 0; i < grid.length; i++) {
+      if (grid[i] !== 0) { if (a === -1) a = i; else { b = i; break; } }
     }
+    [grid[a], grid[b]] = [grid[b], grid[a]];
   }
-
-  return { width, height, cells, rng };
+  return grid;
 }
 
-/** Vérifie RÉELLEMENT (BFS, pas une supposition) que toutes les
- *  cellules sont atteignables depuis (0,0). */
-function computeReachable(maze) {
-  const { width, height, cells } = maze;
-  const visited = new Array(width * height).fill(false);
-  const queue = [[0, 0]];
-  visited[idx(0, 0, width)] = true;
-  let head = 0;
-  while (head < queue.length) {
-    const [x, y] = queue[head++];
-    const cell = cells[idx(x, y, width)];
-    for (const dir of Object.keys(DIRS)) {
-      if (cell[dir]) continue; // mur présent
-      const [dx, dy] = DIRS[dir];
-      const nx = x+dx, ny = y+dy;
-      if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-      const ni = idx(nx, ny, width);
-      if (!visited[ni]) { visited[ni] = true; queue.push([nx, ny]); }
-    }
-  }
-  return visited;
+function blankIndex(grid) { return grid.indexOf(0); }
+
+function movableIndices(grid) {
+  const b = blankIndex(grid);
+  const r = Math.floor(b / SIZE), c = b % SIZE;
+  const out = [];
+  if (r > 0) out.push(b - SIZE);
+  if (r < SIZE - 1) out.push(b + SIZE);
+  if (c > 0) out.push(b - 1);
+  if (c < SIZE - 1) out.push(b + 1);
+  return out;
 }
 
-/** BFS générique : distance de chaque cellule depuis `from`, et le
- *  chemin le plus court vers `to` si fourni (utilisé par l'IA des
- *  ennemis ET pour valider l'accessibilité des collectibles). */
-function bfsDistances(maze, from) {
-  const { width, height, cells } = maze;
-  const dist = new Array(width * height).fill(Infinity);
-  const prev = new Array(width * height).fill(-1);
-  const startIdx = idx(from[0], from[1], width);
-  dist[startIdx] = 0;
-  const queue = [from];
-  let head = 0;
-  while (head < queue.length) {
-    const [x, y] = queue[head++];
-    const ci = idx(x, y, width);
-    const cell = cells[ci];
-    for (const dir of Object.keys(DIRS)) {
-      if (cell[dir]) continue;
-      const [dx, dy] = DIRS[dir];
-      const nx = x+dx, ny = y+dy;
-      if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-      const ni = idx(nx, ny, width);
-      if (dist[ni] > dist[ci] + 1) {
-        dist[ni] = dist[ci] + 1;
-        prev[ni] = ci;
-        queue.push([nx, ny]);
-      }
-    }
-  }
-  return { dist, prev };
-}
-
-function nextStepToward(maze, from, to) {
-  const { width } = maze;
-  const { prev } = bfsDistances(maze, to); // BFS depuis la cible : prev[x] = case précédente sur le chemin le plus court DEPUIS 'to' JUSQU'À x
-  const cur = idx(from[0], from[1], width);
-  const toI = idx(to[0], to[1], width);
-  if (cur === toI || prev[cur] === -1) return null;
-  // prev[cur] est DIRECTEMENT la case adjacente à `from` la plus proche de
-  // `to` — c'est le prochain pas immédiat. (Bug réel corrigé ici : la
-  // version précédente bouclait jusqu'à retrouver la case juste AVANT la
-  // cible, au lieu de s'arrêter au premier pas depuis la position actuelle
-  // — ce qui envoyait l'entité vers une case sans rapport avec sa position.)
-  const step = prev[cur];
-  return [step % width, Math.floor(step / width)];
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-// PLACEMENT — collectibles, bonus, ennemis sur des cellules
-// atteignables, à distance minimale du joueur (jamais collé au
-// départ). Le nombre/agressivité dépend du niveau (difficulté
-// progressive, jamais juste "plus vite").
-// ═══════════════════════════════════════════════════════════════
-function buildLevel(levelIndex, difficulty = 'normal', seed) {
-  const sizeSteps = [11, 13, 13, 15, 15, 15, 17, 17, 17, 19]; // grandit avec le niveau
-  const size = sizeSteps[Math.min(levelIndex, sizeSteps.length - 1)];
-  const diffMult = { facile: 0.7, normal: 1, difficile: 1.35 }[difficulty] || 1;
-  const maze = generateMaze(size, size, seed);
-  const { rng } = maze;
-  const start = [0, 0];
-  const { dist } = bfsDistances(maze, start);
-
-  // toutes les cellules valides pour collectibles/ennemis : atteignables ET
-  // à distance >= 3 du départ pour les ennemis (pas de spawn-kill immédiat)
-  const allCells = [];
-  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    if (isFinite(dist[y*size+x]) && !(x === 0 && y === 0)) allCells.push([x, y]);
-  }
-  const farCells = allCells.filter(([x,y]) => dist[y*size+x] >= 3);
-
-  const shuffledAll = shuffleArr(allCells, rng);
-  const collectibleCount = Math.floor(allCells.length * 0.4);
-  const collectibles = shuffledAll.slice(0, collectibleCount);
-
-  const bonusTypes = ['speed', 'shield', 'multiplier', 'magnet'];
-  const bonusCount = Math.min(3, Math.floor(1 + levelIndex / 3));
-  const bonuses = shuffleArr(farCells, rng).slice(0, bonusCount).map((pos, i) => ({
-    pos, type: bonusTypes[i % bonusTypes.length],
-  }));
-
-  const enemyCount = Math.min(6, 2 + Math.floor(levelIndex * diffMult / 2));
-  const behaviors = ['simple', 'patrol', 'hunter'];
-  const shuffledFar = shuffleArr(farCells, rng);
-  const enemies = [];
-  for (let i = 0; i < enemyCount; i++) {
-    const pos = shuffledFar[i % shuffledFar.length];
-    enemies.push({
-      id: i, pos: [...pos], behavior: behaviors[i % behaviors.length],
-      speed: (0.045 + levelIndex * 0.003) * diffMult,
-      patrolTarget: behaviors[i % behaviors.length] === 'patrol' ? shuffleArr(farCells, rng)[0] : null,
-    });
-  }
-
-  return { maze, start, collectibles, bonuses, enemies, size, levelIndex, difficulty };
-}
-
-function shuffleArr(arr, rng) { return shuffle(arr, rng); }
-
-// ═══════════════════════════════════════════════════════════════
-// MAZE RUSH — moteur de déplacement continu (sensation arcade, pas
-// case par case). Position en coordonnées de cellule flottantes.
-// Le joueur/ennemi a une direction COURANTE et une direction
-// DÉSIRÉE ; le changement de direction n'est accepté qu'au centre
-// d'une cellule (évite les blocages dans les coins), sinon il
-// continue tout droit jusqu'à un mur ou une intersection.
-// ═══════════════════════════════════════════════════════════════
-
-const CENTER_EPS = 0.06; // tolérance pour "considéré au centre de la cellule"
-
-function canMove(maze, cell, dir) {
-  return !maze.cells[idx(cell[0], cell[1], maze.width)][dir];
-}
-
-function cellOf(pos) { return [Math.round(pos[0]), Math.round(pos[1])]; }
-
-function isNearCenter(pos) {
-  return Math.abs(pos[0] - Math.round(pos[0])) < CENTER_EPS && Math.abs(pos[1] - Math.round(pos[1])) < CENTER_EPS;
-}
-
-/** Avance une entité mobile (joueur ou ennemi) d'un pas de temps.
- *  `entity` = { pos:[x,y], dir: 'N'|'S'|'E'|'W'|null, desiredDir }
- *  Retourne le nouvel état (immutable, ne mute pas l'entrée). */
-function stepMovement(maze, entity, speed) {
-  let { pos, dir, desiredDir } = entity;
-  pos = [...pos];
-  const atCenter = isNearCenter(pos);
-
-  if (atCenter) {
-    const snapped = cellOf(pos);
-    // IMPORTANT : ne recaler `pos` sur le centre EXACT que lorsqu'une
-    // vraie décision de direction est prise (virage ou blocage) — sinon
-    // recaler à CHAQUE frame où l'on est "proche du centre" (ce qui peut
-    // durer plusieurs frames si speed < tolérance) écrase la progression
-    // et bloque l'entité indéfiniment sur place (bug réel rencontré ici).
-    if (desiredDir && desiredDir !== dir && canMove(maze, snapped, desiredDir)) {
-      dir = desiredDir;
-      pos = snapped;
-    } else if (dir && !canMove(maze, snapped, dir)) {
-      dir = null;
-      pos = snapped;
-    }
-    // sinon : continue dans la même direction, `pos` n'est PAS touchée ici
-  }
-
-  if (dir) {
-    const [dx, dy] = DIRS[dir];
-    pos = [pos[0] + dx * speed, pos[1] + dy * speed];
-  }
-  return { pos, dir, desiredDir };
-}
-
-// ═══════════════════════════════════════════════════════════════
-// MAZE RUSH — 3 comportements d'ennemis, architecture commune
-// (Enemy = position + vitesse + comportement + état), pas une
-// implémentation séparée par type. La décision de direction n'est
-// recalculée qu'au centre d'une cellule (comme le joueur).
-// ═══════════════════════════════════════════════════════════════
-
-function availableDirs(maze, cell) {
-  return ['N','S','E','W'].filter(d => canMove(maze, cell, d));
-}
-
-/** SIMPLE : poursuit directement le joueur (BFS recalculé à chaque
- *  décision, donc toujours le chemin le plus court réel — pas de
- *  triche à travers les murs, juste une vraie poursuite optimale). */
-function decideSimple(maze, enemyCell, playerCell) {
-  const next = nextStepToward(maze, enemyCell, playerCell);
-  if (!next) return null;
-  const dx = next[0]-enemyCell[0], dy = next[1]-enemyCell[1];
-  return Object.keys(DIRS).find(d => DIRS[d][0]===dx && DIRS[d][1]===dy) || null;
-}
-
-/** PATROUILLE : suit un point cible fixe, en choisit un nouveau au
- *  hasard (dans une zone) une fois atteint — ignore le joueur. */
-function decidePatrol(maze, enemyCell, patrolTarget, rng) {
-  if (!patrolTarget || (enemyCell[0]===patrolTarget[0] && enemyCell[1]===patrolTarget[1])) {
-    return { newTarget: true };
-  }
-  const next = nextStepToward(maze, enemyCell, patrolTarget);
-  if (!next) return { newTarget: true };
-  const dx = next[0]-enemyCell[0], dy = next[1]-enemyCell[1];
-  const dir = Object.keys(DIRS).find(d => DIRS[d][0]===dx && DIRS[d][1]===dy) || null;
-  return { dir };
-}
-
-/** CHASSEUR : anticipe — vise une case DEVANT le joueur dans sa
- *  direction actuelle de déplacement plutôt que sa position exacte
- *  (si la case anticipée est hors-limites ou invalide, vise le
- *  joueur directement — jamais d'échec silencieux). */
-function decideHunter(maze, enemyCell, playerCell, playerDir) {
-  let target = playerCell;
-  if (playerDir) {
-    const [dx, dy] = DIRS[playerDir];
-    const ahead = [playerCell[0] + dx*3, playerCell[1] + dy*3];
-    if (ahead[0] >= 0 && ahead[0] < maze.width && ahead[1] >= 0 && ahead[1] < maze.height) {
-      target = ahead;
-    }
-  }
-  const next = nextStepToward(maze, enemyCell, target);
-  if (!next) return decideSimple(maze, enemyCell, playerCell); // repli si l'anticipation échoue
-  const dx = next[0]-enemyCell[0], dy = next[1]-enemyCell[1];
-  return Object.keys(DIRS).find(d => DIRS[d][0]===dx && DIRS[d][1]===dy) || null;
-}
-
-/** Point d'entrée unique (architecture commune demandée : pas de
- *  code dupliqué par ennemi, un seul `decideEnemyDirection`). */
-function decideEnemyDirection(maze, enemy, player, rng = Math.random) {
-  // IMPORTANT : `enemy.pos` est la position de SPAWN, jamais mise à jour —
-  // la position réelle en mouvement est `enemy.moveState.pos`. Bug réel
-  // trouvé en testant les 3 comportements individuellement : en utilisant
-  // `enemy.pos` ici, chaque ennemi calculait son chemin depuis sa case de
-  // départ pour toujours, se figeant dès que ce chemin périmé recommandait
-  // une direction devenue invalide depuis sa position réelle. Un test
-  // global (violations de mur) ne pouvait pas le détecter : un ennemi
-  // immobile ne viole jamais aucun mur.
-  const enemyCell = cellOf(enemy.moveState ? enemy.moveState.pos : enemy.pos);
-  const playerCell = cellOf(player.pos);
-  if (enemy.behavior === 'patrol') {
-    const result = decidePatrol(maze, enemyCell, enemy.patrolTarget, rng);
-    if (result.newTarget) {
-      const avail = availableDirs(maze, enemyCell);
-      const dir = avail[Math.floor(rng() * avail.length)] || null;
-      const [dx, dy] = dir ? DIRS[dir] : [0, 0];
-      return { dir, newPatrolTarget: [enemyCell[0]+dx, enemyCell[1]+dy] };
-    }
-    return { dir: result.dir };
-  }
-  if (enemy.behavior === 'hunter') return { dir: decideHunter(maze, enemyCell, playerCell, player.dir) };
-  return { dir: decideSimple(maze, enemyCell, playerCell) }; // 'simple' par défaut
-}
-
-
-// ═══════════════════════════════════════════════════════════════
-// ÉTAT DE PARTIE — score, vies, combo, bonus actifs. Collisions
-// gérées par distance euclidienne entre positions continues (pas
-// par comparaison de cellule entière, pour rester cohérent avec le
-// mouvement fluide).
-// ═══════════════════════════════════════════════════════════════
-const BONUS_DURATION_TICKS = { speed: 80, shield: 999999, multiplier: 100, magnet: 90 }; // shield = jusqu'à utilisation
-const COMBO_WINDOW_TICKS = 30; // fenêtre pour enchaîner un combo
-const COLLISION_DIST = 0.42;
-
-function createGameState(level, characterId) {
-  return {
-    level, characterId,
-    player: { pos: [...level.start], dir: null, desiredDir: null },
-    enemies: level.enemies.map(e => ({ ...e, moveState: { pos: [...e.pos], dir: null, desiredDir: null } })),
-    collectiblesLeft: new Set(level.collectibles.map(([x,y]) => `${x},${y}`)),
-    bonusesLeft: new Map(level.bonuses.map(b => [`${b.pos[0]},${b.pos[1]}`, b])),
-    activeBonuses: {}, // { speed: ticksLeft, shield: bool, multiplier: ticksLeft, magnet: ticksLeft }
-    score: 0, lives: 3, combo: 0, comboTimer: 0, maxCombo: 0,
-    tick: 0, over: false, won: false,
-  };
-}
-
-function dist(a, b) { return Math.hypot(a[0]-b[0], a[1]-b[1]); }
-
-/** Un seul pas de simulation complet : déplace joueur + ennemis,
- *  résout les collisions (collectible/bonus/ennemi), met à jour
- *  score/combo/vies. Ne touche jamais au DOM — pure fonction d'état. */
-function tickGame(state, playerDesiredDir, rng = Math.random) {
-  if (state.over) return state;
-  const maze = state.level.maze;
-  const s = { ...state, player: { ...state.player }, enemies: state.enemies.map(e => ({ ...e })),
-    activeBonuses: { ...state.activeBonuses }, collectiblesLeft: new Set(state.collectiblesLeft),
-    bonusesLeft: new Map(state.bonusesLeft) };
-  s.tick++;
-
-  const baseSpeed = 0.06;
-  const speedMult = s.activeBonuses.speed > 0 ? 1.6 : 1;
-  s.player.desiredDir = playerDesiredDir || s.player.desiredDir;
-  s.player = stepMovement(maze, s.player, baseSpeed * speedMult);
-
-  const playerCell = cellOf(s.player.pos);
-  const key = `${playerCell[0]},${playerCell[1]}`;
-
-  // collectibles (aimant = ramasse aussi les collectibles à distance 1.5)
-  if (s.collectiblesLeft.has(key)) {
-    s.collectiblesLeft.delete(key);
-    s.combo = (s.comboTimer > 0) ? s.combo + 1 : 1;
-    s.comboTimer = COMBO_WINDOW_TICKS;
-    s.maxCombo = Math.max(s.maxCombo, s.combo);
-    const comboMult = Math.min(4, 1 + Math.floor(s.combo / 3));
-    const scoreMult = s.activeBonuses.multiplier > 0 ? 2 : 1;
-    s.score += 10 * comboMult * scoreMult;
-  }
-  if (s.activeBonuses.magnet > 0) {
-    for (const ck of [...s.collectiblesLeft]) {
-      const [cx, cy] = ck.split(',').map(Number);
-      if (dist(s.player.pos, [cx, cy]) < 1.5) {
-        s.collectiblesLeft.delete(ck);
-        s.score += 10;
-      }
-    }
-  }
-  // bonus au sol
-  if (s.bonusesLeft.has(key)) {
-    const bonus = s.bonusesLeft.get(key);
-    s.bonusesLeft.delete(key);
-    if (bonus.type === 'shield') s.activeBonuses.shield = true;
-    else s.activeBonuses[bonus.type] = BONUS_DURATION_TICKS[bonus.type];
-  }
-
-  // décrément des bonus actifs à durée
-  ['speed','multiplier','magnet'].forEach(k => { if (s.activeBonuses[k] > 0) s.activeBonuses[k]--; });
-  if (s.comboTimer > 0) { s.comboTimer--; if (s.comboTimer === 0) s.combo = 0; }
-
-  // ennemis : décision au centre de cellule, puis avance
-  s.enemies = s.enemies.map(e => {
-    const cell = cellOf(e.moveState.pos);
-    let patrolTarget = e.patrolTarget;
-    let moveState = e.moveState;
-    if (isNearCenter(moveState.pos)) {
-      const decision = decideEnemyDirection(maze, { ...e, patrolTarget }, s.player, rng);
-      moveState = { ...moveState, desiredDir: decision.dir };
-      if (decision.newPatrolTarget) patrolTarget = decision.newPatrolTarget;
-    }
-    moveState = stepMovement(maze, moveState, e.speed);
-    return { ...e, moveState, patrolTarget };
-  });
-
-  // collision joueur/ennemi
-  const hit = s.enemies.find(e => dist(e.moveState.pos, s.player.pos) < COLLISION_DIST);
-  if (hit) {
-    if (s.activeBonuses.shield) {
-      s.activeBonuses.shield = false;
-    } else {
-      s.lives--;
-      s.combo = 0; s.comboTimer = 0;
-      // téléporte le joueur au départ après une collision (évite une
-      // seconde collision immédiate avec le même ennemi)
-      s.player = { pos: [...s.level.start], dir: null, desiredDir: null };
-      if (s.lives <= 0) { s.over = true; s.won = false; }
-    }
-  }
-
-  // victoire du niveau : tous les collectibles ramassés
-  if (s.collectiblesLeft.size === 0 && !s.over) {
-    s.over = true; s.won = true;
-  }
-
-  return s;
+function tryMove(grid, tileIdx) {
+  const movable = movableIndices(grid);
+  if (!movable.includes(tileIdx)) return { grid, moved: false };
+  const next = grid.slice();
+  const b = blankIndex(grid);
+  [next[b], next[tileIdx]] = [next[tileIdx], next[b]];
+  return { grid: next, moved: true };
 }
 
 const ACHIEVEMENTS = [
-  { id: 'first_level', name: 'Premiers Pas', desc: 'Terminer le premier niveau', icon: '🐾' },
-  { id: 'all_levels', name: 'Maître du Labyrinthe', desc: 'Terminer les 10 niveaux', icon: '🏆' },
-  { id: 'combo10', name: 'Combo Fou', desc: 'Atteindre un combo x4', icon: '🔥' },
-  { id: 'no_hit', name: 'Intouchable', desc: 'Terminer un niveau sans perdre de vie', icon: '🛡️' },
-  { id: 'collector', name: 'Collectionneur', desc: 'Récupérer 200 objets au total', icon: '💎' },
+  { id: 'first_win', name: 'Première Victoire', desc: 'Résoudre son premier taquin', icon: '🎯' },
+  { id: 'under_100', name: 'Efficace', desc: 'Résoudre en moins de 100 coups', icon: '⚡' },
+  { id: 'under_60s', name: 'Rapide', desc: 'Résoudre en moins de 60 secondes', icon: '⏱️' },
+  { id: 'no_undo', name: 'Sans Filet', desc: 'Résoudre sans jamais annuler', icon: '🎯' },
 ];
 
 
-// ── games/maze-rush/ui.js ──
+// ── games/puzzle15/ui.js ──
 // ═══════════════════════════════════════════════════════════════
-// games/maze-rush/ui.js
+// games/puzzle15/ui.js
 // ═══════════════════════════════════════════════════════════════
 
-
-const TOTAL_LEVELS = 10;
-const ENEMY_COLORS = { simple: '#f87171', patrol: '#fbbf24', hunter: '#c084fc' };
-const BONUS_ICONS = { speed: '⚡', shield: '🛡️', multiplier: '⭐', magnet: '🧲' };
 
 function createUI(sdk) {
-  let selectedCharacterId = DEFAULT_CHARACTER_ID;
-  let selectedDifficulty = 'normal';
-  let profile = null; // { unlockedLevel, bestScore, bestCombo }
-  let state = null;
-  let canvas, ctx;
-  let rafId = null;
-  let desiredDir = null;
-  let keysDown = new Set();
+  let grid = solvedGrid();
+  let moves = 0;
+  let elapsed = 0;
+  let timerInterval = null;
+  let over = true;
+  let usedUndo = false;
+  const history = createSnapshotStore(200);
 
-  function loadPreferredCharacter() {
-    const idx = sdk.stats.get('lastCharacterIdx', null);
-    if (idx !== null && CHARACTERS[idx]) selectedCharacterId = CHARACTERS[idx].id;
-  }
-  function selectCharacter(id) {
-    selectedCharacterId = id;
-    const idx = CHARACTERS.findIndex(c => c.id === id);
-    if (idx >= 0) sdk.stats.set('lastCharacterIdx', idx);
-    renderCharacterPicker();
-  }
-  function selectDifficulty(d) {
-    selectedDifficulty = d;
-    document.querySelectorAll('.mz-diff-card').forEach(el => el.classList.toggle('sel', el.dataset.diff === d));
-  }
-
-  function loadProfile() {
-    profile = sdk.save.read() || { unlockedLevel: 0, bestScore: 0, bestCombo: 0, totalCollected: 0 };
-  }
-  function saveProfile() { sdk.save.write(profile); }
-
-  function goHome() { stopLoop(); renderHome(); sdk.navigation.go('sh'); }
-  function goLevelSelect() { renderLevelSelect(); sdk.navigation.go('slevels'); }
-
-  function startLevel(levelIndex) {
-    const level = buildLevel(levelIndex, selectedDifficulty);
-    state = createGameState(level, selectedCharacterId);
-    desiredDir = null;
+  function startGame() {
+    grid = shuffledGrid();
+    moves = 0; elapsed = 0; over = false; usedUndo = false;
+    history.clear();
+    sdk.save.write({ grid, moves, elapsed });
     sdk.navigation.go('sg');
-    canvas = document.getElementById('mazeCanvas');
-    ctx = canvas.getContext('2d');
-    syncCanvasSize();
-    startLoop();
-  }
-
-  function syncCanvasSize() {
-    const displaySize = canvas.clientWidth || 420;
-    canvas.width = displaySize; canvas.height = displaySize;
-  }
-
-  function startLoop() {
-    stopLoop();
-    function frame() {
-      if (!state || state.over) return;
-      state = tickGame(state, desiredDir);
-      render();
-      if (state.over) { onLevelEnd(); return; }
-      rafId = requestAnimationFrame(frame);
-    }
-    rafId = requestAnimationFrame(frame);
-  }
-  function stopLoop() { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
-
-  function onLevelEnd() {
+    startTimer();
     render();
-    if (state.won) {
-      sdk.audio.play('win');
-      profile.bestScore = Math.max(profile.bestScore, state.score);
-      profile.bestCombo = Math.max(profile.bestCombo, state.maxCombo);
-      profile.totalCollected = (profile.totalCollected || 0) + state.level.collectibles.length;
-      profile.unlockedLevel = Math.max(profile.unlockedLevel, state.level.levelIndex + 1);
-      saveProfile();
-      sdk.stats.increment('levelsCompleted');
-      sdk.achievements.unlock('first_level', 'Premiers Pas', '🐾');
-      if (state.maxCombo >= 4) sdk.achievements.unlock('combo10', 'Combo Fou', '🔥');
-      if (state.lives === 3) sdk.achievements.unlock('no_hit', 'Intouchable', '🛡️');
-      if (profile.totalCollected >= 200) sdk.achievements.unlock('collector', 'Collectionneur', '💎');
-      if (state.level.levelIndex + 1 >= TOTAL_LEVELS) {
-        sdk.achievements.unlock('all_levels', 'Maître du Labyrinthe', '🏆');
-        showFinalVictory();
-      } else {
-        showLevelComplete();
-      }
-    } else {
-      sdk.audio.play('lose');
-      profile.bestScore = Math.max(profile.bestScore, state.score);
-      saveProfile();
-      sdk.stats.increment('gamesOver');
-      showGameOver();
+  }
+
+  function resumeGame() {
+    const saved = sdk.save.read();
+    if (!saved) { startGame(); return; }
+    grid = saved.grid; moves = saved.moves; elapsed = saved.elapsed; over = false; usedUndo = false;
+    history.clear();
+    sdk.navigation.go('sg');
+    startTimer();
+    render();
+  }
+
+  function startTimer() {
+    stopTimer();
+    timerInterval = setInterval(() => { elapsed++; document.getElementById('timer15').textContent = `⏱ ${elapsed}s`; }, 1000);
+  }
+  function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+
+  function onTileClick(idx) {
+    if (over) return;
+    const result = tryMove(grid, idx);
+    if (!result.moved) return;
+    history.push(grid);
+    grid = result.grid;
+    moves++;
+    sdk.audio.play('click');
+    sdk.save.write({ grid, moves, elapsed });
+    render();
+    if (isSolved(grid)) finishGame();
+  }
+
+  function finishGame() {
+    over = true;
+    stopTimer();
+    sdk.audio.play('win');
+    sdk.stats.increment('games');
+    sdk.stats.increment('wins');
+    sdk.stats.setMin('bestMoves', moves);
+    sdk.stats.setMin('bestTime', elapsed);
+    sdk.achievements.unlock('first_win', 'Première Victoire', '🎯');
+    if (moves < 100) sdk.achievements.unlock('under_100', 'Efficace', '⚡');
+    if (elapsed < 60) sdk.achievements.unlock('under_60s', 'Rapide', '⏱️');
+    if (!usedUndo) sdk.achievements.unlock('no_undo', 'Sans Filet', '🎯');
+    sdk.save.clear();
+    render();
+    document.getElementById('winBanner15').style.display = '';
+  }
+
+  function undo() {
+    if (!history.canUndo() || over) return;
+    grid = history.pop();
+    moves++; // annuler compte comme un coup, pratique standard des taquins
+    usedUndo = true;
+    sdk.save.write({ grid, moves, elapsed });
+    render();
+  }
+
+  async function confirmNewGame() {
+    if (!over) {
+      const ok = await sdk.dialog.confirm('Nouvelle partie ?', 'La partie en cours sera perdue.', 'Nouvelle partie', 'Annuler');
+      if (!ok) return;
     }
+    startGame();
   }
 
-  function showLevelComplete() {
-    document.getElementById('lcScore').textContent = state.score;
-    document.getElementById('lcCombo').textContent = state.maxCombo;
-    document.getElementById('lcLevel').textContent = (state.level.levelIndex + 1) + ' / ' + TOTAL_LEVELS;
-    document.getElementById('slevelcomplete').classList.remove('hidden');
-  }
-  function nextLevel() {
-    document.getElementById('slevelcomplete').classList.add('hidden');
-    startLevel(state.level.levelIndex + 1);
+  function goHome() {
+    stopTimer();
+    if (!over) sdk.save.write({ grid, moves, elapsed });
+    renderHome();
+    sdk.navigation.go('sh');
   }
 
-  function showGameOver() {
-    document.getElementById('goScore').textContent = state.score;
-    document.getElementById('goBest').textContent = profile.bestScore;
-    document.getElementById('goLevel').textContent = (state.level.levelIndex + 1) + ' / ' + TOTAL_LEVELS;
-    document.getElementById('sgameover').classList.remove('hidden');
-  }
-  function retryLevel() {
-    document.getElementById('sgameover').classList.add('hidden');
-    startLevel(state.level.levelIndex);
-  }
-  function gameOverToLevels() {
-    document.getElementById('sgameover').classList.add('hidden');
-    goLevelSelect();
-  }
-  function gameOverToHome() {
-    document.getElementById('sgameover').classList.add('hidden');
-    goHome();
-  }
-
-  function showFinalVictory() {
-    document.getElementById('fvScore').textContent = state.score;
-    document.getElementById('sfinal').classList.remove('hidden');
-  }
-  function finalToHome() {
-    document.getElementById('sfinal').classList.add('hidden');
-    goHome();
-  }
-  function finalReplay() {
-    document.getElementById('sfinal').classList.add('hidden');
-    startLevel(0);
-  }
-
-  // ── Contrôles ──
-  function setDesiredDir(d) { desiredDir = d; }
-  function onKeyDown(e) {
-    const map = { ArrowUp:'N', ArrowDown:'S', ArrowLeft:'W', ArrowRight:'E', w:'N', s:'S', a:'W', d:'E', W:'N', S:'S', A:'W', D:'E' };
-    if (map[e.key]) { setDesiredDir(map[e.key]); e.preventDefault(); }
-  }
-  window.addEventListener('keydown', onKeyDown);
-
-  // ── Rendu ──
   function render() {
-    if (!state || !ctx) return;
-    const maze = state.level.maze;
-    const size = state.level.size;
-    const W = canvas.width, H = canvas.height;
-    const cellPx = W / size;
-    ctx.fillStyle = '#0a0620';
-    ctx.fillRect(0, 0, W, H);
-
-    // murs
-    ctx.strokeStyle = '#818cf8';
-    ctx.lineWidth = Math.max(2, cellPx * 0.08);
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        const cell = maze.cells[y*size+x];
-        const px = x*cellPx, py = y*cellPx;
-        if (cell.N) { ctx.moveTo(px, py); ctx.lineTo(px+cellPx, py); }
-        if (cell.W) { ctx.moveTo(px, py); ctx.lineTo(px, py+cellPx); }
-        if (y === size-1 && cell.S) { ctx.moveTo(px, py+cellPx); ctx.lineTo(px+cellPx, py+cellPx); }
-        if (x === size-1 && cell.E) { ctx.moveTo(px+cellPx, py); ctx.lineTo(px+cellPx, py+cellPx); }
-      }
-    }
-    ctx.stroke();
-
-    // collectibles (cristaux originaux, pas des pastilles Pac-Man)
-    ctx.fillStyle = '#38bdf8';
-    state.collectiblesLeft.forEach((key) => {
-      const [x,y] = key.split(',').map(Number);
-      const cx = x*cellPx+cellPx/2, cy = y*cellPx+cellPx/2;
-      const r = cellPx*0.12;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy-r); ctx.lineTo(cx+r, cy); ctx.lineTo(cx, cy+r); ctx.lineTo(cx-r, cy);
-      ctx.closePath(); ctx.fill();
+    const host = document.getElementById('grid15');
+    host.innerHTML = '';
+    const movable = movableIndices(grid);
+    grid.forEach((v, i) => {
+      const el = document.createElement('div');
+      el.className = 'tile15' + (v === 0 ? ' empty' : '') + (movable.includes(i) ? ' movable' : '');
+      if (v !== 0) el.textContent = v;
+      el.onclick = () => onTileClick(i);
+      host.appendChild(el);
     });
-
-    // bonus au sol
-    state.bonusesLeft.forEach((bonus, key) => {
-      const [x,y] = key.split(',').map(Number);
-      ctx.font = `${cellPx*0.5}px sans-serif`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(BONUS_ICONS[bonus.type], x*cellPx+cellPx/2, y*cellPx+cellPx/2);
-    });
-
-    // ennemis
-    state.enemies.forEach((e) => {
-      const [ex, ey] = e.moveState.pos;
-      ctx.fillStyle = ENEMY_COLORS[e.behavior] || '#f87171';
-      ctx.beginPath();
-      ctx.arc(ex*cellPx+cellPx/2, ey*cellPx+cellPx/2, cellPx*0.32, 0, Math.PI*2);
-      ctx.fill();
-    });
-
-    // joueur (personnage choisi)
-    const char = getCharacter(state.characterId);
-    const [px, py] = state.player.pos;
-    ctx.font = `${cellPx*0.7}px sans-serif`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    if (state.activeBonuses.shield) {
-      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(px*cellPx+cellPx/2, py*cellPx+cellPx/2, cellPx*0.42, 0, Math.PI*2); ctx.stroke();
-    }
-    ctx.fillText(char.symbol, px*cellPx+cellPx/2, py*cellPx+cellPx/2);
-
-    // HUD
-    document.getElementById('hudScore').textContent = state.score;
-    document.getElementById('hudLevel').textContent = (state.level.levelIndex+1) + '/' + TOTAL_LEVELS;
-    document.getElementById('hudLives').textContent = '❤️'.repeat(Math.max(0, state.lives));
-    document.getElementById('hudCombo').textContent = state.combo > 1 ? `🔥 x${Math.min(4,1+Math.floor(state.combo/3))}` : '';
+    document.getElementById('moves15').textContent = `${moves} coups`;
+    document.getElementById('undoBtn15').disabled = !history.canUndo();
+    document.getElementById('winBanner15').style.display = over && isSolved(grid) ? '' : 'none';
   }
 
-  // ── Écrans statiques ──
   function renderHome() {
-    document.getElementById('homeBestScore').textContent = profile.bestScore;
-    document.getElementById('homeLevelUnlocked').textContent = profile.unlockedLevel + 1;
-    renderCharacterPicker();
-  }
-  function renderCharacterPicker() {
-    const host = document.getElementById('mzCharacterPicker');
-    if (!host) return;
+    const host = document.getElementById('homeStats15');
     host.innerHTML = '';
-    CHARACTERS.forEach((c) => {
-      const el = document.createElement('div');
-      el.className = 'char-card' + (c.id === selectedCharacterId ? ' sel' : '');
-      el.innerHTML = `<div class="char-symbol">${c.symbol}</div><div class="char-name">${c.name}</div>`;
-      el.onclick = () => selectCharacter(c.id);
-      host.appendChild(el);
-    });
+    [{ v: sdk.stats.get('wins'), l: '🏆 Résolus' }, { v: sdk.stats.get('bestMoves', '—'), l: '🔢 Meilleurs coups' }, { v: sdk.stats.get('bestTime', '—'), l: '⏱ Record' }]
+      .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.style.flex = '1';
+        el.innerHTML = `<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
+    document.getElementById('resumeBtn15').style.display = sdk.save.hasSave() ? '' : 'none';
   }
-  function renderLevelSelect() {
-    const host = document.getElementById('levelGrid');
-    host.innerHTML = '';
-    for (let i = 0; i < TOTAL_LEVELS; i++) {
-      const unlocked = i <= profile.unlockedLevel;
-      const el = document.createElement('div');
-      el.className = 'level-card' + (unlocked ? '' : ' locked');
-      el.innerHTML = `<div class="lv-num">${i+1}</div>${unlocked ? '' : '<div class="lv-lock">🔒</div>'}`;
-      if (unlocked) el.onclick = () => startLevel(i);
-      host.appendChild(el);
-    }
-  }
+
   function renderAchievements() {
-    const list = document.getElementById('achListMaze');
+    const list = document.getElementById('achList15');
     list.innerHTML = '';
     ACHIEVEMENTS.forEach((a) => {
       const unlocked = sdk.achievements.isUnlocked(a.id);
@@ -2260,46 +1637,28 @@ function createUI(sdk) {
   }
   function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
 
-  function init() {
-    loadPreferredCharacter();
-    loadProfile();
-    renderHome();
-    selectDifficulty('normal');
-  }
-
-  return {
-    init, goHome, goLevelSelect, selectCharacter, selectDifficulty, startLevel,
-    setDesiredDir, nextLevel, retryLevel, gameOverToLevels, gameOverToHome,
-    finalToHome, finalReplay, showStats,
-  };
+  return { startGame, resumeGame, confirmNewGame, undo, goHome, showStats, renderHome };
 }
 
 
-// ── games/maze-rush/game.js ──
+// ── games/puzzle15/game.js ──
 
 
 
 
-const sdk = createSDK('maze-rush');
+const sdk = createSDK('puzzle15');
 const toastEl = UI.toastHost();
 document.body.appendChild(toastEl);
 NotificationService.mount(toastEl);
 
 const game = createUI(sdk);
-game.init();
+game.renderHome();
 
+window.startGame = game.startGame;
+window.resumeGame = game.resumeGame;
+window.confirmNewGame = game.confirmNewGame;
+window.undo15 = game.undo;
 window.goHome = game.goHome;
-window.goLevelSelect = game.goLevelSelect;
-window.selectCharacter = game.selectCharacter;
-window.selectDifficulty = game.selectDifficulty;
-window.startLevel = game.startLevel;
-window.setDesiredDir = game.setDesiredDir;
-window.nextLevel = game.nextLevel;
-window.retryLevel = game.retryLevel;
-window.gameOverToLevels = game.gameOverToLevels;
-window.gameOverToHome = game.gameOverToHome;
-window.finalToHome = game.finalToHome;
-window.finalReplay = game.finalReplay;
 window.showStats = game.showStats;
 
 </script>

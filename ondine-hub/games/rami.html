@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Rami × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;--c1:#38bdf8;--c2:#7dd3fc;--cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);--text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;--sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;min-height:100%;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:20px;cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-primary:disabled{opacity:.35;box-shadow:none;}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-btn-secondary:disabled{opacity:.35;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:22px;max-width:340px;width:100%;box-shadow:var(--sh2);max-height:80vh;overflow-y:auto;}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;line-height:1.6;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(32px,9vw,44px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-grid.cols4{grid-template-columns:repeat(4,1fr);}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+#sg{align-items:center;padding:8px;gap:6px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;}
+.hud-badge{font-family:'Fredoka One',cursive;font-size:11px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;}
+.opponents-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;width:100%;max-width:420px;}
+.opp-pill{background:var(--glass);border:1.5px solid var(--border);border-radius:12px;padding:5px 10px;font-size:10px;font-weight:800;text-align:center;}
+.opp-pill.active{border-color:var(--co);background:rgba(251,191,36,.12);color:var(--co);}
+
+.table-area{width:100%;max-width:440px;display:flex;flex-direction:column;gap:6px;flex:1;overflow-y:auto;padding:4px;}
+.piles-row{display:flex;justify-content:center;gap:20px;padding:8px 0;}
+.pile{position:relative;width:52px;height:74px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.pile-stock{background:linear-gradient(145deg,#1e3a5f,#152a47);border:1.5px solid var(--border2);font-size:22px;}
+.pile-discard{background:linear-gradient(145deg,#f5f0e6,#e2dcc8);border:1.5px solid rgba(0,0,0,.2);color:#0f172a;font-size:20px;font-weight:800;}
+.pile-count{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text2);white-space:nowrap;}
+.pile.dim{opacity:.4;cursor:default;}
+
+.melds-area{display:flex;flex-direction:column;gap:6px;padding:4px 0;}
+.meld-group-label{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;}
+.meld-row{display:flex;gap:4px;flex-wrap:wrap;}
+.mini-card{width:26px;height:36px;border-radius:5px;background:linear-gradient(145deg,#f5f0e6,#e2dcc8);border:1px solid rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+
+.hand-row{display:flex;gap:5px;overflow-x:auto;padding:10px 4px;scrollbar-width:none;}
+.hand-row::-webkit-scrollbar{display:none;}
+.card{position:relative;flex-shrink:0;width:52px;height:74px;border-radius:9px;background:linear-gradient(145deg,#f5f0e6,#e2dcc8);
+  border:1.5px solid rgba(0,0,0,.2);box-shadow:0 3px 8px rgba(0,0,0,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform .12s;font-weight:800;}
+.card.sel{transform:translateY(-12px);box-shadow:0 0 0 2.5px var(--co),0 8px 14px rgba(0,0,0,.4);}
+.card .rank{font-size:15px;}
+.card .suit{font-size:16px;}
+.card.red{color:#dc2626;} .card.black{color:#111;}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:340px;flex-wrap:wrap;}
+
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+</style>
+</head>
+<body>
+
+<div id="toastHost" class="ondine-toast"></div>
+
+<!-- ═══════ HOME ═══════ -->
+<div class="screen" id="sh">
+  <div class="logo">RAMI</div>
+  <div class="logo-sub">× Ondine</div>
+
+  <div class="section-title">Mode</div>
+  <div class="opt-grid">
+    <div class="opt-card sel" id="modeSolo" onclick="setMode('solo')"><div class="opt-icon">🤖</div><div class="opt-name">Solo vs IA</div></div>
+    <div class="opt-card" id="modeLocal" onclick="setMode('local')"><div class="opt-icon">👥</div><div class="opt-name">Local (2-4j)</div></div>
+  </div>
+
+  <div class="section-title" id="diffTitle">Difficulté IA</div>
+  <div class="opt-grid" id="diffGrid">
+    <div class="opt-card sel" id="diffEasy" onclick="setDiff('easy')"><div class="opt-icon">🌱</div><div class="opt-name">Facile</div></div>
+    <div class="opt-card" id="diffNormal" onclick="setDiff('normal')"><div class="opt-icon">⚡</div><div class="opt-name">Normal</div></div>
+    <div class="opt-card" id="diffHard" onclick="setDiff('hard')"><div class="opt-icon">🔥</div><div class="opt-name">Difficile</div></div>
+  </div>
+
+  <div class="section-title" id="countTitle" style="display:none;">Nombre de joueurs</div>
+  <div class="opt-grid" id="countGrid" style="display:none;"></div>
+
+  <div class="hbtns" style="margin-top:8px;">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🃏 Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" id="resumeBtn" onclick="resumeGame()" style="display:none;">▶ Reprendre la partie</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showRules()">ⓘ Règles du jeu</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
+  </div>
+
+  <div class="hstats" id="homeStats"></div>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════ GAME ═══════ -->
+<div class="screen hidden" id="sg">
+  <div class="game-header">
+    <div class="icon-btn" onclick="confirmLeaveGame()">🏠</div>
+    <div class="hud-badge" id="turnBadge"></div>
+    <div style="display:flex;gap:6px;">
+      <div class="icon-btn" onclick="undoAction()" id="undoBtn">↩️</div>
+      <div class="icon-btn" onclick="giveHint()">💡</div>
+      <div class="icon-btn" onclick="showRules()">ⓘ</div>
+    </div>
+  </div>
+  <div class="opponents-row" id="opponentsRow"></div>
+
+  <div class="table-area">
+    <div class="piles-row">
+      <div class="pile pile-stock" id="stockPile" onclick="onDrawStock()">🂠<div class="pile-count" id="stockCount"></div></div>
+      <div class="pile pile-discard" id="discardPile" onclick="onDrawDiscard()"><div class="pile-count" id="discardCount"></div></div>
+    </div>
+    <div class="melds-area" id="meldsArea"></div>
+  </div>
+
+  <div class="hand-row" id="handRow"></div>
+  <div class="game-footer">
+    <button class="ondine-btn ondine-btn-primary" style="flex:1;" id="btnLayMeld" onclick="onLayMeld()" disabled>✓ Poser la combinaison</button>
+    <button class="ondine-btn ondine-btn-secondary" style="flex:1;" id="btnSort" onclick="toggleSort()">🔀 Trier par couleur</button>
+  </div>
+</div>
+
+<!-- ═══════ RESULT ═══════ -->
+<div class="screen hidden" id="sres">
+  <div class="res-icon" id="resIcon">🏆</div>
+  <div class="res-title" id="resTitle"></div>
+  <div class="res-sub" id="resSub"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;">Succès</div>
+    <div class="ach-list" id="achList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="modalOverlay"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+// RÈGLES — "Rami simplifié", 1 jeu de 52 cartes (sans jokers),
+// documentées et testées en isolation avant intégration (validation
+// des suites/groupes, cas limites, pioche/défausse/pose/fin de
+// manche, simulations complètes IA-vs-IA à 2/3/4 joueurs — voir
+// commentaires détaillés ci-dessous pour chaque règle).
+//
+//  - 7 cartes par joueur (2 à 4 joueurs)
+//  - à son tour : piocher 1 carte (pioche ou dessus de la défausse),
+//    poser des combinaisons si on le souhaite, puis défausser 1
+//    carte (sauf si la pose vient de vider la main : victoire
+//    immédiate, pas de défausse nécessaire)
+//  - SUITE : 3+ cartes consécutives de la MÊME couleur (As bas
+//    uniquement : A-2-3...Q-K, pas de A haute après le Roi)
+//  - GROUPE : 3 ou 4 cartes de même rang, couleurs différentes
+//  - pas de minimum de points requis pour "ouvrir"
+//  - on ne peut ajouter des cartes qu'à SES PROPRES combinaisons
+//  - RÈGLE DE BLOCAGE (comme au Rami réel) : si la pioche est
+//    épuisée trop de fois sans qu'aucun joueur ne soit sorti, la
+//    manche se termine par décompte de points — la main la plus
+//    légère gagne. Sans cette règle, une manche peut mathématiquement
+//    ne jamais se terminer (prouvé par simulation complète).
+// ═══════════════════════════════════════════════════════════════
+const SUITS = ['♠','♥','♦','♣'];
+const RANKS = [1,2,3,4,5,6,7,8,9,10,11,12,13];
+const RANK_LABEL = {1:'A',11:'J',12:'Q',13:'K'};
+const RED_SUITS = ['♥','♦'];
+
+function buildDeck() { const deck=[]; for (const s of SUITS) for (const r of RANKS) deck.push({rank:r,suit:s,id:`${r}${s}`}); return deck; }
+function shuffleArr(arr) { const a=[...arr]; for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function isValidRun(cards) {
+  if (cards.length < 3) return false;
+  const suit = cards[0].suit;
+  if (!cards.every(c=>c.suit===suit)) return false;
+  const ranks = cards.map(c=>c.rank).sort((a,b)=>a-b);
+  for (let i=1;i<ranks.length;i++) if (ranks[i]!==ranks[i-1]+1) return false;
+  return new Set(ranks).size === ranks.length;
+}
+function isValidSet(cards) {
+  if (cards.length < 3 || cards.length > 4) return false;
+  const rank = cards[0].rank;
+  if (!cards.every(c=>c.rank===rank)) return false;
+  return new Set(cards.map(c=>c.suit)).size === cards.length;
+}
+function isValidMeld(cards) { return isValidRun(cards) || isValidSet(cards); }
+function cardPoints(card) { return card.rank===1 ? 1 : Math.min(card.rank,10); }
+function handPoints(hand) { return hand.reduce((s,c)=>s+cardPoints(c),0); }
+
+const MAX_RESHUFFLES = 3;
+function createGame(playerCount) {
+  const deck = shuffleArr(buildDeck());
+  const players = Array.from({length:playerCount}, () => ({ hand: [], melds: [] }));
+  for (let i=0;i<7;i++) for (const p of players) p.hand.push(deck.pop());
+  const discard = [deck.pop()];
+  return { deck, discard, players, current:0, phase:'draw', roundOver:false, winner:null, blocked:false, reshuffleCount:0 };
+}
+function drawFromStock(state) {
+  if (state.phase !== 'draw') return false;
+  if (state.deck.length === 0) { reshuffleDiscardIntoStock(state); if (state.reshuffleCount > MAX_RESHUFFLES) { endByPoints(state); return false; } }
+  if (state.deck.length === 0) { endByPoints(state); return false; }
+  state.players[state.current].hand.push(state.deck.pop());
+  state.phase = 'meld_discard';
+  return true;
+}
+function drawFromDiscard(state) {
+  if (state.phase !== 'draw') return false;
+  if (state.discard.length === 0) return false;
+  state.players[state.current].hand.push(state.discard.pop());
+  state.phase = 'meld_discard';
+  return true;
+}
+function reshuffleDiscardIntoStock(state) {
+  if (state.discard.length <= 1) return;
+  const top = state.discard.pop();
+  state.deck = shuffleArr(state.discard);
+  state.discard = [top];
+  state.reshuffleCount++;
+}
+function endByPoints(state) {
+  state.roundOver = true; state.blocked = true;
+  let bestIdx = 0, bestPoints = Infinity;
+  state.players.forEach((p,i) => { const pts = handPoints(p.hand); if (pts < bestPoints) { bestPoints = pts; bestIdx = i; } });
+  state.winner = bestIdx;
+}
+function layMeld(state, cardIds) {
+  if (state.phase !== 'meld_discard') return false;
+  const player = state.players[state.current];
+  const cards = cardIds.map(id => player.hand.find(c=>c.id===id)).filter(Boolean);
+  if (cards.length !== cardIds.length) return false;
+  if (!isValidMeld(cards)) return false;
+  player.hand = player.hand.filter(c=>!cardIds.includes(c.id));
+  player.melds.push(cards);
+  if (player.hand.length === 0) { state.roundOver = true; state.winner = state.current; }
+  return true;
+}
+function discardCard(state, cardId) {
+  if (state.phase !== 'meld_discard' || state.roundOver) return false;
+  const player = state.players[state.current];
+  const idx = player.hand.findIndex(c=>c.id===cardId);
+  if (idx === -1) return false;
+  const [card] = player.hand.splice(idx,1);
+  state.discard.push(card);
+  if (player.hand.length === 0) { state.roundOver = true; state.winner = state.current; return true; }
+  state.current = (state.current+1) % state.players.length;
+  state.phase = 'draw';
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IA — 3 niveaux réellement différents (testés en auto-jeu)
+// ═══════════════════════════════════════════════════════════════
+function findPossibleSets(hand) {
+  const byRank = {}; hand.forEach(c=>{ (byRank[c.rank] ||= []).push(c); });
+  const sets = [];
+  Object.values(byRank).forEach(cards => { if (cards.length>=3) { sets.push(cards.slice(0,3)); if (cards.length===4) sets.push(cards); } });
+  return sets;
+}
+function findPossibleRuns(hand) {
+  const bySuit = {}; hand.forEach(c=>{ (bySuit[c.suit] ||= []).push(c); });
+  const runs = [];
+  Object.values(bySuit).forEach(cards => {
+    const sorted = [...cards].sort((a,b)=>a.rank-b.rank);
+    let streak = [sorted[0]];
+    for (let i=1;i<sorted.length;i++) { if (sorted[i].rank===sorted[i-1].rank+1) streak.push(sorted[i]); else { flush(); streak=[sorted[i]]; } }
+    flush();
+    function flush() { if (streak.length>=3) for (let start=0;start<=streak.length-3;start++) for (let end=start+3;end<=streak.length;end++) runs.push(streak.slice(start,end)); }
+  });
+  return runs;
+}
+function findAllMelds(hand) { return [...findPossibleSets(hand), ...findPossibleRuns(hand)]; }
+function aiChooseDraw(hand, topDiscard, difficulty) {
+  if (difficulty === 'easy' || !topDiscard) return 'stock';
+  const melds = findAllMelds([...hand, topDiscard]);
+  return melds.some(m => m.some(c=>c.id===topDiscard.id)) ? 'discard' : 'stock';
+}
+function aiChooseMeld(hand) {
+  const melds = findAllMelds(hand);
+  if (!melds.length) return null;
+  return melds.reduce((best,m) => m.length>best.length ? m : best, melds[0]);
+}
+function aiChooseDiscard(hand, difficulty, watchedRanks) {
+  function connectivity(card, rest) {
+    let score = 0;
+    rest.forEach(c => { if (c.id===card.id) return; if (c.rank===card.rank) score+=2; if (c.suit===card.suit && Math.abs(c.rank-card.rank)<=2) score+=1; });
+    if (difficulty === 'hard' && watchedRanks && watchedRanks.has(card.rank)) score += 3; // évite de nourrir l'adversaire
+    return score;
+  }
+  let worst = hand[0], worstScore = Infinity;
+  hand.forEach(card => { const score = connectivity(card, hand); if (score <= worstScore) { worstScore = score; worst = card; } });
+  return worst;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'og_rami_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats: {}, achievements: [], save: null }, loadStore());
+function statGet(k,d=0) { return k in STORE.stats ? STORE.stats[k] : d; }
+function statInc(k,n=1) { STORE.stats[k]=(STORE.stats[k]||0)+n; saveStore(STORE); return STORE.stats[k]; }
+function achUnlock(id,name,icon) { if (STORE.achievements.includes(id)) return; STORE.achievements.push(id); saveStore(STORE); playSound('unlock'); toast(`${icon} Succès : ${name}`); }
+const ACHIEVEMENTS = [
+  { id:'first_meld', name:'Première Pose', desc:'Poser sa première combinaison', icon:'🎯' },
+  { id:'first_win', name:'Première Victoire', desc:'Gagner sa première manche', icon:'🏆' },
+  { id:'big_run', name:'Grande Suite', desc:'Poser une suite de 5 cartes ou plus', icon:'📏' },
+  { id:'perfect_hand', name:'Main Parfaite', desc:'Gagner en posant toute sa main en une seule pose', icon:'✨' },
+  { id:'wins_5', name:'5 victoires', desc:'Gagner 5 manches', icon:'🏅' },
+  { id:'master', name:'Maître du Rami', desc:'Gagner 20 manches', icon:'👑' },
+];
+
+let toastTimer = null;
+function toast(msg) { const t=document.getElementById('toastHost'); t.textContent=msg; t.classList.remove('ondine-toast-show'); void t.offsetWidth; t.classList.add('ondine-toast-show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('ondine-toast-show'),2200); }
+let audioCtx = null;
+function tone(freq,dur,type='sine',vol=.12) { try { if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type=type; osc.frequency.value=freq; gain.gain.setValueAtTime(vol,audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur); osc.start(); osc.stop(audioCtx.currentTime+dur); } catch(e){} }
+function playSound(name) { const P={ draw:()=>tone(450,.06,'sine',.1), meld:()=>[660,880].forEach((f,i)=>setTimeout(()=>tone(f,.13,'sine',.14),i*80)), discard:()=>tone(300,.08,'triangle',.09), win:()=>[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.16),i*100)), error:()=>tone(220,.15,'sawtooth',.1), unlock:()=>[660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,.14,'sine',.14),i*80)) }; (P[name]||(()=>{}))(); }
+function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let CONFIG = { mode:'solo', difficulty:'easy', playerCount:2 };
+let G = null;
+let selectedIds = [];
+let sortMode = 'suit';
+let lastActionSnapshot = null;
+let watchedRanks = new Set();
+
+function setMode(m) {
+  CONFIG.mode = m;
+  document.getElementById('modeSolo').classList.toggle('sel', m==='solo');
+  document.getElementById('modeLocal').classList.toggle('sel', m==='local');
+  document.getElementById('diffTitle').style.display = m==='solo' ? '' : 'none';
+  document.getElementById('diffGrid').style.display = m==='solo' ? '' : 'none';
+  document.getElementById('countTitle').style.display = m==='local' ? '' : 'none';
+  document.getElementById('countGrid').style.display = m==='local' ? '' : 'none';
+  if (m==='local') renderCountGrid();
+}
+function renderCountGrid() {
+  const grid = document.getElementById('countGrid'); grid.innerHTML = '';
+  [2,3,4].forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'opt-card' + (n===CONFIG.playerCount?' sel':'');
+    el.innerHTML = `<div class="opt-icon">👤</div><div class="opt-name">${n} joueurs</div>`;
+    el.onclick = () => { CONFIG.playerCount = n; renderCountGrid(); };
+    grid.appendChild(el);
+  });
+}
+function setDiff(d) { CONFIG.difficulty = d; ['Easy','Normal','Hard'].forEach(k => document.getElementById('diff'+k).classList.toggle('sel', k.toLowerCase()===d)); }
+
+function startGame() {
+  const n = CONFIG.mode==='solo' ? 2 : CONFIG.playerCount;
+  G = createGame(n);
+  selectedIds = []; watchedRanks = new Set();
+  STORE.save = null; saveStore(STORE);
+  showScreen('sg');
+  renderAll();
+  maybeAiTurn();
+}
+function resumeGame() {
+  if (!STORE.save) { toast('Aucune partie sauvegardée'); return; }
+  G = STORE.save.G; CONFIG = STORE.save.CONFIG; selectedIds = [];
+  showScreen('sg'); renderAll(); toast('▶ Partie reprise');
+  maybeAiTurn();
+}
+function persistSave() { STORE.save = { G, CONFIG }; saveStore(STORE); }
+function goHome() { updateHomeStats(); showScreen('sh'); document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none'; }
+async function confirmLeaveGame() {
+  if (G && !G.roundOver) { const ok = await confirmDialog('Quitter la partie ?', 'Ta partie sera sauvegardée.', 'Quitter', 'Continuer'); if (!ok) return; persistSave(); }
+  goHome();
+}
+
+function isHumanTurn() { return CONFIG.mode==='local' || G.current===0; }
+
+function onDrawStock() {
+  if (!G || G.roundOver || G.phase!=='draw' || !isHumanTurn()) return;
+  lastActionSnapshot = null; // pas d'annulation possible après avoir pioché (règle standard)
+  const ok = drawFromStock(G);
+  if (!ok && G.roundOver) { playSound('win'); setTimeout(endRound, 300); return; }
+  if (ok) { playSound('draw'); vibrate(10); renderAll(); }
+}
+function onDrawDiscard() {
+  if (!G || G.roundOver || G.phase!=='draw' || !isHumanTurn()) return;
+  const card = G.discard[G.discard.length-1];
+  if (card) watchedRanks.add(card.rank);
+  const ok = drawFromDiscard(G);
+  if (ok) { playSound('draw'); vibrate(10); renderAll(); }
+}
+function toggleSelect(cardId) {
+  if (!isHumanTurn() || G.phase!=='meld_discard') return;
+  const i = selectedIds.indexOf(cardId);
+  if (i===-1) selectedIds.push(cardId); else selectedIds.splice(i,1);
+  renderHand();
+  document.getElementById('btnLayMeld').disabled = selectedIds.length < 3;
+}
+function onLayMeld() {
+  if (!G || selectedIds.length < 3) return;
+  const ok = layMeld(G, [...selectedIds]);
+  if (!ok) { playSound('error'); toast('Combinaison invalide'); return; }
+  playSound('meld'); vibrate(15);
+  const laidCount = selectedIds.length;
+  achUnlock('first_meld','Première Pose','🎯');
+  if (laidCount >= 5) achUnlock('big_run','Grande Suite','📏');
+  selectedIds = [];
+  document.getElementById('btnLayMeld').disabled = true;
+  if (G.roundOver) { setTimeout(() => { if (G.players[G.winner].melds.length===1) achUnlock('perfect_hand','Main Parfaite','✨'); endRound(); }, 300); return; }
+  renderAll();
+  persistSave();
+}
+function onDiscardCard(cardId) {
+  if (!isHumanTurn() || G.phase!=='meld_discard') return;
+  if (selectedIds.length > 0) { toast('Désélectionne tes cartes avant de défausser'); return; }
+  const ok = discardCard(G, cardId);
+  if (!ok) return;
+  playSound('discard'); vibrate(10);
+  if (G.roundOver) { setTimeout(endRound, 300); return; }
+  renderAll();
+  persistSave();
+  maybeAiTurn();
+}
+
+function maybeAiTurn() {
+  if (!G || G.roundOver) return;
+  if (CONFIG.mode !== 'solo' || G.current !== 1) return;
+  setTimeout(() => {
+    const hand = G.players[1].hand;
+    const topDiscard = G.discard[G.discard.length-1];
+    const drawChoice = aiChooseDraw(hand, topDiscard, CONFIG.difficulty);
+    const ok = drawChoice==='discard' ? drawFromDiscard(G) : drawFromStock(G);
+    if (!ok && G.roundOver) { setTimeout(endRound, 300); return; }
+    renderAll();
+    setTimeout(() => {
+      let meld, count=0;
+      while (!G.roundOver && (meld = aiChooseMeld(G.players[1].hand)) && count < 5) {
+        const remaining = G.players[1].hand.length - meld.length;
+        if (remaining === 1) break; // évite le piège à 1 carte (voir tests)
+        if (!layMeld(G, meld.map(c=>c.id))) break;
+        count++;
+      }
+      renderAll();
+      if (G.roundOver) { setTimeout(endRound, 300); return; }
+      setTimeout(() => {
+        const discardChoice = aiChooseDiscard(G.players[1].hand, CONFIG.difficulty, watchedRanks);
+        discardCard(G, discardChoice.id);
+        if (G.roundOver) { setTimeout(endRound, 300); return; }
+        renderAll();
+        persistSave();
+      }, 500);
+    }, 500);
+  }, 450);
+}
+
+function undoAction() {
+  toast('↩️ Annulation possible uniquement avant de piocher');
+}
+
+function giveHint() {
+  if (!G || G.roundOver || !isHumanTurn()) return;
+  const meld = aiChooseMeld(G.players[G.current].hand);
+  if (meld) { toast(`💡 Tu peux poser : ${meld.map(c=>RANK_LABEL[c.rank]||c.rank).join(' ')} ${meld[0].suit}`); selectedIds = meld.map(c=>c.id); renderHand(); document.getElementById('btnLayMeld').disabled = false; }
+  else toast('💡 Aucune combinaison évidente — pioche ou défausse ta carte la moins utile');
+}
+function toggleSort() {
+  sortMode = sortMode==='suit' ? 'rank' : 'suit';
+  document.getElementById('btnSort').textContent = sortMode==='suit' ? '🔀 Trier par couleur' : '🔀 Trier par rang';
+  renderHand();
+}
+
+function endRound() {
+  statInc('games');
+  const humanWon = CONFIG.mode==='solo' ? G.winner===0 : true;
+  if (CONFIG.mode==='solo') {
+    if (G.winner===0) { statInc('wins'); playSound('win'); vibrate([20,40,20]); achUnlock('first_win','Première Victoire','🏆');
+      if (statGet('wins')>=5) achUnlock('wins_5','5 victoires','🏅');
+      if (statGet('wins')>=20) achUnlock('master','Maître du Rami','👑');
+    } else { statInc('losses'); }
+  } else { playSound('win'); }
+  STORE.save = null; saveStore(STORE);
+  showResult();
+}
+function showResult() {
+  const icon = document.getElementById('resIcon'), title = document.getElementById('resTitle'), sub = document.getElementById('resSub');
+  const winnerLabel = CONFIG.mode==='solo' ? (G.winner===0?'Toi':"L'IA") : `Joueur ${G.winner+1}`;
+  icon.textContent = (CONFIG.mode==='solo' && G.winner!==0) ? '🤖' : '🏆';
+  title.textContent = `${winnerLabel} ${G.blocked ? 'gagne aux points' : 'sort en premier'} !`;
+  sub.textContent = G.blocked ? `Pioche épuisée — main la plus légère l'emporte` : `Manche terminée`;
+  document.getElementById('sres').classList.remove('hidden'); /* audit UX fin de partie : overlay sans masquer le plateau/la main en dessous */
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+function sortedHand(hand) {
+  const h = [...hand];
+  if (sortMode === 'rank') return h.sort((a,b)=>a.rank-b.rank);
+  return h.sort((a,b)=> SUITS.indexOf(a.suit)-SUITS.indexOf(b.suit) || a.rank-b.rank);
+}
+function renderAll() { renderHand(); renderHud(); renderPiles(); renderMelds(); }
+function renderHud() {
+  document.getElementById('turnBadge').textContent = G.roundOver ? 'Manche terminée' :
+    (isHumanTurn() ? (G.phase==='draw' ? 'Pioche une carte' : 'Pose ou défausse') : "L'IA joue…");
+  const row = document.getElementById('opponentsRow'); row.innerHTML = '';
+  if (CONFIG.mode==='solo') {
+    const el = document.createElement('div'); el.className='opp-pill'+(G.current===1?' active':'');
+    el.textContent = `🤖 IA : ${G.players[1].hand.length} cartes`; row.appendChild(el);
+  } else {
+    G.players.forEach((p,i) => { const el=document.createElement('div'); el.className='opp-pill'+(i===G.current?' active':'');
+      el.textContent = `Joueur ${i+1} : ${p.hand.length} cartes`; row.appendChild(el); });
+  }
+}
+function renderPiles() {
+  document.getElementById('stockCount').textContent = `${G.deck.length} cartes`;
+  const top = G.discard[G.discard.length-1];
+  const discardEl = document.getElementById('discardPile');
+  if (top) { discardEl.innerHTML = `<span class="${RED_SUITS.includes(top.suit)?'red':'black'}" style="color:${RED_SUITS.includes(top.suit)?'#dc2626':'#111'}">${RANK_LABEL[top.rank]||top.rank}${top.suit}</span><div class="pile-count" id="discardCount">${G.discard.length} cartes</div>`; }
+  const canDraw = isHumanTurn() && G.phase==='draw' && !G.roundOver;
+  document.getElementById('stockPile').classList.toggle('dim', !canDraw);
+  document.getElementById('discardPile').classList.toggle('dim', !canDraw || !top);
+}
+function renderMelds() {
+  const area = document.getElementById('meldsArea'); area.innerHTML = '';
+  G.players.forEach((p,i) => {
+    if (!p.melds.length) return;
+    const label = document.createElement('div'); label.className='meld-group-label';
+    label.textContent = CONFIG.mode==='solo' ? (i===0?'Tes poses':'Poses de l\u2019IA') : `Poses — Joueur ${i+1}`;
+    area.appendChild(label);
+    p.melds.forEach(meld => {
+      const row = document.createElement('div'); row.className='meld-row';
+      meld.forEach(c => { const el=document.createElement('div'); el.className='mini-card'; el.style.color = RED_SUITS.includes(c.suit)?'#dc2626':'#111'; el.textContent = `${RANK_LABEL[c.rank]||c.rank}${c.suit}`; row.appendChild(el); });
+      area.appendChild(row);
+    });
+  });
+}
+function renderHand() {
+  const row = document.getElementById('handRow'); row.innerHTML = '';
+  if (!G) return;
+  const human = CONFIG.mode==='solo' ? G.players[0] : G.players[G.current];
+  const canAct = isHumanTurn() && !G.roundOver;
+  sortedHand(human.hand).forEach(card => {
+    const el = document.createElement('div');
+    el.className = 'card' + (selectedIds.includes(card.id)?' sel':'');
+    el.innerHTML = `<div class="rank" style="color:${RED_SUITS.includes(card.suit)?'#dc2626':'#111'}">${RANK_LABEL[card.rank]||card.rank}</div><div class="suit" style="color:${RED_SUITS.includes(card.suit)?'#dc2626':'#111'}">${card.suit}</div>`;
+    el.onclick = () => {
+      if (!canAct || G.phase!=='meld_discard') return;
+      toggleSelect(card.id);
+    };
+    el.addEventListener('dblclick', () => { if (canAct && G.phase==='meld_discard' && selectedIds.length===0) onDiscardCard(card.id); });
+    row.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION / STATS / RULES
+// ═══════════════════════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id==='sstats') renderStatsScreen();
+}
+function updateHomeStats() {
+  const host = document.getElementById('homeStats'); host.innerHTML = '';
+  [{v:statGet('games'),l:'🎮 Parties'},{v:statGet('wins'),l:'🏆 Victoires'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.style.flex='1'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
+}
+function renderStatsScreen() {
+  const grid = document.getElementById('statsGrid'); grid.innerHTML = '';
+  [{v:statGet('games'),l:'Parties'},{v:statGet('wins'),l:'Victoires'},{v:statGet('losses'),l:'Défaites'}]
+    .forEach(s => { const el=document.createElement('div'); el.className='statCard'; el.innerHTML=`<div class="v">${s.v}</div><div class="l">${s.l}</div>`; grid.appendChild(el); });
+  const list = document.getElementById('achList'); list.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => { const unlocked=STORE.achievements.includes(a.id); const el=document.createElement('div'); el.className='achCard'+(unlocked?' unlocked':''); el.innerHTML=`<div class="ic">${a.icon}</div><div><div class="name">${a.name}</div><div class="desc">${a.desc}</div></div>`; list.appendChild(el); });
+}
+function showRules() {
+  const overlay = document.getElementById('modalOverlay');
+  overlay.innerHTML = `<div class="modal-box"><div class="modal-title">🃏 Règles du Rami</div>
+    <div class="modal-body">1 jeu de 52 cartes, 7 cartes par joueur.<br><br>
+    <b>À ton tour :</b> pioche 1 carte (pioche ou dessus de la défausse), pose des combinaisons si tu peux, puis défausse 1 carte.<br><br>
+    <b>Suite</b> : 3+ cartes qui se suivent, même couleur (l'As est bas uniquement, pas de Q-K-A).<br>
+    <b>Groupe</b> : 3 ou 4 cartes de même rang, couleurs différentes.<br><br>
+    Sors en premier en vidant complètement ta main pour gagner la manche ! Double-tap une carte pour la défausser directement.</div>
+    <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdClose">Compris !</button></div></div>`;
+  overlay.classList.remove('hidden');
+  document.getElementById('mdClose').onclick = () => overlay.classList.add('hidden');
+}
+function confirmDialog(title,message,confirmLabel,cancelLabel) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    overlay.innerHTML = `<div class="modal-box"><div class="modal-title">${title}</div><div class="modal-body">${message}</div>
+      <div class="modal-actions"><button class="ondine-btn ondine-btn-primary" id="mdConfirm">${confirmLabel}</button>
+      <button class="ondine-btn ondine-btn-secondary" id="mdCancel">${cancelLabel}</button></div></div>`;
+    overlay.classList.remove('hidden');
+    document.getElementById('mdConfirm').onclick = () => { overlay.classList.add('hidden'); resolve(true); };
+    document.getElementById('mdCancel').onclick = () => { overlay.classList.add('hidden'); resolve(false); };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+updateHomeStats();
+document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none';
+window.setMode=setMode; window.setDiff=setDiff; window.startGame=startGame; window.resumeGame=resumeGame;
+window.goHome=goHome; window.showScreen=showScreen; window.confirmLeaveGame=confirmLeaveGame;
+window.onDrawStock=onDrawStock; window.onDrawDiscard=onDrawDiscard; window.onLayMeld=onLayMeld;
+window.undoAction=undoAction; window.giveHint=giveHint; window.toggleSort=toggleSort; window.showRules=showRules;
+</script>
+</body>
+</html>
