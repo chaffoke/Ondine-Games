@@ -288,6 +288,17 @@ body {
 @keyframes tilePop{from{transform:scale(.7);}to{transform:scale(1);}}
 
 .footer2048{display:flex;gap:8px;width:100%;max-width:320px;flex-wrap:wrap;justify-content:center;}
+/* Overlay de fin de partie réelle (blocage) — même pattern que
+   Démineur/Racing/Maze Rush, le plateau reste visible dessous. */
+#sover2048{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.result-icon{font-size:56px;}
+.result-title{font-family:'Fredoka One',cursive;font-size:24px;color:var(--co);}
+.result-stats{display:flex;gap:8px;width:100%;max-width:320px;margin:8px 0;flex-wrap:wrap;}
+.result-stat{flex:1;min-width:90px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 6px;}
+.result-stat .rv{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c1);}
+.result-stat .rl{font-size:8px;color:var(--text2);text-transform:uppercase;}
+.result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
+.result-btns button{flex:1;min-width:130px;}
 
 #sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
 #achList2048{width:100%;display:flex;flex-direction:column;gap:6px;}
@@ -319,6 +330,22 @@ body {
     <button class="ondine-btn ondine-btn-primary" id="continueBtn2048" onclick="continueAfterWin()" style="display:none;">Continuer</button>
   </div>
   <div style="font-size:11px;color:var(--text2);text-align:center;">Flèches du clavier ou glisser au doigt</div>
+</div>
+
+<!-- Fin de partie (blocage réel — pas la victoire 2048 intermédiaire,
+     qui garde son propre mécanisme "Continuer" existant). Overlay
+     par-dessus la grille, cohérent avec Démineur/Racing/Maze Rush. -->
+<div class="screen hidden result-overlay" id="sover2048">
+  <div class="result-icon">💀</div>
+  <div class="result-title">Partie terminée</div>
+  <div class="result-stats">
+    <div class="result-stat"><div class="rv" id="overScore2048">0</div><div class="rl">Score</div></div>
+    <div class="result-stat"><div class="rv" id="overBest2048">0</div><div class="rl">Record</div></div>
+  </div>
+  <div class="result-btns">
+    <button class="ondine-btn ondine-btn-primary" onclick="confirmNewGame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
 </div>
 
 <div class="screen hidden" id="sstats">
@@ -1685,9 +1712,16 @@ function createUI(sdk) {
     document.getElementById('undoBtn2048').disabled = !history.canUndo();
 
     const banner = document.getElementById('banner2048');
-    if (over) { banner.textContent = '💀 Partie terminée'; banner.style.display = ''; }
-    else if (won && !continuedAfterWin) { banner.textContent = '🏆 2048 atteint !'; banner.style.display = ''; }
-    else { banner.style.display = 'none'; }
+    if (over) {
+      banner.style.display = 'none';
+      document.getElementById('overScore2048').textContent = score;
+      document.getElementById('overBest2048').textContent = sdk.stats.get('bestScore', 0);
+      document.getElementById('sover2048').classList.remove('hidden');
+    } else {
+      document.getElementById('sover2048').classList.add('hidden');
+      if (won && !continuedAfterWin) { banner.textContent = '🏆 2048 atteint !'; banner.style.display = ''; }
+      else banner.style.display = 'none';
+    }
     document.getElementById('continueBtn2048').style.display = (won && !continuedAfterWin) ? '' : 'none';
   }
 

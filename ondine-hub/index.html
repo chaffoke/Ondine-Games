@@ -84,6 +84,21 @@ body{background:
 .game-card .cat-badge{position:absolute;bottom:10px;right:10px;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);background:rgba(255,255,255,.06);border-radius:6px;padding:2px 6px;}
 
 .empty-state{text-align:center;padding:40px 20px;color:var(--text2);}
+.stats-overlay{position:fixed;inset:0;z-index:9000;background:var(--bg);overflow-y:auto;}
+.stats-overlay.hidden{display:none;}
+.stats-panel-inner{max-width:520px;margin:0 auto;padding:14px 16px 40px;}
+.stats-panel-header{display:flex;align-items:center;justify-content:space-between;padding:6px 0 14px;}
+.stats-panel-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);}
+.stats-summary-row{display:flex;gap:8px;margin-bottom:16px;}
+.stats-summary-card{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center;}
+.stats-summary-card .v{font-family:'Fredoka One',cursive;font-size:20px;color:var(--c1);}
+.stats-summary-card .l{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.stats-game-card{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:10px 12px;margin-bottom:8px;}
+.stats-game-card .ic{font-size:22px;}
+.stats-game-card .info{flex:1;min-width:0;}
+.stats-game-card .name{font-weight:800;font-size:13px;}
+.stats-game-card .details{font-size:10.5px;color:var(--text2);margin-top:2px;display:flex;flex-wrap:wrap;gap:6px;}
+.stats-empty{text-align:center;padding:30px 20px;color:var(--text2);font-size:13px;}
 .empty-state .ic{font-size:40px;margin-bottom:10px;opacity:.5;}
 .empty-state .txt{font-size:13px;}
 </style>
@@ -93,6 +108,7 @@ body{background:
 <div class="header">
   <div class="logo-row">
     <div class="logo">Ondine Games</div>
+    <div class="icon-btn" onclick="showStatsPanel()" id="statsBtn" title="Statistiques">📊</div>
     <div class="icon-btn" onclick="toggleFavOnly()" id="favFilterBtn">⭐</div>
   </div>
   <div class="search-box">
@@ -113,6 +129,24 @@ body{background:
   <div class="empty-state" id="emptyState" style="display:none;">
     <div class="ic">🔍</div>
     <div class="txt">Aucun jeu ne correspond à ta recherche</div>
+  </div>
+</div>
+
+<!-- Panneau Statistiques — overlay, cohérent avec le pattern déjà
+     utilisé dans les jeux (fond flouté, contenu par-dessus). N'invente
+     aucune statistique : lit uniquement ce qui existe réellement en
+     localStorage pour chaque jeu, sous les DEUX conventions de clé
+     du projet (ondine.games.<id>.stats pour les jeux SDK récents,
+     ondine_stats_<id> pour les jeux Hub plus anciens). -->
+<div class="stats-overlay hidden" id="statsPanel">
+  <div class="stats-panel-inner">
+    <div class="stats-panel-header">
+      <div class="icon-btn" onclick="hideStatsPanel()">←</div>
+      <div class="stats-panel-title">📊 Statistiques</div>
+      <div style="width:36px;"></div>
+    </div>
+    <div id="statsSummary"></div>
+    <div id="statsPerGame"></div>
   </div>
 </div>
 
@@ -168,7 +202,7 @@ const GAMES = [
   { id:'spider', name:'Spider Solitaire', icon:'🕷️', desc:'Solitaire à deux couleurs', path:'games/spider.html', cat:'cartes', color:'#a78bfa' },
   { id:'tetris', name:'Tetris', icon:'🟦', desc:'Empile les pièces, complète les lignes', path:'games/tetris.html', cat:'action', color:'#38bdf8' },
   { id:'maze-rush', name:'Maze Rush', icon:'🌀', desc:'Labyrinthe arcade, choisis ton personnage', path:'games/maze-rush.html', cat:'action', color:'#818cf8' },
-  { id:'puzzle-mosaique', name:'Puzzle Mosaïque', icon:'🧩', desc:'Sudoku irrégulier 8×8, choisis ton personnage', path:'games/puzzle-mosaique.html', cat:'reflexion', color:'#fbbf24' },
+  { id:'puzzle-mosaique', name:'Meowdoku', icon:'🐱', desc:'Le Sudoku à pattes de velours', path:'games/puzzle-mosaique.html', cat:'reflexion', color:'#fbbf24' },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -273,6 +307,109 @@ renderTabs();
 renderRecent();
 renderGrid();
 window.toggleFav=toggleFav; window.toggleFavOnly=toggleFavOnly; window.setCategory=setCategory; window.renderGrid=renderGrid;
+
+// ═══════════════════════════════════════════════════════════════
+// STATISTIQUES — lit UNIQUEMENT ce qui existe réellement en
+// localStorage, sous les deux conventions de clé coexistant dans le
+// projet (jeux SDK récents vs jeux Hub plus anciens). N'invente
+// jamais une statistique : un jeu jamais joué n'apparaît simplement
+// pas dans la liste.
+// ═══════════════════════════════════════════════════════════════
+function readGameStats(gameId) {
+  // convention récente (SDK) : ondine.games.<id>.stats
+  try {
+    const raw = localStorage.getItem(`ondine.games.${gameId}.stats`);
+    if (raw !== null) return JSON.parse(raw);
+  } catch (e) {}
+  // convention plus ancienne (jeux Hub) : ondine_stats_<id>
+  try {
+    const raw = localStorage.getItem(`ondine_stats_${gameId}`);
+    if (raw !== null) return JSON.parse(raw);
+  } catch (e) {}
+  return null;
+}
+
+/** Cherche la première clé présente parmi plusieurs alias possibles
+ *  (les jeux n'utilisent pas tous le même nom pour la même notion). */
+function pickStat(stats, aliases) {
+  for (const key of aliases) {
+    if (stats[key] !== undefined && stats[key] !== null) return stats[key];
+  }
+  return undefined;
+}
+
+function formatGameStatLine(stats) {
+  const parts = [];
+  const games = pickStat(stats, ['games', 'parties', 'roundsPlayed', 'puzzlesSolved']);
+  if (games !== undefined) parts.push(`🎮 ${games} partie${games > 1 ? 's' : ''}`);
+  const wins = pickStat(stats, ['wins', 'victories']);
+  if (wins !== undefined) parts.push(`🏆 ${wins} victoire${wins > 1 ? 's' : ''}`);
+  const bestScore = pickStat(stats, ['bestScore', 'highScore', 'maxTileEver', 'bestBankroll']);
+  if (bestScore !== undefined) parts.push(`⭐ ${bestScore}`);
+  // meilleur temps : peut être stocké sous des clés composées comme
+  // bestTime_facile / bestTime_normal — on prend la plus petite valeur
+  // trouvée parmi toutes les clés commençant par "bestTime"
+  const timeKeys = Object.keys(stats).filter(k => k.startsWith('bestTime'));
+  if (timeKeys.length) {
+    const best = Math.min(...timeKeys.map(k => stats[k]).filter(v => typeof v === 'number'));
+    if (isFinite(best)) parts.push(`⏱ ${best}s`);
+  }
+  return parts;
+}
+
+function showStatsPanel() {
+  const games = [
+    {id:'solitaire',name:'Solitaire',icon:'🃏'},{id:'uno',name:'Uno',icon:'🔴'},{id:'puissance4',name:'Puissance 4',icon:'🔴'},
+    {id:'othello',name:'Othello',icon:'⚫'},{id:'dames',name:'Dames',icon:'⚪'},{id:'demineur',name:'Démineur',icon:'💣'},
+    {id:'sudoku',name:'Sudoku',icon:'🔢'},{id:'mastermind',name:'Mastermind',icon:'🧠'},{id:'mahjong',name:'Mahjong Solitaire',icon:'🀄'},
+    {id:'yams',name:'YAMS',icon:'🎲'},{id:'421',name:'421',icon:'🎲'},{id:'shutthebox',name:'Shut the Box',icon:'📦'},
+    {id:'rhythmhero',name:'Rhythm Hero',icon:'🎵'},{id:'2048',name:'2048',icon:'🔢'},{id:'bataille-navale',name:'Bataille Navale',icon:'🚢'},
+    {id:'belote',name:'Belote',icon:'🃏'},{id:'blackjack',name:'Blackjack',icon:'🂡'},{id:'checkers',name:'Dames Internationales',icon:'⚪'},
+    {id:'chess',name:'Échecs',icon:'♟️'},{id:'flappy',name:'Flappy Bulle',icon:'🫧'},{id:'game-of-goose',name:'Jeu de l\u2019Oie',icon:'🦢'},
+    {id:'memory',name:'Memory',icon:'🧠'},{id:'mille-bornes',name:'Road Trip',icon:'🚗'},{id:'morpion',name:'Morpion',icon:'❌'},
+    {id:'puzzle15',name:'Puzzle 15',icon:'🧩'},{id:'quarto',name:'Quarto',icon:'⬜'},{id:'racing',name:'Ondine Racing',icon:'🏎️'},
+    {id:'rami',name:'Rami',icon:'🀄'},{id:'simon',name:'Simon',icon:'🎵'},{id:'snake',name:'Snake',icon:'🐍'},
+    {id:'spider',name:'Spider Solitaire',icon:'🕷️'},{id:'tetris',name:'Tetris',icon:'🟦'},{id:'maze-rush',name:'Maze Rush',icon:'🌀'},
+    {id:'puzzle-mosaique',name:'Meowdoku',icon:'🐱'},
+  ];
+
+  let totalGames = 0;
+  const playedGames = [];
+  games.forEach((g) => {
+    const stats = readGameStats(g.id);
+    if (!stats) return;
+    const gamesCount = pickStat(stats, ['games', 'parties', 'roundsPlayed', 'puzzlesSolved']);
+    if (gamesCount) totalGames += gamesCount;
+    const line = formatGameStatLine(stats);
+    if (line.length) playedGames.push({ ...g, line, gamesCount: gamesCount || 0 });
+  });
+  playedGames.sort((a, b) => b.gamesCount - a.gamesCount);
+
+  const summaryHost = document.getElementById('statsSummary');
+  summaryHost.innerHTML = `<div class="stats-summary-row">
+    <div class="stats-summary-card"><div class="v">${totalGames}</div><div class="l">Parties totales</div></div>
+    <div class="stats-summary-card"><div class="v">${playedGames.length}</div><div class="l">Jeux joués</div></div>
+  </div>`;
+
+  const listHost = document.getElementById('statsPerGame');
+  if (!playedGames.length) {
+    listHost.innerHTML = '<div class="stats-empty">Aucune statistique pour le moment — joue à un jeu pour la voir apparaître ici !</div>';
+  } else {
+    listHost.innerHTML = playedGames.map((g) => `
+      <div class="stats-game-card">
+        <div class="ic">${g.icon}</div>
+        <div class="info">
+          <div class="name">${g.name}</div>
+          <div class="details">${g.line.map(p => `<span>${p}</span>`).join('')}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  document.getElementById('statsPanel').classList.remove('hidden');
+}
+function hideStatsPanel() { document.getElementById('statsPanel').classList.add('hidden'); }
+window.showStatsPanel = showStatsPanel;
+window.hideStatsPanel = hideStatsPanel;
 
 // Enregistrement du Service Worker — uniquement pour le critère
 // d'installabilité Android/Chrome. Échoue silencieusement en file://

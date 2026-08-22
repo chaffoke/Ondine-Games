@@ -11,6 +11,31 @@
 // avec différenciation réelle prouvée entre les 3 niveaux.
 // ═══════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════
+// SPORTS — architecture data-driven, un seul moteur réel pour
+// l'instant ('racing', qui réutilise le moteur circuit existant).
+// Les autres sports sont volontairement des placeholders "à venir" :
+// pas de faux gameplay, aucun sport ne peut être lancé tant que
+// hasEngine n'est pas true. physicsProfile/vehicleProfile/
+// economyProfile sont préparés pour de futures phases (non lus par
+// le moteur actuel), pour éviter une restructuration complète quand
+// les vrais moteurs Rallye/Stock Car/etc. seront développés.
+// ═══════════════════════════════════════════════════════════════
+export const SPORTS = {
+  racing:      { id: 'racing',      order: 1, name: 'Course',        icon: '🏎️', desc: 'Circuit classique, vitesse pure.', vehicleType: 'Formule',      hasEngine: true,  defaultUnlocked: true,  unlockCondition: null,
+    physicsProfile: 'circuit', vehicleProfile: 'formula', economyProfile: 'standard' },
+  rally:       { id: 'rally',       order: 2, name: 'Rallye',        icon: '🚗', desc: 'Terrains variés, conduite technique.', vehicleType: 'Rallye',    hasEngine: true,  defaultUnlocked: false, unlockCondition: 'Débloqué au niveau 2',
+    physicsProfile: 'offroad', vehicleProfile: 'rally', economyProfile: 'standard' },
+  stockCar:    { id: 'stockCar',    order: 3, name: 'Stock Car',     icon: '🏁', desc: 'Ovale, contact, stratégie.', vehicleType: 'Stock Car',      hasEngine: false, defaultUnlocked: false, unlockCondition: 'Bientôt disponible',
+    physicsProfile: 'oval', vehicleProfile: 'stockcar', economyProfile: 'standard' },
+  superbike:   { id: 'superbike',   order: 4, name: 'Superbike',     icon: '🏍️', desc: 'Moto, prise de risque maximale.', vehicleType: 'Moto',        hasEngine: false, defaultUnlocked: false, unlockCondition: 'Bientôt disponible',
+    physicsProfile: 'bike', vehicleProfile: 'superbike', economyProfile: 'standard' },
+  speedster:   { id: 'speedster',   order: 5, name: 'Speedster',     icon: '⚡', desc: 'Vitesse extrême en ligne.', vehicleType: 'Prototype',        hasEngine: false, defaultUnlocked: false, unlockCondition: 'Bientôt disponible',
+    physicsProfile: 'drag', vehicleProfile: 'speedster', economyProfile: 'standard' },
+  monsterTruck:{ id: 'monsterTruck',order: 6, name: 'Monster Truck', icon: '🚛', desc: 'Franchissement, spectacle.', vehicleType: 'Monster Truck',     hasEngine: false, defaultUnlocked: false, unlockCondition: 'Bientôt disponible',
+    physicsProfile: 'offroad-heavy', vehicleProfile: 'monstertruck', economyProfile: 'standard' },
+};
+
 export const TRACKS = {
   cote_sirenes: {
     id: 'cote_sirenes', name: 'Côte des Sirènes', icon: '🌊', theme: 'ocean',
@@ -37,7 +62,39 @@ export const TRACKS = {
     colors: { bg: '#2a0a1a', track: '#4a1030', accent: '#f472b6' },
     waypoints: [[50,10],[70,18],[90,30],[78,42],[90,58],[75,72],[85,88],[55,85],[45,68],[25,75],[10,55],[30,45],[10,30],[30,15]],
   },
+  // ═══ RALLYE — 3 tracés distincts, fusionnés dans TRACKS (préfixe
+  // rally_) pour réutiliser tel quel computeTrackGeometry/trackPointAt
+  // sans aucune modification du moteur de géométrie. rallyMeta porte
+  // les données propres au contre-la-montre (difficulté, seuils de
+  // récompense) — jamais lues par le moteur Course. ═══
+  rally_forest: {
+    id: 'rally_forest', name: 'Spéciale Forêt', icon: '🌲', theme: 'forest',
+    colors: { bg: '#0a1f14', track: '#123320', accent: '#34d399' },
+    waypoints: [[15,15],[35,12],[42,28],[30,35],[45,45],[60,32],[75,40],[70,58],[85,62],[80,80],[60,85],[45,70],[28,75],[20,55],[35,50],[18,38]],
+    rallyMeta: { difficulty: 'Technique', desc: 'Virages serrés, parcours exigeant.', goldTime: 24, silverTime: 30, bronzeTime: 40 },
+  },
+  rally_mountain: {
+    id: 'rally_mountain', name: 'Spéciale Montagne', icon: '⛰️', theme: 'snow',
+    colors: { bg: '#0e2333', track: '#1c3d52', accent: '#e0f2fe' },
+    waypoints: [[50,10],[78,22],[85,45],[65,55],[80,70],[55,88],[30,80],[20,60],[35,50],[15,35],[30,15]],
+    rallyMeta: { difficulty: 'Moyen', desc: 'Grandes courbes, changements de direction.', goldTime: 21, silverTime: 27, bronzeTime: 35 },
+  },
+  rally_desert: {
+    id: 'rally_desert', name: 'Spéciale Désert', icon: '🏜️', theme: 'volcano',
+    colors: { bg: '#2a1a0a', track: '#4a3010', accent: '#fbbf24' },
+    waypoints: [[10,50],[30,15],[60,20],[90,10],[92,40],[70,45],[85,75],[55,90],[30,80],[12,85]],
+    rallyMeta: { difficulty: 'Rapide', desc: 'Longues portions, vitesse pure.', goldTime: 24, silverTime: 30, bronzeTime: 40 },
+  },
 };
+
+// Liste explicite des circuits COURSE — indispensable maintenant que
+// les circuits Rallye (rally_*) sont fusionnés dans le même objet
+// TRACKS (pour réutiliser computeTrackGeometry/trackPointAt tel
+// quel) : la progression de niveau qui débloque des circuits Course
+// ne doit JAMAIS itérer sur Object.keys(TRACKS) directement, sous
+// peine de débloquer un circuit Rallye par erreur.
+export const COURSE_TRACK_IDS = ['cote_sirenes', 'ondine_city', 'foret_nocturne', 'mont_blizzard', 'volcan_violet'];
+export const RALLY_TRACK_IDS = ['rally_forest', 'rally_mountain', 'rally_desert'];
 
 export function dist(a, b) { return Math.hypot(b[0]-a[0], b[1]-a[1]); }
 export function computeTrackGeometry(track) {
@@ -128,6 +185,42 @@ export function upgradeBonus(upgrades) {
   };
 }
 
+// ═══════════════════════════════════════════════════════════════
+// AMÉLIORATIONS — architecture générique, catégories Performance et
+// Économie. Chaque définition suffit à calculer coût/bonus à
+// n'importe quel niveau (pas de plafond artificiel comme l'ancien
+// système à 3 paliers fixes) : cost(level) = baseCost * growth^level.
+// Performance (engine/turbo/tires/boost) alimente upgradeBonus()
+// ci-dessus, donc un achat modifie réellement tickRace() au tick
+// suivant. Économie (marketing/sponsors) alimente le revenu passif,
+// géré côté UI (n'a pas sa place dans la physique de course).
+// ═══════════════════════════════════════════════════════════════
+export const UPGRADES_DEF = {
+  engine:    { name: 'Moteur',        icon: '🏎️', category: 'performance', baseCost: 20, growth: 1.15, bonusPerLevel: 2.5, unit: '%', desc: 'Vitesse de pointe' },
+  turbo:     { name: 'Turbo',         icon: '⚡', category: 'performance', baseCost: 20, growth: 1.15, bonusPerLevel: 6,   unit: '%', desc: 'Accélération en sortie de virage' },
+  tires:     { name: 'Pneus',         icon: '🛞', category: 'performance', baseCost: 20, growth: 1.15, bonusPerLevel: 8,   unit: '%', desc: 'Adhérence en virage' },
+  boost:     { name: 'Boost',         icon: '💥', category: 'performance', baseCost: 25, growth: 1.18, bonusPerLevel: 8,   unit: '%', desc: 'Puissance du bouton BOOST manuel (pas l\u2019accélération)' },
+  marketing: { name: 'Marketing',     icon: '📣', category: 'economie',    baseCost: 15, growth: 1.12, bonusPerLevel: 0.15, unit: '$/s', desc: 'Revenu passif' },
+  sponsors:  { name: 'Sponsors',      icon: '🤝', category: 'economie',    baseCost: 35, growth: 1.14, bonusPerLevel: 0.30, unit: '$/s', desc: 'Revenu passif (sponsors majeurs)' },
+};
+
+/** Coût pour acheter le PROCHAIN niveau (passer de `level` à `level+1`). */
+export function upgradeCost(type, level) {
+  const def = UPGRADES_DEF[type];
+  return Math.round(def.baseCost * Math.pow(def.growth, level));
+}
+
+/** Revenu passif total ($/s), calculé depuis les upgrades économie. */
+export function computeRevenuePerSec(upgrades) {
+  const u = upgrades || {};
+  let total = 1; // revenu de base, cohérent avec l'affichage initial "$1/s" déjà présent dans le projet
+  Object.keys(UPGRADES_DEF).forEach((type) => {
+    const def = UPGRADES_DEF[type];
+    if (def.category === 'economie') total += (u[type] || 0) * def.bonusPerLevel;
+  });
+  return Math.round(total * 100) / 100;
+}
+
 export function createCar(slotId, carDefId, name, icon, color, isPlayer, upgrades, strategyId) {
   return {
     slotId, carDef: carDefId, name, icon, color, isPlayer,
@@ -182,7 +275,17 @@ export function tickRace(race, boostRequests) {
     const progressInLap = car.progress % geo.total;
     const track = trackPointAt(race.trackId, progressInLap);
     const cornerPenalty = (1 - track.speedMultiplier) * (1 - carDef.cornerGrip) * (1 - bonus.gripBonus);
-    let speed = carDef.baseSpeed * bonus.speedBonus * strat.speedMult * (1 - cornerPenalty);
+    // accelBonus (Turbo) : le moteur n'a pas de notion de vitesse qui
+    // monte progressivement (calcul instantané à chaque tick, pas une
+    // simulation d'inertie) — donc "accélération" est modélisée comme
+    // la capacité à conserver plus de vitesse en sortant d'un virage
+    // (où cornerPenalty est le plus fort). Réduit le malus de virage
+    // proportionnellement à accelBonus, plutôt qu'un simple bonus
+    // plat qui ferait doublon avec Moteur (speedBonus). BUG CORRIGÉ :
+    // accelBonus était déjà calculé dans upgradeBonus() mais jamais
+    // utilisé ici — le Turbo n'avait donc jusqu'ici aucun effet réel.
+    const accelReduction = (bonus.accelBonus - 1); // ex: 0.06 pour turbo niveau 1
+    let speed = carDef.baseSpeed * bonus.speedBonus * strat.speedMult * (1 - cornerPenalty * (1 - accelReduction));
     if (car.boosting > 0) {
       speed *= carDef.boostPower * bonus.boostBonus;
       car.boosting--;
@@ -221,6 +324,85 @@ export function tickRace(race, boostRequests) {
 // ═══════════════════════════════════════════════════════════════
 export const REWARD_TABLE = { 1: 150, 2: 110, 3: 85, 4: 60, 5: 40, 6: 25 };
 export const XP_TABLE =     { 1: 80,  2: 60,  3: 45,  4: 30, 5: 20, 6: 10 };
+
+// ═══════════════════════════════════════════════════════════════
+// RALLYE — moteur contre-la-montre, séparé du moteur multi-voitures
+// de Course mais réutilisant tout ce qui est générique : upgradeBonus,
+// trackPointAt/getGeometry (mêmes TRACKS fusionnés), CARS, les
+// constantes de boost. Différences volontaires : 1 seule voiture (pas
+// d'IA, pas de classement), chronométré en TEMPS RÉEL (dtMs variable
+// venant de requestAnimationFrame côté UI, pas un tick fixe), et un
+// profil physique "spéciale" où les virages pénalisent davantage
+// (RALLY_CORNER_WEIGHT), cohérent avec "davantage d'importance à
+// l'adhérence" demandé.
+// ═══════════════════════════════════════════════════════════════
+export const RALLY_CORNER_WEIGHT = 1.4;
+
+export function createRallyRun(trackId, carDefId, upgrades) {
+  return {
+    trackId, carDef: carDefId,
+    upgrades: upgrades || { engine: 0, turbo: 0, tires: 0, boost: 0 },
+    progress: 0, finished: false, elapsedMs: 0,
+    boostMeter: BOOST_MAX, boosting: 0, currentSpeed: 0, boostsUsed: 0,
+  };
+}
+
+/** Avance la simulation d'un pas de TEMPS RÉEL (dtMs, venant de
+ *  requestAnimationFrame côté UI) — pas un tick fixe, pour que le
+ *  chronomètre reste juste même si le framerate varie. Retourne un
+ *  NOUVEL objet (immuable, même convention que tickRace). */
+export function tickRallyRun(run, dtMs, boostRequested) {
+  if (run.finished) return run;
+  const r = { ...run };
+  if (boostRequested) tryActivateRallyBoost(r);
+
+  const carDef = CARS[r.carDef];
+  const bonus = upgradeBonus(r.upgrades);
+  const geo = getGeometry(r.trackId);
+  const track = trackPointAt(r.trackId, r.progress);
+  const accelReduction = (bonus.accelBonus - 1);
+  const rawCornerPenalty = (1 - track.speedMultiplier) * (1 - carDef.cornerGrip) * (1 - bonus.gripBonus) * RALLY_CORNER_WEIGHT;
+  const cornerPenalty = Math.min(0.92, rawCornerPenalty); // jamais figer complètement la voiture
+  let speed = carDef.baseSpeed * bonus.speedBonus * (1 - cornerPenalty * (1 - accelReduction));
+  if (r.boosting > 0) {
+    speed *= carDef.boostPower * bonus.boostBonus;
+    r.boosting = Math.max(0, r.boosting - dtMs);
+  }
+  r.currentSpeed = speed;
+  // même échelle que le moteur Course (speed = unités/tick de TICK_MS),
+  // converti proportionnellement au vrai temps écoulé.
+  r.progress += speed * (dtMs / TICK_MS);
+  r.elapsedMs += dtMs;
+  r.boostMeter = Math.min(BOOST_MAX, r.boostMeter + (BOOST_REGEN_PER_TICK / TICK_MS) * dtMs);
+
+  if (r.progress >= geo.total && !r.finished) {
+    r.finished = true;
+    r.progress = geo.total;
+  }
+  return r;
+}
+
+export function tryActivateRallyBoost(run) {
+  if (run.boosting > 0 || run.boostMeter < BOOST_COST) return false;
+  run.boostMeter -= BOOST_COST;
+  run.boosting = BOOST_DURATION_TICKS * TICK_MS; // durée identique à Course, exprimée en ms
+  run.boostsUsed = (run.boostsUsed || 0) + 1;
+  return true;
+}
+
+/** Résultat bronze/argent/or selon les seuils définis DANS les
+ *  données du parcours (rallyMeta), jamais codés en dur dans l'UI —
+ *  cohérent avec l'exigence explicite. Récompense cohérente avec
+ *  l'économie actuelle (échelle proche de REWARD_TABLE de Course). */
+export function computeRallyResult(track, elapsedMs) {
+  const seconds = elapsedMs / 1000;
+  const meta = track.rallyMeta;
+  let medal = null, credits = 20; // participation minimale
+  if (seconds <= meta.goldTime) { medal = 'gold'; credits = 120; }
+  else if (seconds <= meta.silverTime) { medal = 'silver'; credits = 70; }
+  else if (seconds <= meta.bronzeTime) { medal = 'bronze'; credits = 40; }
+  return { seconds, medal, credits };
+}
 
 export function computeRewards(playerCar, difficulty) {
   const diffMult = { easy: 0.8, normal: 1, hard: 1.3 }[difficulty] || 1;

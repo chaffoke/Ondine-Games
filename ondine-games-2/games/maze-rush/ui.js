@@ -275,18 +275,36 @@ export function createUI(sdk) {
   }
 
   /** Glisser le doigt pour diriger, comme Snake — même seuil (20px) et
-   *  même logique (direction dominante horizontale/verticale). Attaché
-   *  UNE SEULE FOIS ici : #mazeCanvas est un élément DOM statique (jamais
-   *  recréé entre les niveaux/Rejouer), donc pas de risque d'accumuler
-   *  des écouteurs en double au fil des parties. */
+   *  même logique (direction dominante horizontale/verticale).
+   *
+   *  CORRECTIF (signalé par Kevin) : la première version n'écoutait
+   *  que sur #mazeCanvas, donc le geste devait obligatoirement
+   *  commencer AU-DESSUS du labyrinthe — pas naturel sur mobile, où
+   *  le pouce est souvent en bas de l'écran. Écoute maintenant sur
+   *  TOUT l'écran de jeu (#sg : HUD, canvas, D-pad, et l'espace vide
+   *  en dessous), pas seulement le canvas.
+   *
+   *  Le D-pad (.dpad-btn) est explicitement exclu du DÉMARRAGE d'un
+   *  geste de swipe : il a déjà son propre mécanisme dédié
+   *  (ontouchstart → setDesiredDir direct) — laisser le swipe
+   *  démarrer dessus aussi créerait un risque de conflit (un tap qui
+   *  dérape légèrement pourrait être interprété comme un swipe dans
+   *  une autre direction que le bouton pressé).
+   *
+   *  touch-action:none est appliqué uniquement sur #sg (voir CSS),
+   *  pas sur tout le document — cet écran est déjà plein-écran sans
+   *  scroll nécessaire, donc aucun effet de bord ailleurs dans le site. */
   function attachSwipeControls() {
-    const canvasEl = document.getElementById('mazeCanvas');
-    let touchStartX = 0, touchStartY = 0;
-    canvasEl.addEventListener('touchstart', (e) => {
+    const gameScreen = document.getElementById('sg');
+    let touchStartX = 0, touchStartY = 0, trackingSwipe = false;
+    gameScreen.addEventListener('touchstart', (e) => {
+      if (e.target.closest('.dpad-btn')) { trackingSwipe = false; return; }
       const t = e.touches[0];
       touchStartX = t.clientX; touchStartY = t.clientY;
+      trackingSwipe = true;
     }, { passive: true });
-    canvasEl.addEventListener('touchend', (e) => {
+    gameScreen.addEventListener('touchend', (e) => {
+      if (!trackingSwipe) return;
       const t = e.changedTouches[0];
       const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
       if (Math.abs(dx) < 20 && Math.abs(dy) < 20) return; // tap simple, pas un glissement

@@ -70,6 +70,12 @@ html,body{width:100%;min-height:100%;font-family:'Nunito',sans-serif;background:
 .stock-pile .badge{position:absolute;bottom:-4px;right:-4px;background:var(--co);color:#000;font-size:8px;font-weight:800;border-radius:8px;padding:1px 4px;}
 
 .column{width:40px;min-height:120px;display:flex;flex-direction:column;position:relative;}
+/* Paysage : les colonnes profitent vraiment de la largeur disponible
+   au lieu de rester à 40px fixes (qui gaspillait ~450px sur un écran
+   de 844px de large en paysage). 10 colonnes + espacements du .board. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .column{width:calc((100vw - 48px) / 10);}
+}
 .spider-card{width:40px;height:54px;border-radius:6px;position:absolute;left:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;cursor:pointer;transition:box-shadow .15s;border:1px solid rgba(0,0,0,.25);}
 .spider-card.up{background:linear-gradient(145deg,#f5f0e6,#e2dcc8);box-shadow:0 2px 4px rgba(0,0,0,.3);}
 .spider-card.down{background:linear-gradient(145deg,#1e3a5f,#152a47);border-color:var(--border2);}
@@ -90,6 +96,17 @@ html,body{width:100%;min-height:100%;font-family:'Nunito',sans-serif;background:
 .stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
 .ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+
+/* ═══ ORIENTATION HELPER — bloc canonique réutilisable tel quel dans
+   tout jeu nécessitant le paysage (voir Mahjong pour un 2e exemple).
+   Ne dépend d'aucun service partagé au runtime : ces jeux sont des
+   fichiers HTML autonomes, pas de vrai système de modules commun. ═══ */
+#orientationOverlay{position:fixed;inset:0;z-index:99999;background:rgba(6,16,31,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;text-align:center;padding:20px;}
+#orientationOverlay .oo-icon{font-size:48px;animation:oo-rotate 1.8s ease-in-out infinite;}
+#orientationOverlay .oo-text{font-family:'Fredoka One',cursive;font-size:18px;}
+#orientationOverlay .oo-sub{font-size:13px;color:#93a3b8;}
+@keyframes oo-rotate{0%,100%{transform:rotate(0deg);}50%{transform:rotate(90deg);}}
+.oo-home-btn{margin-top:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -236,7 +253,48 @@ let usedUndo = false;
 
 function setDiff(d) { CONFIG.difficulty = d; ['One','Two','Four'].forEach((k,i) => document.getElementById('diff'+k).classList.toggle('sel', [1,2,4][i]===d)); }
 
+// ═══ ORIENTATION HELPER — bloc JS canonique, identique dans tout jeu
+// nécessitant le paysage. N'assume JAMAIS que screen.orientation.lock()
+// fonctionne (iOS Safari ne le supporte généralement pas du tout ;
+// Android Chrome le refuse souvent hors plein écran) — le vrai
+// mécanisme fonctionnel est l'overlay de rotation manuelle, le lock
+// natif n'est qu'un bonus tenté silencieusement quand disponible. ═══
+const OrientationHelper = (function () {
+  let overlayEl = null, active = false, lockAttempted = false;
+  function isLandscape() { return window.innerWidth > window.innerHeight; }
+  function isMobileLike() { return Math.min(window.innerWidth, window.innerHeight) < 700; }
+  function ensureOverlay() {
+    if (overlayEl) return overlayEl;
+    overlayEl = document.createElement('div');
+    overlayEl.id = 'orientationOverlay';
+    overlayEl.innerHTML = '<div class="oo-icon">↔</div><div class="oo-text">Tourne ton téléphone</div><div class="oo-sub">Passe en mode paysage pour jouer</div><button class="oo-home-btn" onclick="goHome()">🏠 Retour à l’accueil</button>';
+    document.body.appendChild(overlayEl);
+    return overlayEl;
+  }
+  function updateOverlay() {
+    const el = ensureOverlay();
+    el.style.display = (active && isMobileLike() && !isLandscape()) ? 'flex' : 'none';
+  }
+  async function requestLandscapeOrientation() {
+    active = true;
+    updateOverlay();
+    window.addEventListener('resize', updateOverlay);
+    if (!lockAttempted && screen.orientation && screen.orientation.lock) {
+      lockAttempted = true;
+      try { await screen.orientation.lock('landscape'); } catch (e) { /* attendu sur de nombreux navigateurs — pas une erreur réelle, l'overlay reste le vrai mécanisme */ }
+    }
+  }
+  function restoreOrientation() {
+    active = false;
+    window.removeEventListener('resize', updateOverlay);
+    if (overlayEl) overlayEl.style.display = 'none';
+    if (screen.orientation && screen.orientation.unlock) { try { screen.orientation.unlock(); } catch (e) {} }
+  }
+  return { requestLandscapeOrientation, restoreOrientation };
+})();
+
 function startGame() {
+  OrientationHelper.requestLandscapeOrientation();
   const shoe = shuffleArr(buildTwoDeckShoe(CONFIG.difficulty));
   const columns = Array.from({length:10}, () => []);
   // 4 premières colonnes: 6 cartes, 6 dernières: 5 cartes (total 54 distribuées, 50 restent au talon)
@@ -252,11 +310,12 @@ function startGame() {
 }
 function resumeGame() {
   if (!STORE.save) { toast('Aucune partie sauvegardée'); return; }
+  OrientationHelper.requestLandscapeOrientation();
   G = STORE.save.G; CONFIG = STORE.save.CONFIG; selected=null; history=[];
   showScreen('sg'); renderAll(); startTimer(); toast('▶ Partie reprise');
 }
 function persistSave() { STORE.save = { G, CONFIG, elapsed }; saveStore(STORE); }
-function goHome() { stopTimer(); updateHomeStats(); showScreen('sh'); document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none'; }
+function goHome() { OrientationHelper.restoreOrientation(); stopTimer(); updateHomeStats(); showScreen('sh'); document.getElementById('resumeBtn').style.display = STORE.save ? '' : 'none'; }
 async function confirmLeaveGame() { if (G && !G.over) persistSave(); goHome(); }
 async function confirmNewGame() { const ok = await confirmDialog('Nouvelle partie ?', 'La partie en cours sera abandonnée.', 'Nouvelle partie', 'Annuler'); if (ok) startGame(); }
 async function confirmAbandon() { const ok = await confirmDialog('Abandonner ?', 'Cette partie sera comptée comme non gagnée.', 'Abandonner', 'Continuer'); if (ok) { statInc('games'); STORE.save=null; saveStore(STORE); goHome(); } }

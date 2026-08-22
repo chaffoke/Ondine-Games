@@ -165,7 +165,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
 .p4-disc.yellow{background:radial-gradient(circle at 35% 30%,#fde68a,var(--p4-yellow) 60%);}
 .p4-disc.drop{animation:p4drop .45s cubic-bezier(.5,0,.75,1) forwards;}
 @keyframes p4drop{0%{transform:translateY(-420%);}70%{transform:translateY(4%);}85%{transform:translateY(-2%);}100%{transform:translateY(0);}}
-.p4-disc.win{animation:p4win 1s ease-in-out infinite;z-index:3;}
+.p4-disc.win{animation:p4win 1s ease-in-out infinite;z-index:3;transform:translateY(0);}
 @keyframes p4win{0%,100%{box-shadow:inset 0 -4px 8px rgba(0,0,0,.35),0 0 10px rgba(255,255,255,.3);}50%{box-shadow:inset 0 -4px 8px rgba(0,0,0,.35),0 0 24px rgba(255,255,255,.8);}}
 
 /* ── VICTORY ── */
@@ -974,11 +974,11 @@ const NotificationService = (function () {
 //        pas que "victories" est "positif" ou que "errors" est
 //        "négatif" — c'est au jeu d'agir en conséquence).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_stats_${gameId}`; }
+function statsKeyFor(gameId) { return `ondine_stats_${gameId}`; }
 
 function readAll(gameId) {
   try {
-    return JSON.parse(localStorage.getItem(keyFor(gameId)) || '{}');
+    return JSON.parse(localStorage.getItem(statsKeyFor(gameId)) || '{}');
   } catch (e) {
     console.warn('[StatsService] lecture corrompue pour', gameId, e);
     return {};
@@ -986,7 +986,7 @@ function readAll(gameId) {
 }
 
 function writeAll(gameId, data) {
-  localStorage.setItem(keyFor(gameId), JSON.stringify(data));
+  localStorage.setItem(statsKeyFor(gameId), JSON.stringify(data));
 }
 
 const StatsService = {
@@ -1018,7 +1018,7 @@ const StatsService = {
     return all[key];
   },
   getAll(gameId) { return readAll(gameId); },
-  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  reset(gameId) { localStorage.removeItem(statsKeyFor(gameId)); },
 };
 
 
@@ -1033,10 +1033,10 @@ const StatsService = {
 //        vérifié sa propre condition).
 // POSSÈDE : une entrée localStorage par jeu (`ondine_ach_<gameId>`).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_ach_${gameId}`; }
+function achKeyFor(gameId) { return `ondine_ach_${gameId}`; }
 
 function readUnlocked(gameId) {
-  try { return JSON.parse(localStorage.getItem(keyFor(gameId)) || '[]'); }
+  try { return JSON.parse(localStorage.getItem(achKeyFor(gameId)) || '[]'); }
   catch (e) { console.warn('[AchievementsService] lecture corrompue pour', gameId, e); return []; }
 }
 
@@ -1051,11 +1051,11 @@ const AchievementsService = {
     const list = readUnlocked(gameId);
     if (list.includes(achId)) return false;
     list.push(achId);
-    localStorage.setItem(keyFor(gameId), JSON.stringify(list));
+    localStorage.setItem(achKeyFor(gameId), JSON.stringify(list));
     return true;
   },
   unlockedList(gameId) { return readUnlocked(gameId); },
-  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  reset(gameId) { localStorage.removeItem(achKeyFor(gameId)); },
 };
 
 
@@ -1134,21 +1134,21 @@ const AudioService = {
 //        de cet état — c'est entièrement défini par le jeu.
 // POSSÈDE : une entrée localStorage par jeu (`ondine_save_<gameId>`).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_save_${gameId}`; }
+function saveKeyFor(gameId) { return `ondine_save_${gameId}`; }
 
 const SaveService = {
   write(gameId, state) {
-    try { localStorage.setItem(keyFor(gameId), JSON.stringify(state)); return true; }
+    try { localStorage.setItem(saveKeyFor(gameId), JSON.stringify(state)); return true; }
     catch (e) { console.warn('[SaveService] échec de sauvegarde pour', gameId, e); return false; }
   },
   read(gameId) {
     try {
-      const raw = localStorage.getItem(keyFor(gameId));
+      const raw = localStorage.getItem(saveKeyFor(gameId));
       return raw ? JSON.parse(raw) : null;
     } catch (e) { console.warn('[SaveService] sauvegarde corrompue pour', gameId, e); return null; }
   },
-  hasSave(gameId) { return localStorage.getItem(keyFor(gameId)) !== null; },
-  clear(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  hasSave(gameId) { return localStorage.getItem(saveKeyFor(gameId)) !== null; },
+  clear(gameId) { localStorage.removeItem(saveKeyFor(gameId)); },
 };
 
 
@@ -1466,8 +1466,26 @@ function playColumn(col) {
   renderDisc(row, col, G.current, true);
 
   const winCells = findWinCells(G.grid, row, col, G.current);
-  if (winCells) { endGame(G.current, winCells); return; }
-  if (isBoardFull(G.grid)) { endGame('draw', []); return; }
+  const isDraw = !winCells && isBoardFull(G.grid);
+  if (winCells || isDraw) {
+    // Le pion vient de recevoir l'animation de chute .drop (450ms,
+    // voir @keyframes p4drop). AVANT cette correction, endGame()
+    // était appelée en synchrone juste après renderDisc() : flashWinCell()
+    // ajoutait alors immédiatement la classe .win, dont l'animation
+    // p4win (glow, sans transform) ÉCRASE la propriété CSS `animation`
+    // encore active de .drop — le pion gagnant, souvent le dernier posé,
+    // se retrouvait bloqué à sa position de départ hors-champ
+    // (transform:translateY(-420%) du disque de base) : invisible.
+    // On attend donc la fin RÉELLE de l'animation de chute (450ms)
+    // avant de détecter/afficher quoi que ce soit — respecte le flux
+    // chute → pion visible → (court délai) → détection → mise en
+    // évidence → résultat.
+    setTimeout(() => {
+      if (winCells) endGame(G.current, winCells);
+      else endGame('draw', []);
+    }, 480);
+    return;
+  }
 
   G.current = G.current === 1 ? 2 : 1;
   updateTurnIndicator();
@@ -1530,13 +1548,13 @@ function showVictory(winner) {
   if (winner === 'draw') {
     icon.textContent = '🤝'; title.textContent = 'Match nul !'; sub.textContent = 'Grille remplie, personne ne gagne.';
   } else if (CONFIG.mode === 'solo') {
-    icon.textContent = winner === 1 ? '🏆' : '🤖';
-    title.textContent = winner === 1 ? 'Victoire !' : "L'IA gagne...";
-    sub.textContent = winner === 1 ? 'Bien joué !' : 'Retente ta chance !';
+    icon.textContent = winner === 1 ? '🏆' : '😕';
+    title.textContent = winner === 1 ? 'Tu as gagné !' : 'Tu as perdu';
+    sub.textContent = '4 alignés !';
   } else {
     icon.textContent = '🏆';
     title.textContent = (winner === 1 ? 'Rouge' : 'Jaune') + ' gagne !';
-    sub.textContent = 'Belle partie !';
+    sub.textContent = '4 alignés !';
   }
   // IMPORTANT (audit UX fin de partie) : contrairement à showScreen(),
   // on n'affiche PAS svic via un changement d'écran classique — ça

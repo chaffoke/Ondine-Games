@@ -22,3 +22,4 @@ window.replaySame = game.replaySame;
 window.useHint = game.useHint;
 window.confirmQuit = game.confirmQuit;
 window.showStats = game.showStats;
+window.showRules = game.showRules;

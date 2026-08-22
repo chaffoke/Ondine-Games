@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { SIZE, regionCells, generatePuzzle, countSolutions, isValidPlacement, DIFFICULTY_CLUES, ACHIEVEMENTS } from './logic.js';
 import { CHARACTERS, DEFAULT_CHARACTER_ID, getCharacter } from '../../core/data/characters.js';
+import { UI } from '../../core/ui/components.js';
 
 // Les 8 valeurs (1-8) du puzzle sont distinguées par une couleur de
 // badge, PAS par 8 animaux différents — le personnage choisi (un
@@ -331,6 +332,32 @@ export function createUI(sdk) {
   }
   function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
 
+  /** Écran de règles — formulé pour un joueur qui ne connaît PAS déjà
+   *  le concept de Sudoku irrégulier. Décrit le fonctionnement RÉEL du
+   *  jeu (triple contrainte ligne/colonne/région, badges colorés),
+   *  pas une explication générique de Sudoku classique. */
+  function showRules() {
+    const body = document.createElement('div');
+    body.innerHTML = `
+      <p><b>🎯 Objectif</b><br>
+      Remplis toute la grille de symboles, sans jamais qu'un même symbole apparaisse deux fois dans une même ligne, une même colonne, ou une même région.</p>
+      <p><b>🐾 Comment jouer</b><br>
+      1. Touche une case vide pour la sélectionner (elle s'entoure de bleu).<br>
+      2. Touche un des 8 symboles en bas de l'écran pour le placer dedans.</p>
+      <p><b>📋 Règles importantes</b><br>
+      • Un symbole (repéré par sa couleur ET son numéro) ne peut apparaître qu'une seule fois par ligne.<br>
+      • Une seule fois par colonne.<br>
+      • Une seule fois par région — la zone délimitée par un contour blanc épais, de forme libre (pas forcément un carré).<br>
+      • Une case qui devient rouge signale qu'elle enfreint une de ces trois règles.</p>
+      <p><b>🏆 Victoire</b><br>
+      La grille est entièrement remplie, sans aucune case en erreur.</p>
+      <p style="color:var(--text2);font-size:12px;">💡 Un indice ne résout pas le puzzle à ta place — il révèle juste une case au hasard si tu es bloqué.</p>
+    `;
+    const closeBtn = UI.button('Compris !', { variant: 'primary', onClick: () => modal.close() });
+    const modal = UI.modal({ title: '🐱 Comment jouer au Meowdoku ?', bodyEl: body, actions: [closeBtn] });
+    document.body.appendChild(modal.el);
+  }
+
   async function confirmQuit() {
     if (state && !state.over) {
       const ok = await sdk.dialog.confirm('Quitter le puzzle ?', 'Ta progression est sauvegardée automatiquement.', 'Quitter', 'Annuler');
@@ -348,6 +375,6 @@ export function createUI(sdk) {
 
   return {
     init, goHome, selectDifficulty, selectCharacter, startNewPuzzle, resumePuzzle, nextPuzzle, resultToHome, replaySame,
-    useHint, confirmQuit, showStats,
+    useHint, confirmQuit, showStats, showRules,
   };
 }

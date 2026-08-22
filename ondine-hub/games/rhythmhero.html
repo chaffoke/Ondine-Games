@@ -966,11 +966,11 @@ const NotificationService = (function () {
 //        pas que "victories" est "positif" ou que "errors" est
 //        "négatif" — c'est au jeu d'agir en conséquence).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_stats_${gameId}`; }
+function statsKeyFor(gameId) { return `ondine_stats_${gameId}`; }
 
 function readAll(gameId) {
   try {
-    return JSON.parse(localStorage.getItem(keyFor(gameId)) || '{}');
+    return JSON.parse(localStorage.getItem(statsKeyFor(gameId)) || '{}');
   } catch (e) {
     console.warn('[StatsService] lecture corrompue pour', gameId, e);
     return {};
@@ -978,7 +978,7 @@ function readAll(gameId) {
 }
 
 function writeAll(gameId, data) {
-  localStorage.setItem(keyFor(gameId), JSON.stringify(data));
+  localStorage.setItem(statsKeyFor(gameId), JSON.stringify(data));
 }
 
 const StatsService = {
@@ -1010,7 +1010,7 @@ const StatsService = {
     return all[key];
   },
   getAll(gameId) { return readAll(gameId); },
-  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  reset(gameId) { localStorage.removeItem(statsKeyFor(gameId)); },
 };
 
 
@@ -1025,10 +1025,10 @@ const StatsService = {
 //        vérifié sa propre condition).
 // POSSÈDE : une entrée localStorage par jeu (`ondine_ach_<gameId>`).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_ach_${gameId}`; }
+function achKeyFor(gameId) { return `ondine_ach_${gameId}`; }
 
 function readUnlocked(gameId) {
-  try { return JSON.parse(localStorage.getItem(keyFor(gameId)) || '[]'); }
+  try { return JSON.parse(localStorage.getItem(achKeyFor(gameId)) || '[]'); }
   catch (e) { console.warn('[AchievementsService] lecture corrompue pour', gameId, e); return []; }
 }
 
@@ -1043,11 +1043,11 @@ const AchievementsService = {
     const list = readUnlocked(gameId);
     if (list.includes(achId)) return false;
     list.push(achId);
-    localStorage.setItem(keyFor(gameId), JSON.stringify(list));
+    localStorage.setItem(achKeyFor(gameId), JSON.stringify(list));
     return true;
   },
   unlockedList(gameId) { return readUnlocked(gameId); },
-  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  reset(gameId) { localStorage.removeItem(achKeyFor(gameId)); },
 };
 
 
@@ -1126,21 +1126,21 @@ const AudioService = {
 //        de cet état — c'est entièrement défini par le jeu.
 // POSSÈDE : une entrée localStorage par jeu (`ondine_save_<gameId>`).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_save_${gameId}`; }
+function saveKeyFor(gameId) { return `ondine_save_${gameId}`; }
 
 const SaveService = {
   write(gameId, state) {
-    try { localStorage.setItem(keyFor(gameId), JSON.stringify(state)); return true; }
+    try { localStorage.setItem(saveKeyFor(gameId), JSON.stringify(state)); return true; }
     catch (e) { console.warn('[SaveService] échec de sauvegarde pour', gameId, e); return false; }
   },
   read(gameId) {
     try {
-      const raw = localStorage.getItem(keyFor(gameId));
+      const raw = localStorage.getItem(saveKeyFor(gameId));
       return raw ? JSON.parse(raw) : null;
     } catch (e) { console.warn('[SaveService] sauvegarde corrompue pour', gameId, e); return null; }
   },
-  hasSave(gameId) { return localStorage.getItem(keyFor(gameId)) !== null; },
-  clear(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  hasSave(gameId) { return localStorage.getItem(saveKeyFor(gameId)) !== null; },
+  clear(gameId) { localStorage.removeItem(saveKeyFor(gameId)); },
 };
 
 

@@ -41,7 +41,7 @@
 .upg-btn{padding:8px 12px !important;font-size:11px !important;}
 
 /* ── Course ── */
-#sg{padding:8px;gap:6px;align-items:center;}
+#sg{padding:8px;gap:6px;align-items:center;overflow-y:auto;}
 .race-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;}
 .race-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
 #raceCanvas{width:100%;max-width:420px;aspect-ratio:1;border-radius:16px;box-shadow:var(--sh2);}
@@ -66,3 +66,61 @@
 .result-stat .rl{font-size:8px;color:var(--text2);text-transform:uppercase;}
 .result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
 .result-btns button{flex:1;min-width:130px;}
+
+/* Économie idle + améliorations — HUD monétaire en course et grille
+   de cartes réutilisée par le garage ET l'overlay pendant la course. */
+.race-money-row{display:flex;gap:8px;width:100%;max-width:400px;}
+.race-money-item{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-size:12px;font-weight:800;text-align:center;}
+.race-money-item.green{color:var(--cg,#34d399);}
+.upgrade-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:420px;}
+.upgrade-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;}
+.upgrade-card.compact{padding:8px;gap:4px;}
+.uc-head{display:flex;align-items:center;gap:8px;}
+.uc-icon{font-size:18px;}
+.uc-name{font-size:12px;font-weight:800;line-height:1.2;}
+.uc-level{font-size:9px;color:var(--text2);font-weight:600;}
+.uc-values{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.uc-arrow{color:var(--text2);}
+.uc-next{color:var(--cg,#34d399);font-weight:800;}
+.uc-buy{background:var(--c1,#38bdf8);color:#06101f;border:none;border-radius:10px;padding:8px 6px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:4px;min-height:34px;}
+.uc-buy.disabled{background:var(--glass);color:var(--text2);cursor:not-allowed;}
+.uc-cost{font-weight:800;}
+@media (max-width:360px){.upgrade-grid{grid-template-columns:1fr;}}
+
+/* Écran "Choisis ton sport" — 2 colonnes mobile-first, cartes assez
+   grandes pour le tactile, cohérentes avec le style déjà établi
+   (mode-card/variant-card ailleurs dans le projet). */
+#ssport{padding:14px;gap:8px;align-items:center;overflow-y:auto;}
+.sport-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:420px;margin-bottom:10px;}
+.sport-card{background:var(--glass);border:2px solid var(--border);border-radius:16px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .15s;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.sport-card.sel{border-color:var(--c1);background:var(--glass3);transform:translateY(-2px);}
+.sport-card.locked{opacity:.55;}
+.sc-icon{font-size:34px;}
+.sc-name{font-family:'Fredoka One',cursive;font-size:14px;}
+.sc-vehicle{font-size:10px;color:var(--text2);}
+.sc-lock{font-size:9px;color:var(--co,#fbbf24);margin-top:2px;}
+#sportConfirmBtn{width:100%;max-width:420px;}
+#sportConfirmBtn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* Rallye */
+#srallyselect{padding:14px;gap:10px;align-items:center;overflow-y:auto;}
+.rally-track-grid{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px;}
+.rally-track-card{background:var(--glass);border:2px solid var(--border);border-radius:16px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.rally-track-card.sel{border-color:var(--c1);background:var(--glass3);}
+.rtc-icon{font-size:30px;}
+.rtc-name{font-family:'Fredoka One',cursive;font-size:14px;}
+.rtc-diff{font-size:10px;color:var(--text2);margin-top:2px;}
+.rtc-best{font-size:11px;color:var(--cg,#34d399);margin-top:4px;font-weight:700;}
+#srally{padding:8px;gap:6px;align-items:center;overflow-y:auto;}
+#rallyBoostBtn{width:80px;height:80px;border-radius:50%;background:var(--glass);border:3px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;cursor:pointer;color:var(--text2);}
+#rallyBoostBtn.ready{border-color:#fbbf24;color:#fbbf24;box-shadow:0 0 20px rgba(251,191,36,.4);}
+#rallyBoostBtn.active{border-color:var(--c1);color:var(--c1);}
+#rallyBoostBtn span{font-size:9px;font-weight:800;}
+#srallyresult{padding:20px;gap:14px;align-items:center;justify-content:center;}
+.rally-result-card{background:var(--glass);border:1px solid var(--border);border-radius:18px;padding:20px;text-align:center;width:100%;max-width:320px;}
+.rr-label{font-size:11px;color:var(--text2);text-transform:uppercase;margin-top:8px;}
+.rr-time{font-family:'Fredoka One',cursive;font-size:32px;color:var(--c1);}
+.rr-best{font-family:'Fredoka One',cursive;font-size:18px;color:var(--text2);}
+.rr-medal{font-size:18px;font-weight:800;margin-top:12px;}
+.rr-record{font-size:14px;color:#fbbf24;font-weight:800;margin-top:4px;}
+.rr-reward{font-family:'Fredoka One',cursive;font-size:22px;color:var(--cg,#34d399);margin-top:12px;}

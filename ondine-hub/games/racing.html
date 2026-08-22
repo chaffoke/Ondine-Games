@@ -293,7 +293,7 @@ body {
 .upg-btn{padding:8px 12px !important;font-size:11px !important;}
 
 /* ── Course ── */
-#sg{padding:8px;gap:6px;align-items:center;}
+#sg{padding:8px;gap:6px;align-items:center;overflow-y:auto;}
 .race-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;}
 .race-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
 #raceCanvas{width:100%;max-width:420px;aspect-ratio:1;border-radius:16px;box-shadow:var(--sh2);}
@@ -319,6 +319,64 @@ body {
 .result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
 .result-btns button{flex:1;min-width:130px;}
 
+/* Économie idle + améliorations — HUD monétaire en course et grille
+   de cartes réutilisée par le garage ET l'overlay pendant la course. */
+.race-money-row{display:flex;gap:8px;width:100%;max-width:400px;}
+.race-money-item{flex:1;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-size:12px;font-weight:800;text-align:center;}
+.race-money-item.green{color:var(--cg,#34d399);}
+.upgrade-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:420px;}
+.upgrade-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px;}
+.upgrade-card.compact{padding:8px;gap:4px;}
+.uc-head{display:flex;align-items:center;gap:8px;}
+.uc-icon{font-size:18px;}
+.uc-name{font-size:12px;font-weight:800;line-height:1.2;}
+.uc-level{font-size:9px;color:var(--text2);font-weight:600;}
+.uc-values{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.uc-arrow{color:var(--text2);}
+.uc-next{color:var(--cg,#34d399);font-weight:800;}
+.uc-buy{background:var(--c1,#38bdf8);color:#06101f;border:none;border-radius:10px;padding:8px 6px;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:4px;min-height:34px;}
+.uc-buy.disabled{background:var(--glass);color:var(--text2);cursor:not-allowed;}
+.uc-cost{font-weight:800;}
+@media (max-width:360px){.upgrade-grid{grid-template-columns:1fr;}}
+
+/* Écran "Choisis ton sport" — 2 colonnes mobile-first, cartes assez
+   grandes pour le tactile, cohérentes avec le style déjà établi
+   (mode-card/variant-card ailleurs dans le projet). */
+#ssport{padding:14px;gap:8px;align-items:center;overflow-y:auto;}
+.sport-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:420px;margin-bottom:10px;}
+.sport-card{background:var(--glass);border:2px solid var(--border);border-radius:16px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .15s;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.sport-card.sel{border-color:var(--c1);background:var(--glass3);transform:translateY(-2px);}
+.sport-card.locked{opacity:.55;}
+.sc-icon{font-size:34px;}
+.sc-name{font-family:'Fredoka One',cursive;font-size:14px;}
+.sc-vehicle{font-size:10px;color:var(--text2);}
+.sc-lock{font-size:9px;color:var(--co,#fbbf24);margin-top:2px;}
+#sportConfirmBtn{width:100%;max-width:420px;}
+#sportConfirmBtn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* Rallye */
+#srallyselect{padding:14px;gap:10px;align-items:center;overflow-y:auto;}
+.rally-track-grid{display:flex;flex-direction:column;gap:10px;width:100%;max-width:420px;}
+.rally-track-card{background:var(--glass);border:2px solid var(--border);border-radius:16px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.rally-track-card.sel{border-color:var(--c1);background:var(--glass3);}
+.rtc-icon{font-size:30px;}
+.rtc-name{font-family:'Fredoka One',cursive;font-size:14px;}
+.rtc-diff{font-size:10px;color:var(--text2);margin-top:2px;}
+.rtc-best{font-size:11px;color:var(--cg,#34d399);margin-top:4px;font-weight:700;}
+#srally{padding:8px;gap:6px;align-items:center;overflow-y:auto;}
+#rallyBoostBtn{width:80px;height:80px;border-radius:50%;background:var(--glass);border:3px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:22px;cursor:pointer;color:var(--text2);}
+#rallyBoostBtn.ready{border-color:#fbbf24;color:#fbbf24;box-shadow:0 0 20px rgba(251,191,36,.4);}
+#rallyBoostBtn.active{border-color:var(--c1);color:var(--c1);}
+#rallyBoostBtn span{font-size:9px;font-weight:800;}
+#srallyresult{padding:20px;gap:14px;align-items:center;justify-content:center;}
+.rally-result-card{background:var(--glass);border:1px solid var(--border);border-radius:18px;padding:20px;text-align:center;width:100%;max-width:320px;}
+.rr-label{font-size:11px;color:var(--text2);text-transform:uppercase;margin-top:8px;}
+.rr-time{font-family:'Fredoka One',cursive;font-size:32px;color:var(--c1);}
+.rr-best{font-family:'Fredoka One',cursive;font-size:18px;color:var(--text2);}
+.rr-medal{font-size:18px;font-weight:800;margin-top:12px;}
+.rr-record{font-size:14px;color:#fbbf24;font-weight:800;margin-top:4px;}
+.rr-reward{font-family:'Fredoka One',cursive;font-size:22px;color:var(--cg,#34d399);margin-top:12px;}
+
 </style>
 </head>
 <body>
@@ -329,9 +387,63 @@ body {
   <div class="racing-mascot">🐀🕶️</div>
   <div class="ondine-logo">ONDINE RACING</div>
   <div class="ondine-logo-sub">🏎️ Course arcade</div>
-  <button class="ondine-btn ondine-btn-primary" onclick="goSelect()">🏁 Jouer</button>
+  <button class="ondine-btn ondine-btn-primary" onclick="goSportSelect()">🏁 Jouer</button>
   <button class="ondine-btn ondine-btn-secondary" onclick="goGarage()">🔧 Garage</button>
   <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<!-- CHOISIS TON SPORT -->
+<div class="screen hidden" id="ssport">
+  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">←</div>
+  <div class="section-title" style="font-size:20px;">Choisis ton sport</div>
+  <div id="sportUnlockedCount" style="font-size:12px;color:var(--text2);margin-bottom:6px;">1 of 6 unlocked</div>
+  <div class="sport-grid" id="sportGrid"></div>
+  <button class="ondine-btn ondine-btn-primary" id="sportConfirmBtn" onclick="confirmSportSelection()" disabled>Choisir un sport</button>
+</div>
+
+<!-- RALLYE — SÉLECTION DE PARCOURS -->
+<div class="screen hidden" id="srallyselect">
+  <div class="ondine-icon-btn" onclick="goSportSelect()" style="align-self:flex-start;">←</div>
+  <div class="section-title" style="font-size:18px;">Choisis ta spéciale</div>
+  <div class="rally-track-grid" id="rallyTrackList"></div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startRallyRun()">🏁 Prendre le départ</button>
+</div>
+
+<!-- RALLYE — COURSE -->
+<div class="screen hidden" id="srally">
+  <div class="race-hud">
+    <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
+    <div class="race-hud-item">⏱ <span id="rallyTimer">00:00.00</span></div>
+  </div>
+  <div class="race-money-row">
+    <div class="race-money-item">💰 <span id="rallyHudCredits">0</span></div>
+  </div>
+  <canvas id="rallyCanvas" width="420" height="420"></canvas>
+  <div class="boost-row">
+    <div class="boost-gauge"><div id="rallyBoostFill" style="width:100%;"></div></div>
+  </div>
+  <div id="rallyBoostBtn" ontouchstart="onRallyBoostPress()" onclick="onRallyBoostPress()">⚡<span>BOOST</span></div>
+  <div class="section-title" style="margin-top:6px;">Améliorer pendant la spéciale</div>
+  <div class="upgrade-grid" id="rallyUpgrades"></div>
+</div>
+
+<!-- RALLYE — RÉSULTAT -->
+<div class="screen hidden" id="srallyresult">
+  <div class="section-title" style="font-size:20px;">🏁 ARRIVÉE</div>
+  <div class="rally-result-card">
+    <div class="rr-label">Temps</div>
+    <div class="rr-time" id="rallyResultTime">00:00.00</div>
+    <div class="rr-label">Meilleur temps</div>
+    <div class="rr-best" id="rallyResultBest">00:00.00</div>
+    <div class="rr-medal" id="rallyResultMedal"></div>
+    <div class="rr-record" id="rallyResultRecord"></div>
+    <div class="rr-reward" id="rallyResultReward">+$0</div>
+  </div>
+  <div class="result-btns">
+    <button class="ondine-btn ondine-btn-primary" onclick="replayRally()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="rallyBackToSelect()">🗺️ Autre parcours</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
 </div>
 
 <!-- SÉLECTION DE COURSE -->
@@ -361,11 +473,21 @@ body {
     <div class="race-hud-item">Pos. <span id="hudPos">1 / 6</span></div>
     <div class="race-hud-item">Tour <span id="hudLap">1 / 3</span></div>
   </div>
+  <div class="race-money-row">
+    <div class="race-money-item">💰 <span id="hudCredits">0</span></div>
+    <div class="race-money-item green">+<span id="hudRevenue">1.00</span>/s</div>
+  </div>
   <canvas id="raceCanvas" width="420" height="420"></canvas>
   <div class="boost-row">
     <div class="boost-gauge"><div id="boostFill" style="width:100%;"></div></div>
   </div>
   <div id="boostBtn" ontouchstart="onBoostPress()" onclick="onBoostPress()">⚡<span>BOOST</span></div>
+  <!-- Améliorations pendant la course — n'interrompt jamais la course
+       (pas d'écran séparé, pas de pause), juste un panneau compact
+       sous le circuit qui reste visible/scrollable pendant que la
+       course continue en arrière-plan. -->
+  <div class="section-title" style="margin-top:6px;">Améliorer pendant la course</div>
+  <div class="upgrade-grid" id="raceUpgrades"></div>
 </div>
 
 <!-- RÉSULTAT (overlay — le circuit #sg reste visible en dessous) -->
@@ -394,6 +516,34 @@ body {
 
 <script>
 const CoreBundle = (function() {
+// ── data/characters.js ──
+// ═══════════════════════════════════════════════════════════════
+// core/data/characters.js
+// Bibliothèque de personnages partagée entre les jeux Ondine Games
+// qui proposent un choix d'animal cosmétique (Puzzle Mosaïque,
+// Labyrinthe, et les futurs jeux qui en auraient besoin).
+// Extensible : ajouter un objet à ce tableau suffit à faire
+// apparaître un nouveau personnage dans TOUS les jeux qui
+// consomment cette liste — aucune duplication de logique par animal.
+// ═══════════════════════════════════════════════════════════════
+const CHARACTERS = [
+  { id: 'cat',    name: 'Chat',      symbol: '🐱' },
+  { id: 'dog',    name: 'Chien',     symbol: '🐶' },
+  { id: 'rat',    name: 'Rat',       symbol: '🐭' },
+  { id: 'fox',    name: 'Renard',    symbol: '🦊' },
+  { id: 'rabbit', name: 'Lapin',     symbol: '🐰' },
+  { id: 'panda',  name: 'Panda',     symbol: '🐼' },
+  { id: 'frog',   name: 'Grenouille',symbol: '🐸' },
+  { id: 'koala',  name: 'Koala',     symbol: '🐨' },
+];
+
+const DEFAULT_CHARACTER_ID = 'cat';
+
+function getCharacter(id) {
+  return CHARACTERS.find(c => c.id === id) || CHARACTERS.find(c => c.id === DEFAULT_CHARACTER_ID);
+}
+
+
 // ── storage/keys.js ──
 // ═══════════════════════════════════════════════════════════════
 // core/storage/keys.js
@@ -1492,7 +1642,7 @@ const GameRegistry = {
 };
 
 
-return { readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
+return { getCharacter, CHARACTERS, DEFAULT_CHARACTER_ID, readNamespaced, writeNamespaced, removeNamespaced, hasNamespaced, shuffle, createGrid, inBounds, getCell, setCell, forEachCell, neighbors4, neighbors8, floodFill, countAligned, createDeck, draw, deal, reshuffleDiscardIntoDeck, rollDie, rollDice, createDicePool, rollUnlocked, toggleLock, countValues, chooseBestMove, chooseRandomMove, search, AIEngine, createSnapshotStore, UI, mount, show, NotificationService, StatsService, AchievementsService, tone, AudioService, SaveService, DialogService, NavigationService, createSDK, GameRegistry };
 })();
 
 // ── jeu (imports résolus par concaténation) ──
@@ -1511,6 +1661,31 @@ const { createSDK, UI, NotificationService } = CoreBundle;
 // simulations IA (300×3 difficultés) sans blocage ni état incohérent,
 // avec différenciation réelle prouvée entre les 3 niveaux.
 // ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// SPORTS — architecture data-driven, un seul moteur réel pour
+// l'instant ('racing', qui réutilise le moteur circuit existant).
+// Les autres sports sont volontairement des placeholders "à venir" :
+// pas de faux gameplay, aucun sport ne peut être lancé tant que
+// hasEngine n'est pas true. physicsProfile/vehicleProfile/
+// economyProfile sont préparés pour de futures phases (non lus par
+// le moteur actuel), pour éviter une restructuration complète quand
+// les vrais moteurs Rallye/Stock Car/etc. seront développés.
+// ═══════════════════════════════════════════════════════════════
+const SPORTS = {
+  racing:      { id: 'racing',      order: 1, name: 'Course',        icon: '🏎️', desc: 'Circuit classique, vitesse pure.', vehicleType: 'Formule',      hasEngine: true,  defaultUnlocked: true,  unlockCondition: null,
+    physicsProfile: 'circuit', vehicleProfile: 'formula', economyProfile: 'standard' },
+  rally:       { id: 'rally',       order: 2, name: 'Rallye',        icon: '🚗', desc: 'Terrains variés, conduite technique.', vehicleType: 'Rallye',    hasEngine: true,  defaultUnlocked: false, unlockCondition: 'Débloqué au niveau 2',
+    physicsProfile: 'offroad', vehicleProfile: 'rally', economyProfile: 'standard' },
+  stockCar:    { id: 'stockCar',    order: 3, name: 'Stock Car',     icon: '🏁', desc: 'Ovale, contact, stratégie.', vehicleType: 'Stock Car',      hasEngine: false, defaultUnlocked: false, unlockCondition: 'Bientôt disponible',
+    physicsProfile: 'oval', vehicleProfile: 'stockcar', economyProfile: 'standard' },
+  superbike:   { id: 'superbike',   order: 4, name: 'Superbike',     icon: '🏍️', desc: 'Moto, prise de risque maximale.', vehicleType: 'Moto',        hasEngine: false, defaultUnlocked: false, unlockCondition: 'Bientôt disponible',
+    physicsProfile: 'bike', vehicleProfile: 'superbike', economyProfile: 'standard' },
+  speedster:   { id: 'speedster',   order: 5, name: 'Speedster',     icon: '⚡', desc: 'Vitesse extrême en ligne.', vehicleType: 'Prototype',        hasEngine: false, defaultUnlocked: false, unlockCondition: 'Bientôt disponible',
+    physicsProfile: 'drag', vehicleProfile: 'speedster', economyProfile: 'standard' },
+  monsterTruck:{ id: 'monsterTruck',order: 6, name: 'Monster Truck', icon: '🚛', desc: 'Franchissement, spectacle.', vehicleType: 'Monster Truck',     hasEngine: false, defaultUnlocked: false, unlockCondition: 'Bientôt disponible',
+    physicsProfile: 'offroad-heavy', vehicleProfile: 'monstertruck', economyProfile: 'standard' },
+};
 
 const TRACKS = {
   cote_sirenes: {
@@ -1538,7 +1713,39 @@ const TRACKS = {
     colors: { bg: '#2a0a1a', track: '#4a1030', accent: '#f472b6' },
     waypoints: [[50,10],[70,18],[90,30],[78,42],[90,58],[75,72],[85,88],[55,85],[45,68],[25,75],[10,55],[30,45],[10,30],[30,15]],
   },
+  // ═══ RALLYE — 3 tracés distincts, fusionnés dans TRACKS (préfixe
+  // rally_) pour réutiliser tel quel computeTrackGeometry/trackPointAt
+  // sans aucune modification du moteur de géométrie. rallyMeta porte
+  // les données propres au contre-la-montre (difficulté, seuils de
+  // récompense) — jamais lues par le moteur Course. ═══
+  rally_forest: {
+    id: 'rally_forest', name: 'Spéciale Forêt', icon: '🌲', theme: 'forest',
+    colors: { bg: '#0a1f14', track: '#123320', accent: '#34d399' },
+    waypoints: [[15,15],[35,12],[42,28],[30,35],[45,45],[60,32],[75,40],[70,58],[85,62],[80,80],[60,85],[45,70],[28,75],[20,55],[35,50],[18,38]],
+    rallyMeta: { difficulty: 'Technique', desc: 'Virages serrés, parcours exigeant.', goldTime: 24, silverTime: 30, bronzeTime: 40 },
+  },
+  rally_mountain: {
+    id: 'rally_mountain', name: 'Spéciale Montagne', icon: '⛰️', theme: 'snow',
+    colors: { bg: '#0e2333', track: '#1c3d52', accent: '#e0f2fe' },
+    waypoints: [[50,10],[78,22],[85,45],[65,55],[80,70],[55,88],[30,80],[20,60],[35,50],[15,35],[30,15]],
+    rallyMeta: { difficulty: 'Moyen', desc: 'Grandes courbes, changements de direction.', goldTime: 21, silverTime: 27, bronzeTime: 35 },
+  },
+  rally_desert: {
+    id: 'rally_desert', name: 'Spéciale Désert', icon: '🏜️', theme: 'volcano',
+    colors: { bg: '#2a1a0a', track: '#4a3010', accent: '#fbbf24' },
+    waypoints: [[10,50],[30,15],[60,20],[90,10],[92,40],[70,45],[85,75],[55,90],[30,80],[12,85]],
+    rallyMeta: { difficulty: 'Rapide', desc: 'Longues portions, vitesse pure.', goldTime: 24, silverTime: 30, bronzeTime: 40 },
+  },
 };
+
+// Liste explicite des circuits COURSE — indispensable maintenant que
+// les circuits Rallye (rally_*) sont fusionnés dans le même objet
+// TRACKS (pour réutiliser computeTrackGeometry/trackPointAt tel
+// quel) : la progression de niveau qui débloque des circuits Course
+// ne doit JAMAIS itérer sur Object.keys(TRACKS) directement, sous
+// peine de débloquer un circuit Rallye par erreur.
+const COURSE_TRACK_IDS = ['cote_sirenes', 'ondine_city', 'foret_nocturne', 'mont_blizzard', 'volcan_violet'];
+const RALLY_TRACK_IDS = ['rally_forest', 'rally_mountain', 'rally_desert'];
 
 function dist(a, b) { return Math.hypot(b[0]-a[0], b[1]-a[1]); }
 function computeTrackGeometry(track) {
@@ -1629,6 +1836,42 @@ function upgradeBonus(upgrades) {
   };
 }
 
+// ═══════════════════════════════════════════════════════════════
+// AMÉLIORATIONS — architecture générique, catégories Performance et
+// Économie. Chaque définition suffit à calculer coût/bonus à
+// n'importe quel niveau (pas de plafond artificiel comme l'ancien
+// système à 3 paliers fixes) : cost(level) = baseCost * growth^level.
+// Performance (engine/turbo/tires/boost) alimente upgradeBonus()
+// ci-dessus, donc un achat modifie réellement tickRace() au tick
+// suivant. Économie (marketing/sponsors) alimente le revenu passif,
+// géré côté UI (n'a pas sa place dans la physique de course).
+// ═══════════════════════════════════════════════════════════════
+const UPGRADES_DEF = {
+  engine:    { name: 'Moteur',        icon: '🏎️', category: 'performance', baseCost: 20, growth: 1.15, bonusPerLevel: 2.5, unit: '%', desc: 'Vitesse de pointe' },
+  turbo:     { name: 'Turbo',         icon: '⚡', category: 'performance', baseCost: 20, growth: 1.15, bonusPerLevel: 6,   unit: '%', desc: 'Accélération en sortie de virage' },
+  tires:     { name: 'Pneus',         icon: '🛞', category: 'performance', baseCost: 20, growth: 1.15, bonusPerLevel: 8,   unit: '%', desc: 'Adhérence en virage' },
+  boost:     { name: 'Boost',         icon: '💥', category: 'performance', baseCost: 25, growth: 1.18, bonusPerLevel: 8,   unit: '%', desc: 'Puissance du bouton BOOST manuel (pas l\u2019accélération)' },
+  marketing: { name: 'Marketing',     icon: '📣', category: 'economie',    baseCost: 15, growth: 1.12, bonusPerLevel: 0.15, unit: '$/s', desc: 'Revenu passif' },
+  sponsors:  { name: 'Sponsors',      icon: '🤝', category: 'economie',    baseCost: 35, growth: 1.14, bonusPerLevel: 0.30, unit: '$/s', desc: 'Revenu passif (sponsors majeurs)' },
+};
+
+/** Coût pour acheter le PROCHAIN niveau (passer de `level` à `level+1`). */
+function upgradeCost(type, level) {
+  const def = UPGRADES_DEF[type];
+  return Math.round(def.baseCost * Math.pow(def.growth, level));
+}
+
+/** Revenu passif total ($/s), calculé depuis les upgrades économie. */
+function computeRevenuePerSec(upgrades) {
+  const u = upgrades || {};
+  let total = 1; // revenu de base, cohérent avec l'affichage initial "$1/s" déjà présent dans le projet
+  Object.keys(UPGRADES_DEF).forEach((type) => {
+    const def = UPGRADES_DEF[type];
+    if (def.category === 'economie') total += (u[type] || 0) * def.bonusPerLevel;
+  });
+  return Math.round(total * 100) / 100;
+}
+
 function createCar(slotId, carDefId, name, icon, color, isPlayer, upgrades, strategyId) {
   return {
     slotId, carDef: carDefId, name, icon, color, isPlayer,
@@ -1683,7 +1926,17 @@ function tickRace(race, boostRequests) {
     const progressInLap = car.progress % geo.total;
     const track = trackPointAt(race.trackId, progressInLap);
     const cornerPenalty = (1 - track.speedMultiplier) * (1 - carDef.cornerGrip) * (1 - bonus.gripBonus);
-    let speed = carDef.baseSpeed * bonus.speedBonus * strat.speedMult * (1 - cornerPenalty);
+    // accelBonus (Turbo) : le moteur n'a pas de notion de vitesse qui
+    // monte progressivement (calcul instantané à chaque tick, pas une
+    // simulation d'inertie) — donc "accélération" est modélisée comme
+    // la capacité à conserver plus de vitesse en sortant d'un virage
+    // (où cornerPenalty est le plus fort). Réduit le malus de virage
+    // proportionnellement à accelBonus, plutôt qu'un simple bonus
+    // plat qui ferait doublon avec Moteur (speedBonus). BUG CORRIGÉ :
+    // accelBonus était déjà calculé dans upgradeBonus() mais jamais
+    // utilisé ici — le Turbo n'avait donc jusqu'ici aucun effet réel.
+    const accelReduction = (bonus.accelBonus - 1); // ex: 0.06 pour turbo niveau 1
+    let speed = carDef.baseSpeed * bonus.speedBonus * strat.speedMult * (1 - cornerPenalty * (1 - accelReduction));
     if (car.boosting > 0) {
       speed *= carDef.boostPower * bonus.boostBonus;
       car.boosting--;
@@ -1722,6 +1975,85 @@ function tickRace(race, boostRequests) {
 // ═══════════════════════════════════════════════════════════════
 const REWARD_TABLE = { 1: 150, 2: 110, 3: 85, 4: 60, 5: 40, 6: 25 };
 const XP_TABLE =     { 1: 80,  2: 60,  3: 45,  4: 30, 5: 20, 6: 10 };
+
+// ═══════════════════════════════════════════════════════════════
+// RALLYE — moteur contre-la-montre, séparé du moteur multi-voitures
+// de Course mais réutilisant tout ce qui est générique : upgradeBonus,
+// trackPointAt/getGeometry (mêmes TRACKS fusionnés), CARS, les
+// constantes de boost. Différences volontaires : 1 seule voiture (pas
+// d'IA, pas de classement), chronométré en TEMPS RÉEL (dtMs variable
+// venant de requestAnimationFrame côté UI, pas un tick fixe), et un
+// profil physique "spéciale" où les virages pénalisent davantage
+// (RALLY_CORNER_WEIGHT), cohérent avec "davantage d'importance à
+// l'adhérence" demandé.
+// ═══════════════════════════════════════════════════════════════
+const RALLY_CORNER_WEIGHT = 1.4;
+
+function createRallyRun(trackId, carDefId, upgrades) {
+  return {
+    trackId, carDef: carDefId,
+    upgrades: upgrades || { engine: 0, turbo: 0, tires: 0, boost: 0 },
+    progress: 0, finished: false, elapsedMs: 0,
+    boostMeter: BOOST_MAX, boosting: 0, currentSpeed: 0, boostsUsed: 0,
+  };
+}
+
+/** Avance la simulation d'un pas de TEMPS RÉEL (dtMs, venant de
+ *  requestAnimationFrame côté UI) — pas un tick fixe, pour que le
+ *  chronomètre reste juste même si le framerate varie. Retourne un
+ *  NOUVEL objet (immuable, même convention que tickRace). */
+function tickRallyRun(run, dtMs, boostRequested) {
+  if (run.finished) return run;
+  const r = { ...run };
+  if (boostRequested) tryActivateRallyBoost(r);
+
+  const carDef = CARS[r.carDef];
+  const bonus = upgradeBonus(r.upgrades);
+  const geo = getGeometry(r.trackId);
+  const track = trackPointAt(r.trackId, r.progress);
+  const accelReduction = (bonus.accelBonus - 1);
+  const rawCornerPenalty = (1 - track.speedMultiplier) * (1 - carDef.cornerGrip) * (1 - bonus.gripBonus) * RALLY_CORNER_WEIGHT;
+  const cornerPenalty = Math.min(0.92, rawCornerPenalty); // jamais figer complètement la voiture
+  let speed = carDef.baseSpeed * bonus.speedBonus * (1 - cornerPenalty * (1 - accelReduction));
+  if (r.boosting > 0) {
+    speed *= carDef.boostPower * bonus.boostBonus;
+    r.boosting = Math.max(0, r.boosting - dtMs);
+  }
+  r.currentSpeed = speed;
+  // même échelle que le moteur Course (speed = unités/tick de TICK_MS),
+  // converti proportionnellement au vrai temps écoulé.
+  r.progress += speed * (dtMs / TICK_MS);
+  r.elapsedMs += dtMs;
+  r.boostMeter = Math.min(BOOST_MAX, r.boostMeter + (BOOST_REGEN_PER_TICK / TICK_MS) * dtMs);
+
+  if (r.progress >= geo.total && !r.finished) {
+    r.finished = true;
+    r.progress = geo.total;
+  }
+  return r;
+}
+
+function tryActivateRallyBoost(run) {
+  if (run.boosting > 0 || run.boostMeter < BOOST_COST) return false;
+  run.boostMeter -= BOOST_COST;
+  run.boosting = BOOST_DURATION_TICKS * TICK_MS; // durée identique à Course, exprimée en ms
+  run.boostsUsed = (run.boostsUsed || 0) + 1;
+  return true;
+}
+
+/** Résultat bronze/argent/or selon les seuils définis DANS les
+ *  données du parcours (rallyMeta), jamais codés en dur dans l'UI —
+ *  cohérent avec l'exigence explicite. Récompense cohérente avec
+ *  l'économie actuelle (échelle proche de REWARD_TABLE de Course). */
+function computeRallyResult(track, elapsedMs) {
+  const seconds = elapsedMs / 1000;
+  const meta = track.rallyMeta;
+  let medal = null, credits = 20; // participation minimale
+  if (seconds <= meta.goldTime) { medal = 'gold'; credits = 120; }
+  else if (seconds <= meta.silverTime) { medal = 'silver'; credits = 70; }
+  else if (seconds <= meta.bronzeTime) { medal = 'bronze'; credits = 40; }
+  return { seconds, medal, credits };
+}
 
 function computeRewards(playerCar, difficulty) {
   const diffMult = { easy: 0.8, normal: 1, hard: 1.3 }[difficulty] || 1;
@@ -1778,7 +2110,6 @@ function aiShouldBoost(car, difficulty, trackId, rng = Math.random) {
 // ═══════════════════════════════════════════════════════════════
 
 
-const UPGRADE_COST = { engine: [80,160,280], turbo: [80,160,280], tires: [80,160,280], boost: [80,160,280] };
 const STARTING_CREDITS = 200;
 
 function createUI(sdk) {
@@ -1791,16 +2122,83 @@ function createUI(sdk) {
   let over = false;
   let canvas, ctx;
   let rankAtLastLapStart = null; // pour l'achievement "Dépassement de Dernière Seconde"
+  let lastIncomeCheckAt = null; // référence de temps RÉEL pour le calcul du revenu — jamais basé sur le nombre de ticks écoulés (setInterval peut dériver, un timestamp ne dérive pas)
 
   function loadProfile() {
     const saved = sdk.save.read();
     profile = saved || {
       credits: STARTING_CREDITS, xp: 0, level: 1, selectedCar: 'purple_rocket',
-      upgrades: { engine: 0, turbo: 0, tires: 0, boost: 0 },
+      upgrades: { engine: 0, turbo: 0, tires: 0, boost: 0, marketing: 0, sponsors: 0 },
       unlockedTracks: ['cote_sirenes'], records: {}, winStreak: 0, tracksWon: [],
     };
+    // Migration : anciennes sauvegardes n'ont pas les clés économie —
+    // les ajouter sans jamais perdre les niveaux déjà acquis (engine/
+    // turbo/tires/boost restent intacts, migration additive seulement).
+    if (profile.upgrades.marketing === undefined) profile.upgrades.marketing = 0;
+    if (profile.upgrades.sponsors === undefined) profile.upgrades.sponsors = 0;
+    // Migration additive : structure "sports" (phase 3). N'écrase
+    // jamais une progression existante — seulement complétée si
+    // absente. Course reste toujours débloqué (racing.defaultUnlocked
+    // = true), les autres respectent leur propre défaut.
+    if (!profile.racing) profile.racing = { selectedSport: null, sports: {} };
+    Object.keys(SPORTS).forEach((id) => {
+      if (!profile.racing.sports[id]) {
+        profile.racing.sports[id] = { unlocked: SPORTS[id].defaultUnlocked };
+      }
+    });
+    // Migration additive Rallye : meilleurs temps par parcours,
+    // jamais écrasés — un parcours jamais joué est juste absent de
+    // l'objet (pas de valeur inventée).
+    if (!profile.racing.rallyBestTimes) profile.racing.rallyBestTimes = {};
+    lastIncomeCheckAt = Date.now();
+    checkSportUnlocks();
   }
   function saveProfile() { sdk.save.write(profile); }
+
+  /** Condition de déblocage réelle et persistée : Rallye se débloque
+   *  au niveau 2 (réutilise le système XP/niveau déjà existant, pas
+   *  de nouvelle monnaie ni de nouvelle mécanique de progression).
+   *  Vérifiée au chargement ET après chaque gain d'XP (voir addXp),
+   *  jamais un simple `unlocked: true` figé en dur. */
+  function checkSportUnlocks() {
+    if (!profile.racing.sports.rally.unlocked && profile.level >= 2) {
+      profile.racing.sports.rally.unlocked = true;
+      sdk.toast.show('🏁 Rallye débloqué !');
+    }
+  }
+
+  let selectedSportId = null; // sélection en cours sur l'écran "Choisis ton sport", pas encore confirmée
+
+  function currentRevenuePerSec() { return computeRevenuePerSec(profile.upgrades); }
+
+  /** Calcul du revenu idle basé sur un VRAI timestamp écoulé, pas sur
+   *  un compteur de ticks — reste juste même si le navigateur ralentit
+   *  ou si setInterval dérive. Appelé à chaque tick de la boucle de
+   *  course ET par un second intervalle léger hors course (voir
+   *  startIncomeLoop), pour que le revenu tourne aussi hors course. */
+  function tickIncome() {
+    const now = Date.now();
+    const elapsedSec = (now - lastIncomeCheckAt) / 1000;
+    lastIncomeCheckAt = now;
+    if (elapsedSec <= 0) return;
+    profile.credits += currentRevenuePerSec() * elapsedSec;
+  }
+
+  let incomeInterval = null;
+  function startIncomeLoop() {
+    stopIncomeLoop();
+    incomeInterval = setInterval(() => { tickIncome(); refreshMoneyDisplays(); }, 500);
+  }
+  function stopIncomeLoop() { if (incomeInterval) { clearInterval(incomeInterval); incomeInterval = null; } }
+
+  /** Met à jour tous les affichages d'argent/revenu présents à l'écran
+   *  (accueil, garage, ET le HUD pendant une course), sans dépendre
+   *  d'un re-render complet coûteux à chaque tick. */
+  function refreshMoneyDisplays() {
+    document.querySelectorAll('[data-credits-display]').forEach((el) => { el.textContent = Math.floor(profile.credits); });
+    document.querySelectorAll('[data-revenue-display]').forEach((el) => { el.textContent = currentRevenuePerSec().toFixed(2); });
+    if (document.getElementById('sg') && !document.getElementById('sg').classList.contains('hidden')) renderUpgradePanel();
+  }
 
   function xpForNextLevel(level) { return 100 + (level - 1) * 60; }
   function addXp(amount) {
@@ -1810,32 +2208,315 @@ function createUI(sdk) {
       profile.level++;
       sdk.toast.show(`🎉 Niveau ${profile.level} !`);
       const nextTrackIdx = profile.level - 1;
-      const allTracks = Object.keys(TRACKS);
+      const allTracks = COURSE_TRACK_IDS; // JAMAIS Object.keys(TRACKS) — voir commentaire dans logic.js
       if (nextTrackIdx < allTracks.length && !profile.unlockedTracks.includes(allTracks[nextTrackIdx])) {
         profile.unlockedTracks.push(allTracks[nextTrackIdx]);
         sdk.toast.show(`🏁 Nouveau circuit débloqué : ${TRACKS[allTracks[nextTrackIdx]].name}`);
       }
     }
+    checkSportUnlocks();
   }
 
   function goHome() { stopRaceLoop(); renderHome(); sdk.navigation.go('sh'); }
   function goSelect() { renderSelect(); sdk.navigation.go('sselect'); }
+
+  function goSportSelect() { selectedSportId = profile.racing.selectedSport; renderSportSelect(); sdk.navigation.go('ssport'); }
+
+  function selectSport(id) {
+    const sport = SPORTS[id];
+    if (!profile.racing.sports[id].unlocked) { sdk.toast.show(sport.unlockCondition || 'Verrouillé'); return; }
+    selectedSportId = id;
+    renderSportSelect();
+  }
+
+  function confirmSportSelection() {
+    if (!selectedSportId) return;
+    const sport = SPORTS[selectedSportId];
+    if (!sport.hasEngine) { sdk.toast.show('Ce sport n\u2019a pas encore de moteur de course — bientôt disponible !'); return; }
+    profile.racing.selectedSport = selectedSportId;
+    saveProfile();
+    if (selectedSportId === 'rally') goRallySelect();
+    else goSelect(); // Course réutilise l'écran de sélection de circuit existant, inchangé
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // RALLYE — sélection de parcours, boucle de jeu temps réel, résultat.
+  // ═══════════════════════════════════════════════════════════════
+  let rallySelectedTrackId = null;
+  let rallyRun = null;
+  let rallyAnimFrame = null;
+  let rallyLastTs = null;
+  let rallyFinishHandled = false; // garde-fou anti double-crédit/double-déclenchement
+
+  function goRallySelect() {
+    if (!rallySelectedTrackId) rallySelectedTrackId = RALLY_TRACK_IDS[0];
+    renderRallySelect();
+    sdk.navigation.go('srallyselect');
+  }
+
+  function selectRallyTrack(id) { rallySelectedTrackId = id; renderRallySelect(); }
+
+  function renderRallySelect() {
+    const host = document.getElementById('rallyTrackList');
+    host.innerHTML = '';
+    RALLY_TRACK_IDS.forEach((id) => {
+      const t = TRACKS[id];
+      const best = profile.racing.rallyBestTimes[id];
+      const el = document.createElement('div');
+      el.className = 'rally-track-card' + (id === rallySelectedTrackId ? ' sel' : '');
+      el.innerHTML = `
+        <div class="rtc-icon">${t.icon}</div>
+        <div class="rtc-info">
+          <div class="rtc-name">${t.name}</div>
+          <div class="rtc-diff">${t.rallyMeta.difficulty} — ${t.rallyMeta.desc}</div>
+          <div class="rtc-best">${best ? `🏆 Record : ${formatRallyTime(best)}` : 'Pas encore de temps enregistré'}</div>
+        </div>`;
+      el.onclick = () => selectRallyTrack(id);
+      host.appendChild(el);
+    });
+  }
+
+  function formatRallyTime(ms) {
+    const totalSec = ms / 1000;
+    const min = Math.floor(totalSec / 60);
+    const sec = (totalSec - min * 60).toFixed(2);
+    return `${String(min).padStart(2, '0')}:${sec.padStart(5, '0')}`;
+  }
+
+  function startRallyRun() {
+    if (!rallySelectedTrackId) rallySelectedTrackId = RALLY_TRACK_IDS[0];
+    rallyRun = createRallyRun(rallySelectedTrackId, profile.selectedCar, profile.upgrades);
+    rallyFinishHandled = false;
+    sdk.navigation.go('srally');
+    canvas = document.getElementById('rallyCanvas');
+    ctx = canvas.getContext('2d');
+    const displaySize = canvas.clientWidth || 420;
+    canvas.width = displaySize; canvas.height = displaySize;
+    renderUpgradePanel();
+    rallyLastTs = null;
+    if (rallyAnimFrame) cancelAnimationFrame(rallyAnimFrame);
+    rallyAnimFrame = requestAnimationFrame(rallyLoop);
+  }
+
+  /** Boucle temps réel — dtMs calculé depuis performance.now(), donc
+   *  le chronomètre reste juste quel que soit le framerate réel de
+   *  l'appareil (exigence explicite : jamais un compteur de frames). */
+  function rallyLoop(ts) {
+    if (!rallyRun) return;
+    if (rallyLastTs === null) rallyLastTs = ts;
+    const dtMs = Math.min(100, ts - rallyLastTs); // plafonne les sauts (ex: onglet mis en arrière-plan) pour éviter un bond de progression irréaliste
+    rallyLastTs = ts;
+    rallyRun = tickRallyRun(rallyRun, dtMs, rallyBoostRequested);
+    rallyBoostRequested = false;
+    renderRallyFrame();
+    if (rallyRun.finished) { finishRallyRun(); return; }
+    rallyAnimFrame = requestAnimationFrame(rallyLoop);
+  }
+
+  let rallyBoostRequested = false;
+  function onRallyBoostPress() {
+    if (!rallyRun || rallyRun.finished) return;
+    if (rallyRun.boostMeter < BOOST_COST || rallyRun.boosting > 0) { sdk.audio.play('error'); return; }
+    rallyBoostRequested = true;
+  }
+
+  function renderRallyFrame() {
+    if (!rallyRun) return;
+    const W = canvas.width, H = canvas.height;
+    const track = TRACKS[rallyRun.trackId];
+    const geo = getGeometry(rallyRun.trackId);
+    ctx.fillStyle = track.colors.bg;
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = track.colors.track;
+    ctx.lineWidth = W * 0.09;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath();
+    geo.wp.forEach(([x,y], i) => {
+      const px = (x/100)*W, py = (y/100)*H;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    });
+    ctx.closePath();
+    ctx.stroke();
+    ctx.strokeStyle = track.colors.accent;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 10]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ligne de départ — même logique que Course (position géométrique
+    // réelle à progress=0, jamais un point arbitraire)
+    {
+      const startPt = trackPointAt(rallyRun.trackId, 0);
+      const spx = (startPt.x/100)*W, spy = (startPt.y/100)*H;
+      const trackWidth = W * 0.09;
+      const nSquares = 8;
+      const squareLen = trackWidth / nSquares;
+      const lineThickness = W * 0.014;
+      ctx.save();
+      ctx.translate(spx, spy);
+      ctx.rotate((startPt.angle||0) * Math.PI/180);
+      for (let i = 0; i < nSquares; i++) {
+        ctx.fillStyle = (i % 2 === 0) ? '#0a0a0a' : '#f5f5f5';
+        ctx.fillRect(-lineThickness/2, -trackWidth/2 + i*squareLen, lineThickness, squareLen);
+      }
+      ctx.restore();
+    }
+
+    const pt = trackPointAt(rallyRun.trackId, rallyRun.progress % geo.total);
+    const px = (pt.x/100)*W, py = (pt.y/100)*H;
+    if (rallyRun.boosting > 0) {
+      ctx.beginPath(); ctx.arc(px, py, W*0.035, 0, Math.PI*2);
+      ctx.fillStyle = CARS[rallyRun.carDef].color + '55'; ctx.fill();
+    }
+    ctx.save();
+    ctx.translate(px, py); ctx.rotate((pt.angle||0) * Math.PI/180);
+    ctx.beginPath();
+    ctx.moveTo(W*0.018, 0); ctx.lineTo(-W*0.012, W*0.011); ctx.lineTo(-W*0.012, -W*0.011);
+    ctx.closePath();
+    ctx.fillStyle = CARS[rallyRun.carDef].color;
+    ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.restore();
+
+    document.getElementById('rallyTimer').textContent = formatRallyTime(rallyRun.elapsedMs);
+    document.getElementById('rallyBoostFill').style.width = `${rallyRun.boostMeter}%`;
+    document.getElementById('rallyBoostBtn').classList.toggle('ready', rallyRun.boostMeter >= BOOST_COST && rallyRun.boosting === 0);
+    document.getElementById('rallyBoostBtn').classList.toggle('active', rallyRun.boosting > 0);
+    const creditsEl = document.getElementById('rallyHudCredits');
+    if (creditsEl) creditsEl.textContent = Math.floor(profile.credits);
+  }
+
+  /** Fin de spéciale — protégée contre le double-déclenchement
+   *  (rallyFinishHandled) : rallyLoop pourrait en théorie planifier un
+   *  requestAnimationFrame de plus avant que la navigation ne quitte
+   *  l'écran, cette garde évite un double-crédit dans ce cas. */
+  function finishRallyRun() {
+    if (rallyFinishHandled) return;
+    rallyFinishHandled = true;
+    if (rallyAnimFrame) { cancelAnimationFrame(rallyAnimFrame); rallyAnimFrame = null; }
+    const track = TRACKS[rallyRun.trackId];
+    const result = computeRallyResult(track, rallyRun.elapsedMs);
+    const previousBest = profile.racing.rallyBestTimes[rallyRun.trackId];
+    const isNewRecord = !previousBest || rallyRun.elapsedMs < previousBest;
+    if (isNewRecord) profile.racing.rallyBestTimes[rallyRun.trackId] = rallyRun.elapsedMs;
+    profile.credits += result.credits;
+    addXp(Math.round(result.credits / 2));
+    sdk.stats.increment('rallyRuns');
+    if (result.medal) sdk.stats.increment('rallyMedals');
+    saveProfile();
+
+    document.getElementById('rallyResultTime').textContent = formatRallyTime(rallyRun.elapsedMs);
+    document.getElementById('rallyResultBest').textContent = formatRallyTime(profile.racing.rallyBestTimes[rallyRun.trackId]);
+    document.getElementById('rallyResultMedal').textContent = result.medal ? { gold: '🥇 OR', silver: '🥈 ARGENT', bronze: '🥉 BRONZE' }[result.medal] : 'Pas de médaille — réessaie !';
+    document.getElementById('rallyResultRecord').textContent = isNewRecord && previousBest ? '🎉 NOUVEAU RECORD !' : (isNewRecord ? '' : '');
+    document.getElementById('rallyResultReward').textContent = `+$${result.credits}`;
+    sdk.navigation.go('srallyresult');
+    sdk.audio.play(result.medal ? 'win' : 'lose');
+  }
+
+  function replayRally() { startRallyRun(); }
+  function rallyBackToSelect() { goRallySelect(); }
+
+
+  /** Débloque un sport — pas encore de vraie condition joueur dans
+   *  cette phase (les 5 sports hors Course restent volontairement "à
+   *  venir", sans moteur), mais l'architecture de déblocage/sauvegarde
+   *  est réelle et testable dès maintenant. */
+  function unlockSport(id) {
+    if (!profile.racing.sports[id]) return;
+    profile.racing.sports[id].unlocked = true;
+    saveProfile();
+    renderSportSelect();
+  }
+
+  function renderSportSelect() {
+    const unlockedCount = Object.values(profile.racing.sports).filter((s) => s.unlocked).length;
+    const totalCount = Object.keys(SPORTS).length;
+    document.getElementById('sportUnlockedCount').textContent = `${unlockedCount} of ${totalCount} unlocked`;
+    const grid = document.getElementById('sportGrid');
+    grid.innerHTML = '';
+    Object.values(SPORTS).sort((a, b) => a.order - b.order).forEach((sport) => {
+      const state = profile.racing.sports[sport.id];
+      const el = document.createElement('div');
+      el.className = 'sport-card' + (state.unlocked ? '' : ' locked') + (selectedSportId === sport.id ? ' sel' : '');
+      el.innerHTML = `
+        <div class="sc-icon">${sport.icon}</div>
+        <div class="sc-name">${sport.name}</div>
+        <div class="sc-vehicle">${sport.vehicleType}</div>
+        ${state.unlocked ? '' : `<div class="sc-lock">🔒 ${sport.unlockCondition || 'Verrouillé'}</div>`}
+      `;
+      el.onclick = () => selectSport(sport.id);
+      grid.appendChild(el);
+    });
+    const confirmBtn = document.getElementById('sportConfirmBtn');
+    const canConfirm = selectedSportId && profile.racing.sports[selectedSportId].unlocked;
+    confirmBtn.disabled = !canConfirm;
+    confirmBtn.textContent = canConfirm && SPORTS[selectedSportId].hasEngine ? '🏁 Choisir ce sport' : (canConfirm ? '🔜 Bientôt disponible' : 'Choisir un sport');
+  }
   function goGarage() { renderGarage(); sdk.navigation.go('sgarage'); }
 
   function selectTrack(trackId) { selectedTrackId = trackId; renderSelect(); }
   function selectDifficulty(d) { selectedDifficulty = d; renderSelect(); }
   function selectCar(carId) { profile.selectedCar = carId; saveProfile(); renderGarage(); }
 
+  /** Achat d'amélioration, réutilisable À TOUT MOMENT (garage entre
+   *  les courses OU pendant une course en cours). Si une course est
+   *  active, modifie DIRECTEMENT race.cars[playerIdx].upgrades — pas
+   *  seulement profile.upgrades — car upgradeBonus() est appelée
+   *  fraîchement à CHAQUE tick de tickRace() à partir de car.upgrades,
+   *  une copie indépendante prise au lancement de la course (voir
+   *  createRace). Sans cette synchronisation explicite, l'achat
+   *  n'aurait aucun effet avant la course SUIVANTE. */
   function buyUpgrade(type) {
     const level = profile.upgrades[type];
-    if (level >= 3) { sdk.toast.show('Amélioration maximale atteinte'); return; }
-    const cost = UPGRADE_COST[type][level];
+    const cost = upgradeCost(type, level);
     if (profile.credits < cost) { sdk.toast.show('Crédits insuffisants'); sdk.audio.play('error'); return; }
     profile.credits -= cost;
     profile.upgrades[type]++;
+    if (race && !race.over) {
+      const playerCar = race.cars.find((c) => c.isPlayer);
+      if (playerCar) playerCar.upgrades[type] = profile.upgrades[type];
+    }
+    if (rallyRun && !rallyRun.finished) rallyRun.upgrades[type] = profile.upgrades[type];
     saveProfile();
     sdk.audio.play('success');
-    renderGarage();
+    if (document.getElementById('sgarage') && !document.getElementById('sgarage').classList.contains('hidden')) renderGarage();
+    renderUpgradePanel();
+  }
+
+  /** Panneau d'amélioration générique — rendu commun au garage ET à
+   *  l'overlay pendant la course (même structure, même logique de
+   *  coût/bonus, un seul endroit à maintenir). */
+  function renderUpgradeCards(hostId, { compact = false } = {}) {
+    const host = document.getElementById(hostId);
+    if (!host) return;
+    host.innerHTML = '';
+    Object.keys(UPGRADES_DEF).forEach((type) => {
+      const def = UPGRADES_DEF[type];
+      const level = profile.upgrades[type];
+      const cost = upgradeCost(type, level);
+      const current = (level * def.bonusPerLevel).toFixed(def.unit === '$/s' ? 2 : 0);
+      const next = ((level + 1) * def.bonusPerLevel).toFixed(def.unit === '$/s' ? 2 : 0);
+      const canAfford = profile.credits >= cost;
+      const card = document.createElement('div');
+      card.className = 'upgrade-card' + (compact ? ' compact' : '');
+      card.innerHTML = `
+        <div class="uc-head"><div class="uc-icon">${def.icon}</div><div class="uc-name">${def.name}<div class="uc-level">Nv. ${level}</div></div></div>
+        <div class="uc-values">${current}${def.unit} <span class="uc-arrow">→</span> <span class="uc-next">${next}${def.unit}</span></div>
+        <button class="uc-buy${canAfford ? '' : ' disabled'}" data-type="${type}">Améliorer <span class="uc-cost">$${cost}</span></button>
+      `;
+      card.querySelector('.uc-buy').onclick = () => buyUpgrade(type);
+      host.appendChild(card);
+    });
+  }
+
+  function renderUpgradePanel() {
+    // pendant une course (Course OU Rallye) : sous-ensemble compact,
+    // visible sans quitter l'écran de course. Rafraîchit les DEUX
+    // conteneurs s'ils existent — un seul est réellement affiché à la
+    // fois (l'autre écran est caché), donc pas de coût inutile.
+    if (document.getElementById('raceUpgrades')) renderUpgradeCards('raceUpgrades', { compact: true });
+    if (document.getElementById('rallyUpgrades')) renderUpgradeCards('rallyUpgrades', { compact: true });
   }
 
   function startRace() {
@@ -1854,6 +2535,7 @@ function createUI(sdk) {
     const displaySize = canvas.clientWidth || 420;
     canvas.width = displaySize; canvas.height = displaySize;
     renderRaceFrame();
+    renderUpgradePanel();
     startRaceLoop();
   }
 
@@ -1910,7 +2592,7 @@ function createUI(sdk) {
       if (!profile.tracksWon.includes(selectedTrackId)) profile.tracksWon.push(selectedTrackId);
       sdk.achievements.unlock('first_win', 'Première Victoire', '🏆');
       if (profile.winStreak >= 3) sdk.achievements.unlock('streak_3', '3 Victoires Consécutives', '🔥');
-      if (profile.tracksWon.length >= Object.keys(TRACKS).length) sdk.achievements.unlock('champion', 'Champion', '👑');
+      if (profile.tracksWon.length >= COURSE_TRACK_IDS.length) sdk.achievements.unlock('champion', 'Champion', '👑');
       sdk.audio.play('win');
     } else {
       profile.winStreak = 0;
@@ -1975,6 +2657,34 @@ function createUI(sdk) {
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // Ligne de départ/arrivée — positionnée à progress=0, exactement là
+    // où les voitures démarrent réellement (voir logic.js: `progress: 0`
+    // à l'initialisation), pas un point arbitraire. Perpendiculaire au
+    // sens de course (angle + 90°), damier noir/blanc classique,
+    // largeur cohérente avec celle de la piste tracée ci-dessus.
+    {
+      const startPt = trackPointAt(selectedTrackId, 0);
+      const spx = (startPt.x/100)*W, spy = (startPt.y/100)*H;
+      const trackWidth = W * 0.09;
+      const nSquares = 8;
+      const squareLen = trackWidth / nSquares;
+      const lineThickness = W * 0.014;
+      ctx.save();
+      ctx.translate(spx, spy);
+      ctx.rotate((startPt.angle||0) * Math.PI/180);
+      // le damier est perpendiculaire au déplacement : on dessine donc
+      // les cases le long de l'axe Y local (largeur de la piste), avec
+      // une petite épaisseur le long de l'axe X local (sens de course)
+      for (let i = 0; i < nSquares; i++) {
+        ctx.fillStyle = (i % 2 === 0) ? '#0a0a0a' : '#f5f5f5';
+        ctx.fillRect(-lineThickness/2, -trackWidth/2 + i*squareLen, lineThickness, squareLen);
+      }
+      ctx.strokeStyle = 'rgba(0,0,0,.5)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-lineThickness/2, -trackWidth/2, lineThickness, trackWidth);
+      ctx.restore();
+    }
+
     race.cars.forEach((car) => {
       const lapProgress = car.progress % geo.total;
       const pt = trackPointAt(selectedTrackId, lapProgress);
@@ -2002,6 +2712,10 @@ function createUI(sdk) {
     document.getElementById('boostFill').style.width = `${player.boostMeter}%`;
     document.getElementById('boostBtn').classList.toggle('ready', player.boostMeter >= BOOST_COST && player.boosting === 0);
     document.getElementById('boostBtn').classList.toggle('active', player.boosting > 0);
+    const creditsEl = document.getElementById('hudCredits');
+    const revenueEl = document.getElementById('hudRevenue');
+    if (creditsEl) creditsEl.textContent = Math.floor(profile.credits);
+    if (revenueEl) revenueEl.textContent = currentRevenuePerSec().toFixed(2);
   }
 
   function renderHome() {
@@ -2013,7 +2727,7 @@ function createUI(sdk) {
     if (!selectedTrackId) selectedTrackId = profile.unlockedTracks[profile.unlockedTracks.length-1];
     const host = document.getElementById('trackList');
     host.innerHTML = '';
-    Object.values(TRACKS).forEach((t) => {
+    Object.values(TRACKS).filter((t) => COURSE_TRACK_IDS.includes(t.id)).forEach((t) => {
       const unlocked = profile.unlockedTracks.includes(t.id);
       const el = document.createElement('div');
       el.className = 'track-card' + (t.id === selectedTrackId ? ' sel' : '') + (unlocked ? '' : ' locked');
@@ -2028,7 +2742,7 @@ function createUI(sdk) {
   }
 
   function renderGarage() {
-    document.getElementById('garageCredits').textContent = `💰 ${profile.credits}`;
+    document.getElementById('garageCredits').textContent = `💰 ${Math.floor(profile.credits)}`;
     const carHost = document.getElementById('carList');
     carHost.innerHTML = '';
     Object.values(CARS).forEach((c) => {
@@ -2041,20 +2755,7 @@ function createUI(sdk) {
       carHost.appendChild(el);
     });
 
-    const upgHost = document.getElementById('upgradeList');
-    upgHost.innerHTML = '';
-    const labels = { engine: ['🔧 Moteur','+ vitesse max'], turbo: ['🌀 Turbo','+ accélération'], tires: ['🛞 Pneus','+ adhérence'], boost: ['⚡ Boost','+ puissance boost'] };
-    Object.keys(labels).forEach((key) => {
-      const level = profile.upgrades[key];
-      const maxed = level >= 3;
-      const cost = maxed ? null : UPGRADE_COST[key][level];
-      const el = document.createElement('div');
-      el.className = 'upg-card';
-      el.innerHTML = `<div class="upg-info"><div class="upg-name">${labels[key][0]}</div><div class="upg-sub">${labels[key][1]} — niveau ${level}/3</div></div>
-        <button class="ondine-btn ondine-btn-secondary upg-btn" ${maxed ? 'disabled' : ''}>${maxed ? 'MAX' : `+${cost}💰`}</button>`;
-      if (!maxed) el.querySelector('button').onclick = () => buyUpgrade(key);
-      upgHost.appendChild(el);
-    });
+    renderUpgradeCards('upgradeList');
   }
 
   function renderAchievements() {
@@ -2070,11 +2771,13 @@ function createUI(sdk) {
   }
   function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
 
-  function init() { loadProfile(); renderHome(); }
+  function init() { loadProfile(); startIncomeLoop(); renderHome(); }
 
   return {
     init, goHome, goSelect, goGarage, selectTrack, selectDifficulty, selectCar, buyUpgrade,
     startRace, onBoostPress, replayRace, nextRace, resultToGarage, resultToHome, showStats,
+    goSportSelect, selectSport, confirmSportSelection, unlockSport,
+    goRallySelect, selectRallyTrack, startRallyRun, onRallyBoostPress, replayRally, rallyBackToSelect,
   };
 }
 
@@ -2106,6 +2809,16 @@ window.nextRace = game.nextRace;
 window.resultToGarage = game.resultToGarage;
 window.resultToHome = game.resultToHome;
 window.showStats = game.showStats;
+window.goSportSelect = game.goSportSelect;
+window.selectSport = game.selectSport;
+window.confirmSportSelection = game.confirmSportSelection;
+window.unlockSport = game.unlockSport;
+window.goRallySelect = game.goRallySelect;
+window.selectRallyTrack = game.selectRallyTrack;
+window.startRallyRun = game.startRallyRun;
+window.onRallyBoostPress = game.onRallyBoostPress;
+window.replayRally = game.replayRally;
+window.rallyBackToSelect = game.rallyBackToSelect;
 
 </script>
 </body>

@@ -77,6 +77,14 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
 .ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
 .ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+
+/* ═══ ORIENTATION HELPER — bloc canonique identique à Spider ═══ */
+#orientationOverlay{position:fixed;inset:0;z-index:99999;background:rgba(6,16,31,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;text-align:center;padding:20px;}
+#orientationOverlay .oo-icon{font-size:48px;animation:oo-rotate 1.8s ease-in-out infinite;}
+#orientationOverlay .oo-text{font-family:'Fredoka One',cursive;font-size:18px;}
+#orientationOverlay .oo-sub{font-size:13px;color:#93a3b8;}
+@keyframes oo-rotate{0%,100%{transform:rotate(0deg);}50%{transform:rotate(90deg);}}
+.oo-home-btn{margin-top:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -279,9 +287,45 @@ const TILE_W = 32, TILE_H = 42, STEP_X = 30, STEP_Y = 39, LAYER_OFFSET = 7;
 // (STEP_X/STEP_Y/LAYER_OFFSET) ET à la taille visuelle (TILE_W/TILE_H) —
 // les deux doivent toujours varier ensemble, sinon les tuiles se
 // chevauchent ou laissent des trous (elles sont positionnées en absolu).
+// ═══ ORIENTATION HELPER — bloc canonique identique à Spider ═══
+const OrientationHelper = (function () {
+  let overlayEl = null, active = false, lockAttempted = false;
+  function isLandscape() { return window.innerWidth > window.innerHeight; }
+  function isMobileLike() { return Math.min(window.innerWidth, window.innerHeight) < 700; }
+  function ensureOverlay() {
+    if (overlayEl) return overlayEl;
+    overlayEl = document.createElement('div');
+    overlayEl.id = 'orientationOverlay';
+    overlayEl.innerHTML = '<div class="oo-icon">↔</div><div class="oo-text">Tourne ton téléphone</div><div class="oo-sub">Passe en mode paysage pour jouer</div><button class="oo-home-btn" onclick="goHome()">🏠 Retour à l’accueil</button>';
+    document.body.appendChild(overlayEl);
+    return overlayEl;
+  }
+  function updateOverlay() {
+    const el = ensureOverlay();
+    el.style.display = (active && isMobileLike() && !isLandscape()) ? 'flex' : 'none';
+  }
+  async function requestLandscapeOrientation() {
+    active = true;
+    updateOverlay();
+    window.addEventListener('resize', updateOverlay);
+    if (!lockAttempted && screen.orientation && screen.orientation.lock) {
+      lockAttempted = true;
+      try { await screen.orientation.lock('landscape'); } catch (e) { /* attendu sur de nombreux navigateurs */ }
+    }
+  }
+  function restoreOrientation() {
+    active = false;
+    window.removeEventListener('resize', updateOverlay);
+    if (overlayEl) overlayEl.style.display = 'none';
+    if (screen.orientation && screen.orientation.unlock) { try { screen.orientation.unlock(); } catch (e) {} }
+  }
+  return { requestLandscapeOrientation, restoreOrientation };
+})();
+
 function getScale() { return window.innerWidth >= 900 ? 1.55 : 1; }
 
 function startGame() {
+  OrientationHelper.requestLandscapeOrientation();
   const positions = buildLayerPyramid();
   const pairs = generateRemovalOrder(positions);
   // 128 tuiles / 4 par type = exactement 32 types nécessaires. TILE_TYPES en
@@ -298,7 +342,7 @@ function startGame() {
   renderBoard();
   startTimer();
 }
-function goHome() { stopTimer(); updateHomeStats(); showScreen('sh'); }
+function goHome() { OrientationHelper.restoreOrientation(); stopTimer(); updateHomeStats(); showScreen('sh'); }
 // Re-rendu si la fenêtre change de largeur en cours de partie (ex: rotation
 // tablette, redimensionnement navigateur) — sans cela, l'échelle resterait
 // figée sur celle du chargement initial.

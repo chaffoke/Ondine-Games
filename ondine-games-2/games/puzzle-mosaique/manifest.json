@@ -1,10 +1,10 @@
 {
   "id": "puzzle-mosaique",
-  "name": "Puzzle Mosaïque",
-  "icon": "🧩",
+  "name": "Meowdoku",
+  "icon": "🐱",
   "category": "reflexion",
-  "description": "Sudoku irrégulier 8×8 à régions libres. Choisis ton personnage, générateur testé sur 100 puzzles, unicité de solution garantie et vérifiée indépendamment.",
+  "description": "Le Sudoku à pattes de velours. Grille 8×8 à régions libres, choisis ton personnage, règles expliquées en jeu.",
   "minPlayers": 1,
   "maxPlayers": 1,
-  "version": "2.0.0"
+  "version": "2.1.0"
 }

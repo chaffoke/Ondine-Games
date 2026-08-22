@@ -122,7 +122,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
 
 </style>
 <style>
-:root{ --u-red:#f87171; --u-yellow:#fbbf24; --u-green:#34d399; --u-blue:#38bdf8; }
+:root{ --u-red:#f87171; --u-yellow:#fbbf24; --u-green:#34d399; --u-blue:#38bdf8;
+  --u-pink:#f472b6; --u-teal:#2dd4bf; --u-purple:#a78bfa; --u-orange:#fb923c; }
 .screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
 .screen.hidden{display:none!important;}
 
@@ -138,6 +139,14 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
 .mode-card.sel{border-color:var(--c1);background:var(--glass3);}
 .mode-icon{font-size:22px;margin-bottom:4px;}
 .mode-name{font-family:'Fredoka One',cursive;font-size:13px;}
+.variant-grid{display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px;}
+.variant-card{background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:12px;}
+.variant-card.sel{border-color:var(--c1);background:var(--glass3);}
+.variant-card .v-icon{font-size:28px;}
+.variant-card .v-info{flex:1;text-align:left;}
+.variant-card .v-name{font-family:'Fredoka One',cursive;font-size:15px;}
+.variant-card .v-desc{font-size:11px;color:var(--text2);margin-top:2px;}
+.variant-card .v-rules-btn{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:11px;white-space:nowrap;}
 .count-row{display:flex;gap:8px;width:100%;max-width:300px;}
 .count-btn{flex:1;background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:10px 0;text-align:center;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;}
 .count-btn.sel{border-color:var(--c1);background:var(--glass3);color:var(--c1);}
@@ -145,7 +154,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
 .hstats{display:flex;gap:7px;width:100%;max-width:300px;}
 
 /* ── GAME ── */
-#sg{background:transparent;}
+#sg{background:transparent;overflow-y:auto;}
 .game-header{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;flex-shrink:0;}
 .dir-badge{font-family:'Fredoka One',cursive;font-size:20px;color:var(--c2);}
 
@@ -163,20 +172,38 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
 .uno-card.color-yellow{background:linear-gradient(160deg,#fde68a,var(--u-yellow) 70%);}
 .uno-card.color-green{background:linear-gradient(160deg,#6ee7b7,var(--u-green) 70%);}
 .uno-card.color-blue{background:linear-gradient(160deg,#7dd3fc,var(--u-blue) 70%);}
+.uno-card.color-pink{background:linear-gradient(160deg,#fbcfe8,var(--u-pink) 70%);}
+.uno-card.color-teal{background:linear-gradient(160deg,#99f6e4,var(--u-teal) 70%);}
+.uno-card.color-purple{background:linear-gradient(160deg,#ddd6fe,var(--u-purple) 70%);}
+.uno-card.color-orange{background:linear-gradient(160deg,#fed7aa,var(--u-orange) 70%);}
+/* Flip : bordure distincte selon la face active, pour que la
+   différence Light/Dark soit immédiatement visible, pas juste
+   déductible de la couleur. */
+.uno-card.flip-dark{border:2px solid #1e1b2e;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);}
+.uno-card.flip-light{border:2px solid rgba(255,255,255,.6);}
 .uno-card.back{background:linear-gradient(145deg,#0d1633,#152348);border-color:rgba(56,189,248,.3);font-size:16px;color:var(--c2);cursor:pointer;}
 .uno-card.playable{cursor:pointer;transform:translateY(0);transition:transform .15s;}
 .uno-card.playable:active{transform:translateY(-6px) scale(1.04);}
 .uno-card.disabled{opacity:.4;filter:grayscale(.5);}
+/* Pile de pioche mise en évidence quand le joueur DOIT piocher (aucune
+   carte jouable) — pulsation discrète, pas agressive. */
+.uno-card.must-draw{animation:uno-must-draw 1.1s ease-in-out infinite;box-shadow:0 0 0 3px var(--co),0 4px 14px rgba(0,0,0,.4);}
+@keyframes uno-must-draw{0%,100%{transform:scale(1);}50%{transform:scale(1.03);}}
 .current-color-ring{position:absolute;inset:-6px;border-radius:16px;border:3px solid transparent;pointer-events:none;}
 
-.hand-wrap{flex-shrink:0;padding:8px 8px 14px;overflow-x:auto;white-space:nowrap;}
-.hand{display:inline-flex;gap:6px;padding:0 6px;}
+.hand-wrap{flex-shrink:0;padding:8px 8px 14px;}
+.sort-row{display:flex;gap:8px;justify-content:center;padding-top:4px;}
+.sort-btn{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;color:var(--text2);}
+.sort-btn.sel{border-color:var(--c1);color:var(--c1);background:var(--glass3);}
+.hand{display:flex;flex-wrap:wrap;gap:6px;padding:0 6px;justify-content:center;}
 
 .draw-hint{font-size:11px;color:var(--text2);text-align:center;padding:2px 0;}
+.draw-hint.alert{color:var(--co);font-weight:800;font-size:13px;}
 
 /* Color picker overlay */
-#colorPicker{position:fixed;inset:0;z-index:9400;background:rgba(6,8,30,.9);backdrop-filter:blur(14px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
+#colorPicker{position:fixed;inset:0;z-index:9400;background:transparent;}
 #colorPicker.hidden{display:none!important;}
+.cp-box{position:fixed;top:8px;left:8px;right:8px;background:rgba(10,16,40,.97);backdrop-filter:blur(14px);border:1px solid var(--border2);border-radius:18px;box-shadow:var(--sh2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px;max-width:340px;margin:0 auto;}
 .cp-title{font-family:'Fredoka One',cursive;font-size:16px;color:var(--c2);}
 .cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .cp-swatch{width:70px;height:70px;border-radius:16px;cursor:pointer;box-shadow:var(--sh);transition:transform .12s;}
@@ -202,6 +229,25 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
   <div class="logo">UNO</div>
   <div class="logo-sub">× Ondine</div>
 
+  <div class="section-title">Variante</div>
+  <div class="variant-grid" id="variantGrid">
+    <div class="variant-card sel" data-variant="classic" onclick="setVariant('classic')">
+      <div class="v-icon">🎴</div>
+      <div class="v-info"><div class="v-name">Classique</div><div class="v-desc">Le UNO traditionnel.</div></div>
+      <div class="v-rules-btn" onclick="event.stopPropagation();showVariantRules('classic')">❓ Règles</div>
+    </div>
+    <div class="variant-card" data-variant="flip" onclick="setVariant('flip')">
+      <div class="v-icon">🔄</div>
+      <div class="v-info"><div class="v-name">Flip</div><div class="v-desc">Deux faces, des règles plus agressives.</div></div>
+      <div class="v-rules-btn" onclick="event.stopPropagation();showVariantRules('flip')">❓ Règles</div>
+    </div>
+    <div class="variant-card" data-variant="noMercy" onclick="setVariant('noMercy')">
+      <div class="v-icon">💀</div>
+      <div class="v-info"><div class="v-name">No Mercy</div><div class="v-desc">Des règles beaucoup plus brutales.</div></div>
+      <div class="v-rules-btn" onclick="event.stopPropagation();showVariantRules('noMercy')">❓ Règles</div>
+    </div>
+  </div>
+
   <div class="section-title">Mode</div>
   <div class="mode-grid">
     <div class="mode-card sel" id="modeSolo" onclick="setMode('solo')">
@@ -217,6 +263,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
 
   <div class="hbtns" style="margin-top:8px;">
     <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🃏 Nouvelle partie</button>
+    <button class="ondine-btn ondine-btn-secondary" id="resumeBtnUno" onclick="resumeGame()" style="display:none;">↩️ Reprendre</button>
     <button class="ondine-btn ondine-btn-secondary" onclick="showScreen('sstats')">📊 Statistiques & Succès</button>
   </div>
 
@@ -239,17 +286,32 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
     </div>
     <div class="draw-hint" id="drawHint"></div>
   </div>
+  <div class="sort-row">
+    <div class="sort-btn" id="sortColorBtn" onclick="setHandSort('color')">🎨 Couleur</div>
+    <div class="sort-btn" id="sortValueBtn" onclick="setHandSort('value')">🔢 Valeur</div>
+  </div>
   <div class="hand-wrap"><div class="hand" id="hand"></div></div>
 </div>
 
 <!-- Color picker (jouer un Wild) -->
-<div id="colorPicker" class="hidden">
-  <div class="cp-title">Choisis une couleur</div>
-  <div class="cp-grid">
-    <div class="cp-swatch" style="background:var(--u-red)" onclick="pickColor('red')"></div>
-    <div class="cp-swatch" style="background:var(--u-yellow)" onclick="pickColor('yellow')"></div>
-    <div class="cp-swatch" style="background:var(--u-green)" onclick="pickColor('green')"></div>
-    <div class="cp-swatch" style="background:var(--u-blue)" onclick="pickColor('blue')"></div>
+<!-- #colorPicker : capture TOUS les clics sur l'écran entier pendant le
+     choix de couleur (plein écran, transparent) — c'est la vraie
+     correction du bug Wild+4 : avant, la main restait cliquable
+     PENDANT l'attente du choix, ce qui pouvait faire jouer une AUTRE
+     carte entre-temps, décalant les index et invalidant celui du
+     Wild+4 en attente. La boîte visible (#colorPickerBox) reste
+     positionnée en haut, compacte, pour que la main reste VISIBLE —
+     seule l'INTERACTIVITÉ du reste de l'écran est bloquée, pas sa
+     visibilité. -->
+<div id="colorPicker" class="hidden" onclick="event.stopPropagation()">
+  <div class="cp-box" id="colorPickerBox">
+    <div class="cp-title">Choisis une couleur</div>
+    <div class="cp-grid" id="cpGrid">
+      <div class="cp-swatch" id="cpSwatch0"></div>
+      <div class="cp-swatch" id="cpSwatch1"></div>
+      <div class="cp-swatch" id="cpSwatch2"></div>
+      <div class="cp-swatch" id="cpSwatch3"></div>
+    </div>
   </div>
 </div>
 
@@ -271,6 +333,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
   </div>
   <div style="width:100%;overflow-y:auto;padding-bottom:30px;">
     <div class="stats-grid" id="statsGrid"></div>
+    <div class="section-title" style="margin-bottom:8px;">Par variante</div>
+    <div id="statsByVariant" style="width:100%;display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
     <div class="section-title" style="margin-bottom:8px;">Succès</div>
     <div class="ach-list" id="achList"></div>
   </div>
@@ -986,11 +1050,11 @@ const NotificationService = (function () {
 //        pas que "victories" est "positif" ou que "errors" est
 //        "négatif" — c'est au jeu d'agir en conséquence).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_stats_${gameId}`; }
+function statsKeyFor(gameId) { return `ondine_stats_${gameId}`; }
 
 function readAll(gameId) {
   try {
-    return JSON.parse(localStorage.getItem(keyFor(gameId)) || '{}');
+    return JSON.parse(localStorage.getItem(statsKeyFor(gameId)) || '{}');
   } catch (e) {
     console.warn('[StatsService] lecture corrompue pour', gameId, e);
     return {};
@@ -998,7 +1062,7 @@ function readAll(gameId) {
 }
 
 function writeAll(gameId, data) {
-  localStorage.setItem(keyFor(gameId), JSON.stringify(data));
+  localStorage.setItem(statsKeyFor(gameId), JSON.stringify(data));
 }
 
 const StatsService = {
@@ -1030,7 +1094,7 @@ const StatsService = {
     return all[key];
   },
   getAll(gameId) { return readAll(gameId); },
-  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  reset(gameId) { localStorage.removeItem(statsKeyFor(gameId)); },
 };
 
 
@@ -1045,10 +1109,10 @@ const StatsService = {
 //        vérifié sa propre condition).
 // POSSÈDE : une entrée localStorage par jeu (`ondine_ach_<gameId>`).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_ach_${gameId}`; }
+function achKeyFor(gameId) { return `ondine_ach_${gameId}`; }
 
 function readUnlocked(gameId) {
-  try { return JSON.parse(localStorage.getItem(keyFor(gameId)) || '[]'); }
+  try { return JSON.parse(localStorage.getItem(achKeyFor(gameId)) || '[]'); }
   catch (e) { console.warn('[AchievementsService] lecture corrompue pour', gameId, e); return []; }
 }
 
@@ -1063,11 +1127,11 @@ const AchievementsService = {
     const list = readUnlocked(gameId);
     if (list.includes(achId)) return false;
     list.push(achId);
-    localStorage.setItem(keyFor(gameId), JSON.stringify(list));
+    localStorage.setItem(achKeyFor(gameId), JSON.stringify(list));
     return true;
   },
   unlockedList(gameId) { return readUnlocked(gameId); },
-  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  reset(gameId) { localStorage.removeItem(achKeyFor(gameId)); },
 };
 
 
@@ -1146,21 +1210,21 @@ const AudioService = {
 //        de cet état — c'est entièrement défini par le jeu.
 // POSSÈDE : une entrée localStorage par jeu (`ondine_save_<gameId>`).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_save_${gameId}`; }
+function saveKeyFor(gameId) { return `ondine_save_${gameId}`; }
 
 const SaveService = {
   write(gameId, state) {
-    try { localStorage.setItem(keyFor(gameId), JSON.stringify(state)); return true; }
+    try { localStorage.setItem(saveKeyFor(gameId), JSON.stringify(state)); return true; }
     catch (e) { console.warn('[SaveService] échec de sauvegarde pour', gameId, e); return false; }
   },
   read(gameId) {
     try {
-      const raw = localStorage.getItem(keyFor(gameId));
+      const raw = localStorage.getItem(saveKeyFor(gameId));
       return raw ? JSON.parse(raw) : null;
     } catch (e) { console.warn('[SaveService] sauvegarde corrompue pour', gameId, e); return null; }
   },
-  hasSave(gameId) { return localStorage.getItem(keyFor(gameId)) !== null; },
-  clear(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  hasSave(gameId) { return localStorage.getItem(saveKeyFor(gameId)) !== null; },
+  clear(gameId) { localStorage.removeItem(saveKeyFor(gameId)); },
 };
 
 
@@ -1310,8 +1374,128 @@ NotificationService.mount(toastEl);
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
 const COLORS = ['red', 'yellow', 'green', 'blue'];
+
+// ═══════════════════════════════════════════════════════════════
+// ARCHITECTURE DES VARIANTES — chaque variante définit son deck, ses
+// couleurs, ses effets de cartes spéciales et ses règles de victoire/
+// pioche propres. Le moteur commun (canPlay générique, boucle de
+// tour, rendu) lit ces définitions plutôt que de coder en dur
+// `if (variant === 'flip')` un peu partout dans le fichier.
+//
+// SOURCES (recherche web, pas de supposition) :
+// - Classique : deck 108 cartes, référence Mattel standard historique
+//   (76 numérotées + 24 action + 8 wild). Vérifié et confirmé
+//   conforme lors d'un audit précédent (aucun écart).
+// - Flip : 112 cartes physiques à double face (Light/Dark), confirmé
+//   par la notice Mattel officielle (manuals.plus/service.mattel.com,
+//   référence produit GDR44) et recoupé par 8+ sources indépendantes
+//   convergentes. Face Light : rouge/jaune/vert/bleu, 76 numérotées +
+//   28 action (Reverse/Skip/DrawOne ×8 chacun + Flip ×4) + 8 wild
+//   (Wild/WildDrawTwo). Face Dark : rose/turquoise/violet/orange,
+//   même structure numérique, mais Reverse/SkipEveryone/DrawFive ×8
+//   chacun + Flip ×4 + Wild/WildDrawColor.
+// - No Mercy : 168 cartes (confirmé par Wikibooks + 6 sources
+//   indépendantes), stacking à valeur égale ou supérieure uniquement,
+//   Mercy à 25+ cartes, 7=échange de main, 0=rotation de toutes les
+//   mains, pas de Wild/Wild+4 classiques (remplacés par de nouvelles
+//   cartes : Skip Everyone, Draw 4/6/10, Discard All, Wild Reverse
+//   Draw 4, Wild Color Roulette). AVERTISSEMENT DOCUMENTÉ : la
+//   répartition EXACTE carte-par-carte du deck officiel physique
+//   n'est pas identiquement confirmée par mes sources (certaines se
+//   contredisent sur le detail précis) — la composition ci-dessous
+//   totalise bien 168 cartes et respecte les MÉCANISMES vérifiés,
+//   mais le nombre exact de copies de chaque carte peut différer
+//   légèrement de l'édition physique réelle.
+// ═══════════════════════════════════════════════════════════════
+
+const DARK_COLORS = ['pink', 'teal', 'purple', 'orange'];
+
+function buildClassicDeck() {
+  const cards = [];
+  let id = 0;
+  COLORS.forEach((color) => {
+    cards.push({ color, value: '0', id: id++ });
+    for (let n = 1; n <= 9; n++) { cards.push({ color, value: String(n), id: id++ }); cards.push({ color, value: String(n), id: id++ }); }
+    ['skip', 'reverse', 'draw2'].forEach((v) => { cards.push({ color, value: v, id: id++ }); cards.push({ color, value: v, id: id++ }); });
+  });
+  for (let i = 0; i < 4; i++) cards.push({ color: 'wild', value: 'wild', id: id++ });
+  for (let i = 0; i < 4; i++) cards.push({ color: 'wild', value: 'wild4', id: id++ });
+  return cards;
+}
+
+/** Construit les 112 cartes physiques à double face de Flip. Chaque
+ *  carte a une face `light` (jeu normal) et une face `dark` (effets
+ *  renforcés) — les deux faces sont générées séparément puis
+ *  associées dans l'ordre, car les règles officielles n'imposent
+ *  aucun lien spécifique entre les deux faces d'une même carte
+ *  physique (c'est arbitraire à l'impression). */
+function buildFlipFaceSet(colors, actionSet) {
+  const faces = [];
+  colors.forEach((color) => {
+    faces.push({ color, value: '0' });
+    for (let n = 1; n <= 9; n++) { faces.push({ color, value: String(n) }); faces.push({ color, value: String(n) }); }
+    actionSet.slice(0, 3).forEach((v) => { faces.push({ color, value: v }); faces.push({ color, value: v }); }); // 3 actions ×2 = 8
+    faces.push({ color, value: actionSet[3] }); // Flip ×1 par couleur = 4
+  });
+  const wildFaces = [];
+  for (let i = 0; i < 4; i++) wildFaces.push({ color: 'wild', value: actionSet[4] });
+  for (let i = 0; i < 4; i++) wildFaces.push({ color: 'wild', value: actionSet[5] });
+  return [...faces, ...wildFaces];
+}
+function buildFlipDeck() {
+  const lightFaces = buildFlipFaceSet(COLORS, ['skip', 'reverse', 'draw1', 'flip', 'wild', 'wild2']);
+  const darkFaces = buildFlipFaceSet(DARK_COLORS, ['reverse', 'skipall', 'draw5', 'flip', 'wild', 'wildcolor']);
+  return lightFaces.map((light, i) => ({ light, dark: darkFaces[i], id: i }));
+}
+
+/** Deck No Mercy : 168 cartes. Voir avertissement de composition
+ *  ci-dessus — les mécanismes (stacking, Mercy, 7, 0) sont fidèles
+ *  aux règles officielles vérifiées, la répartition exacte carte par
+ *  carte est une approximation raisonnable documentée. */
+function buildNoMercyDeck() {
+  const cards = [];
+  let id = 0;
+  COLORS.forEach((color) => {
+    cards.push({ color, value: '0', id: id++ });
+    cards.push({ color, value: '0', id: id++ }); // 0 dupliqué (règle du 0 = rotation, carte plus fréquente)
+    for (let n = 1; n <= 9; n++) { for (let k = 0; k < 3; k++) cards.push({ color, value: String(n), id: id++ }); } // 3 exemplaires (deck étendu)
+    ['skip', 'reverse', 'draw2'].forEach((v) => { cards.push({ color, value: v, id: id++ }); cards.push({ color, value: v, id: id++ }); });
+  });
+  // nouvelles cartes spéciales, 4 exemplaires chacune (pas de couleur — wild)
+  ['skipall', 'draw4', 'discardall', 'wildreversedraw4', 'draw6', 'draw10', 'colorroulette'].forEach((v) => {
+    for (let i = 0; i < 4; i++) cards.push({ color: 'wild', value: v, id: id++ });
+  });
+  return cards;
+}
+
+const UNO_VARIANTS = {
+  classic: {
+    label: 'Classique', icon: '🎴', shortDesc: 'Le UNO traditionnel.',
+    hasDoubleSide: false, hasStacking: false, mercyLimit: null,
+    buildDeck: buildClassicDeck,
+    colors: COLORS,
+  },
+  flip: {
+    label: 'Flip', icon: '🔄', shortDesc: 'Deux faces, des règles plus agressives.',
+    hasDoubleSide: true, hasStacking: false, mercyLimit: null,
+    buildDeck: buildFlipDeck,
+    colors: COLORS, darkColors: DARK_COLORS,
+  },
+  noMercy: {
+    label: 'No Mercy', icon: '💀', shortDesc: 'Des règles beaucoup plus brutales.',
+    hasDoubleSide: false, hasStacking: true, mercyLimit: 25,
+    buildDeck: buildNoMercyDeck,
+    colors: COLORS,
+  },
+};
 const COLOR_HEX = { red: 'var(--u-red)', yellow: 'var(--u-yellow)', green: 'var(--u-green)', blue: 'var(--u-blue)' };
-const SYMBOLS = { skip: '⛔', reverse: '🔁', draw2: '+2', wild: '🌈', wild4: '+4' };
+const SYMBOLS = {
+  skip: '⛔', reverse: '🔁', draw2: '+2', wild: '🌈', wild4: '+4',
+  // Flip
+  draw1: '+1', flip: '🔃', wild2: '+2', skipall: '⛔⛔', draw5: '+5', wildcolor: '🎨',
+  // No Mercy
+  draw4: '+4', discardall: '🗑️', wildreversedraw4: '🔁+4', draw6: '+6', draw10: '+10', colorroulette: '🎡',
+};
 const BOT_NAMES = ['Bot 1', 'Bot 2', 'Bot 3'];
 
 const ACHIEVEMENTS = [
@@ -1326,8 +1510,13 @@ const ACHIEVEMENTS = [
 // STATE
 // ═══════════════════════════════════════════════════════════════
 let G = null;
-let CONFIG = { mode: 'solo', playerCount: 2 };
+let CONFIG = { mode: 'solo', playerCount: 2, variant: 'classic' };
+function setVariant(v) {
+  CONFIG.variant = v;
+  document.querySelectorAll('.variant-card').forEach((el) => el.classList.toggle('sel', el.dataset.variant === v));
+}
 let pendingWildPlay = null; // { cardIdx } en attente du choix de couleur
+let handSortMode = null; // null='ordre naturel', 'color', 'value' — affichage uniquement
 
 // ═══════════════════════════════════════════════════════════════
 // CARD ENGINE — construction du deck (valide le Card Engine)
@@ -1346,11 +1535,45 @@ function buildUnoCards() {
 }
 
 function canPlay(card, topCard, currentColor) {
-  if (card.color === 'wild') return true;
-  return card.color === currentColor || card.value === topCard.value;
+  const face = activeFace(card);
+  const topFace = activeFace(topCard);
+  // Stacking (No Mercy) : pendant une pile de pénalité en cours, SEULES
+  // les cartes "draw" de valeur égale ou supérieure au cumul peuvent
+  // être jouées — toutes les autres cartes sont temporairement
+  // illégales, même si couleur/valeur matcheraient normalement.
+  if (G && G.pendingDraw > 0 && UNO_VARIANTS[G.variant].hasStacking) {
+    return DRAW_AMOUNTS[face.value] !== undefined && DRAW_AMOUNTS[face.value] >= G.pendingDraw;
+  }
+  if (face.color === 'wild') return true;
+  return face.color === currentColor || face.value === topFace.value;
 }
 
-function nextIndex(idx, dir, n) { return (idx + dir + n) % n; }
+/** Retourne {color, value} de la carte selon la variante/face active.
+ *  Classic et No Mercy ont déjà cette forme directement ; Flip a deux
+ *  faces (light/dark) et bascule selon G.side. Centralise CET accès
+ *  pour que canPlay/rendu/effets n'aient jamais à connaître la
+ *  variante directement. */
+function activeFace(card) {
+  if (CONFIG.variant === 'flip') return (G && G.side === 'dark') ? card.dark : card.light;
+  return card;
+}
+
+function nextIndex(idx, dir, n) {
+  let next = (idx + dir + n) % n;
+  // No Mercy : saute les joueurs éliminés (règle de Mercy). Garde-fou
+  // explicite contre une boucle infinie si, par un état incohérent,
+  // tous les joueurs se retrouvaient marqués éliminés — la partie
+  // devrait déjà être terminée par checkMercy() avant d'en arriver là,
+  // mais une partie ne doit JAMAIS pouvoir se bloquer silencieusement.
+  if (G && G.eliminated && G.eliminated.length) {
+    let guard = 0;
+    while (G.eliminated.includes(next) && guard < n) {
+      next = (next + dir + n) % n;
+      guard++;
+    }
+  }
+  return next;
+}
 
 function drawN(playerIdx, n) {
   for (let i = 0; i < n; i++) {
@@ -1361,11 +1584,51 @@ function drawN(playerIdx, n) {
     const [card] = OndineCards.draw(G.deck, 1);
     if (card) G.players[playerIdx].hand.push(card);
   }
+  // remonter au-dessus de 1 carte casse la dynamique "sur le fil" (voir
+  // playCardAction) — qu'il s'agisse d'une pioche volontaire ou d'une
+  // pénalité +2/+4 subie.
+  if (n > 0 && G.stayedAtOne) G.stayedAtOne[playerIdx] = false;
 }
 
 // ═══════════════════════════════════════════════════════════════
 // GAME FLOW
 // ═══════════════════════════════════════════════════════════════
+/** Écran de règles par variante — contenu volontairement différent
+ *  pour chacune (pas un pavé générique), fidèle aux mécaniques
+ *  réellement implémentées (voir sources documentées plus haut dans
+ *  ce fichier, au niveau de UNO_VARIANTS). */
+function showVariantRules(variant) {
+  const body = document.createElement('div');
+  if (variant === 'classic') {
+    body.innerHTML = `
+      <p><b>🎯 Objectif</b><br>Sois le premier à te débarrasser de toutes tes cartes.</p>
+      <p><b>🃏 Comment jouer</b><br>Pose une carte qui partage la couleur OU le nombre/symbole avec la carte du dessus. Sans carte jouable, pioche une carte — si elle est jouable, tu peux la jouer aussitôt.</p>
+      <p><b>⚡ Cartes spéciales</b><br>⛔ Skip : le joueur suivant passe son tour.<br>🔁 Reverse : inverse le sens du jeu.<br>+2 : le joueur suivant pioche 2 cartes et passe son tour.<br>🌈 Wild : choisis la couleur.<br>+4 : choisis la couleur, le joueur suivant pioche 4 cartes et passe son tour.</p>
+      <p><b>1️⃣ UNO !</b><br>Quand tu n'as plus qu'une carte, le jeu l'annonce pour toi.</p>
+      <p><b>🏆 Victoire</b><br>Le premier qui vide sa main gagne la manche.</p>
+    `;
+  } else if (variant === 'flip') {
+    body.innerHTML = `
+      <p><b>🎯 Objectif</b><br>Comme le UNO classique : vide ta main en premier.</p>
+      <p><b>🔃 Les deux faces</b><br>Chaque carte a une face Light (claire) et une face Dark (sombre). La partie commence côté Light.</p>
+      <p><b>🔄 La carte Flip</b><br>Quand elle est jouée, TOUT bascule d'un coup : ta main, la pioche, la défausse — tout le monde joue maintenant avec l'autre face, aux couleurs et effets différents.</p>
+      <p><b>⚡ Côté Dark, plus brutal</b><br>+1 devient +5, Skip devient "Skip Everyone" (tout le monde passe sauf toi), Wild devient Wild Color (le joueur suivant pioche jusqu'à trouver la bonne couleur).</p>
+      <p><b>🏆 Victoire</b><br>Le premier qui vide sa main gagne, peu importe le côté actif à ce moment.</p>
+    `;
+  } else if (variant === 'noMercy') {
+    body.innerHTML = `
+      <p><b>🎯 Objectif</b><br>Vide ta main en premier, OU sois le dernier joueur encore en jeu.</p>
+      <p><b>🔥 Stacking</b><br>Si on te pose une carte "pioche" (+2, +4, +6, +10), tu peux la contrer en posant une carte "pioche" de valeur ÉGALE OU SUPÉRIEURE — la pénalité s'additionne et passe au joueur suivant. Celui qui ne peut plus contrer pioche TOUT le cumul d'un coup.</p>
+      <p><b>💀 Règle de Mercy</b><br>Si ta main atteint 25 cartes ou plus, tu es éliminé — ta main est mise de côté jusqu'à la fin de la partie.</p>
+      <p><b>🔀 Cartes 7 et 0</b><br>7 : échange ta main avec un adversaire.<br>0 : toutes les mains tournent d'un joueur à l'autre.</p>
+      <p><b>🏆 Victoire</b><br>Vide ta main, ou sois le dernier joueur restant si tous les autres sont éliminés.</p>
+    `;
+  }
+  const closeBtn = UI.button('Compris !', { variant: 'primary', onClick: () => modal.close() });
+  const modal = UI.modal({ title: `${UNO_VARIANTS[variant].icon} Comment jouer — ${UNO_VARIANTS[variant].label}`, bodyEl: body, actions: [closeBtn] });
+  document.body.appendChild(modal.el);
+}
+
 function setMode(m) {
   CONFIG.mode = m;
   document.getElementById('modeSolo').classList.toggle('sel', m === 'solo');
@@ -1393,7 +1656,8 @@ function topCard() { return G.discard[G.discard.length - 1]; }
 
 function startGame() {
   const n = CONFIG.playerCount;
-  const deck = OndineCards.createDeck(buildUnoCards());
+  const variant = UNO_VARIANTS[CONFIG.variant];
+  const deck = OndineCards.createDeck(variant.buildDeck());
   const hands = OndineCards.deal(deck, n, 7);
 
   const players = [];
@@ -1402,24 +1666,55 @@ function startGame() {
     players.push({ id: i, type: CONFIG.mode === 'solo' ? 'bot' : 'human', name: CONFIG.mode === 'solo' ? BOT_NAMES[i - 1] : 'Joueur ' + (i + 1), hand: hands[i] });
   }
 
-  // Première carte de la défausse : on repioche si c'est un Wild4 (règle
-  // standard, évite un début de partie punitif imprévisible)
+  // Première carte de la défausse : règle post-2018 officielle — si
+  // la première carte révélée est une action/Wild, on la remet et en
+  // pioche une autre (au lieu de tirer au sort les effets/couleur).
+  // Vérifié via activeFace() pour rester valide sur les 3 variantes
+  // (Flip a deux faces, donc on vérifie que NI Light NI Dark ne sont
+  // un Wild, pour ne jamais démarrer sur une carte à effet des deux
+  // côtés potentiels).
   let discard = [];
   let firstIdx = deck.length - 1;
-  while (deck[firstIdx] && deck[firstIdx].value === 'wild4') firstIdx--;
+  function isProblematicOpener(card) {
+    if (CONFIG.variant === 'flip') return card.light.color === 'wild' || card.dark.color === 'wild';
+    return card.color === 'wild' || (variant.hasStacking && ['skip','reverse','draw2','skipall','draw4','discardall','wildreversedraw4','draw6','draw10','colorroulette'].includes(card.value));
+  }
+  while (deck[firstIdx] && isProblematicOpener(deck[firstIdx])) firstIdx--;
   const [firstCard] = deck.splice(firstIdx, 1);
   discard.push(firstCard);
+  const firstFace = CONFIG.variant === 'flip' ? firstCard.light : firstCard;
 
   G = {
+    variant: CONFIG.variant,
     players, deck, discard,
     currentIdx: 0, direction: 1,
-    currentColor: firstCard.color === 'wild' ? COLORS[Math.floor(Math.random() * 4)] : firstCard.color,
+    currentColor: firstFace.color === 'wild' ? variant.colors[Math.floor(Math.random() * 4)] : firstFace.color,
     over: false, winner: null, drawnThisTurn: false, hasPlayedAny: false,
+    side: 'light', // pertinent seulement pour Flip, ignoré sinon
+    pendingDraw: 0, // pile de pénalité en cours (stacking, No Mercy uniquement)
+    eliminated: [], // joueurs éliminés par la règle de Mercy
   };
   sdk.clearSave();
   showScreen('sg');
   renderAll();
   sdk.audio.play('click');
+  maybeBotTurn();
+}
+
+/** Corrige la dette technique connue : sdk.save() était déjà appelé à
+ *  chaque fin de tour, mais rien ne rechargeait jamais cet état — le
+ *  bouton "Reprendre" n'existait même pas. Restaure G et CONFIG tels
+ *  quels (pioche, défausse, mains, joueur courant, sens, couleur
+ *  active, tout), puis relance le tour du bot si c'était le sien au
+ *  moment de la sauvegarde — sinon la partie resterait bloquée en
+ *  attendant un bot qui ne joue jamais tout seul. */
+function resumeGame() {
+  const saved = sdk.load();
+  if (!saved || !saved.G) { startGame(); return; }
+  G = saved.G;
+  CONFIG = saved.CONFIG || CONFIG;
+  showScreen('sg');
+  renderAll();
   maybeBotTurn();
 }
 
@@ -1437,60 +1732,211 @@ function endTurn(steps) {
   maybeBotTurn();
 }
 
+/** Valeurs "draw" (pioche forcée) connues, avec leur montant — utilisé
+ *  pour le stacking (No Mercy uniquement) et pour savoir si une carte
+ *  peut légalement s'empiler sur une pile de pénalité en cours. */
+const DRAW_AMOUNTS = { draw2: 2, wild4: 4, draw1: 1, draw5: 5, wild2: 2, draw4: 4, draw6: 6, draw10: 10, wildreversedraw4: 4 };
+
 function applyCardEffect(card) {
+  // Protection défensive : quoi qu'il arrive dans le calcul de l'effet
+  // (achievements, notifications, ou toute exception imprévue), la
+  // partie ne doit JAMAIS se figer après qu'une carte a été jouée —
+  // même schéma déjà appliqué à Démineur pour un problème similaire
+  // (écran de victoire qui ne s'affichait jamais si un achievement
+  // plantait silencieusement). steps=2 par défaut en cas d'échec :
+  // valeur la plus sûre pour ne pas laisser le joueur qui vient de
+  // jouer une carte d'effet rejouer immédiatement par erreur.
+  try {
+    return applyCardEffectInner(card);
+  } catch (e) {
+    console.error('Erreur non bloquante dans applyCardEffect:', e);
+    return 2;
+  }
+}
+
+function applyCardEffectInner(card) {
+  const value = activeFace(card).value;
+  const variant = UNO_VARIANTS[G.variant];
   let steps = 1;
-  if (card.value === 'skip') { steps = 2; sdk.audio.play('flip'); }
-  else if (card.value === 'reverse') {
+
+  if (value === 'skip') { steps = 2; sdk.audio.play('flip'); }
+  else if (value === 'skipall') { steps = G.players.length; sdk.audio.play('flip'); } // saute TOUS les autres joueurs
+  else if (value === 'reverse') {
     G.direction *= -1;
     steps = G.players.length === 2 ? 2 : 1;
     sdk.stats.increment('reversesPlayed');
     sdk.achievement.unlock('reverse_combo', { name: 'Retournement', icon: '🔁' });
     sdk.audio.play('flip');
-  } else if (card.value === 'draw2') {
+  }
+  else if (value === 'flip') {
+    G.side = G.side === 'light' ? 'dark' : 'light';
+    sdk.toast.info(G.side === 'dark' ? '🔃 Retourné côté Dark !' : '🔃 Retourné côté Light !');
+    sdk.audio.play('flip');
+    steps = 1;
+  }
+  else if (value === 'discardall') {
+    // No Mercy : le joueur défausse toutes les cartes de la même
+    // couleur que celle qu'il vient de jouer (règle officielle)
+    const p = G.players[G.currentIdx];
+    const col = G.currentColor;
+    const matching = p.hand.filter((c) => c.color === col);
+    p.hand = p.hand.filter((c) => c.color !== col);
+    G.discard.push(...matching);
+    sdk.toast.info(`${p.name} défausse ${matching.length} carte(s) ${col}`);
+    steps = 1;
+  }
+  else if (value === 'colorroulette') {
+    // No Mercy : le joueur suivant choisit une couleur puis révèle des
+    // cartes de la pioche jusqu'à en trouver une de cette couleur —
+    // toutes les cartes révélées vont dans sa main, il perd son tour
     const target = nextIndex(G.currentIdx, G.direction, G.players.length);
-    drawN(target, 2);
-    sdk.toast.info(`${G.players[target].name} pioche 2 cartes`);
-    steps = 2;
-  } else if (card.value === 'wild4') {
-    const target = nextIndex(G.currentIdx, G.direction, G.players.length);
-    drawN(target, 4);
-    sdk.toast.info(`${G.players[target].name} pioche 4 cartes`);
-    sdk.achievement.unlock('wild4_played', { name: 'Coup de bluff', icon: '🌈' });
+    const chosen = COLORS[Math.floor(Math.random() * 4)]; // le bot/joueur ciblé choisit (simplifié : aléatoire)
+    let drawn = 0;
+    while (G.deck.length > 0) {
+      if (G.deck.length === 0) G.deck = OndineCards.reshuffleDiscardIntoDeck(G.discard, true);
+      const [c] = OndineCards.draw(G.deck, 1);
+      if (!c) break;
+      G.players[target].hand.push(c);
+      drawn++;
+      if (c.color === chosen) break;
+    }
+    sdk.toast.info(`${G.players[target].name} pioche ${drawn} carte(s) (roulette ${chosen})`);
     steps = 2;
   }
+  else if (DRAW_AMOUNTS[value] !== undefined) {
+    // wildreversedraw4 combine reverse ET pénalité — les deux effets
+    // doivent s'appliquer (contrairement à une simple carte reverse
+    // ou une simple carte draw isolée).
+    if (value === 'wildreversedraw4') {
+      G.direction *= -1;
+      sdk.stats.increment('reversesPlayed');
+      sdk.audio.play('flip');
+    }
+    const amount = DRAW_AMOUNTS[value];
+    const target = nextIndex(G.currentIdx, G.direction, G.players.length);
+    if (variant.hasStacking) {
+      // No Mercy : empile la pénalité au lieu de la faire piocher
+      // immédiatement — le joueur suivant pourra la contrer avec une
+      // carte draw de valeur égale ou supérieure (voir humanDraw/botTurn).
+      // IMPORTANT : contrairement au classique, le tour ne saute PAS
+      // le joueur ciblé (steps=1, pas 2) — il doit garder son tour
+      // pour avoir une vraie chance d'empiler, sinon le stacking ne
+      // pourrait jamais se produire.
+      G.pendingDraw += amount;
+      sdk.toast.info(`Pénalité en cours : ${G.pendingDraw} cartes — ${G.players[target].name} doit stacker ou piocher`);
+      steps = 1;
+    } else {
+      drawN(target, amount);
+      sdk.toast.info(`${G.players[target].name} pioche ${amount} carte(s)`);
+      steps = 2;
+    }
+    if (value === 'wild4') sdk.achievement.unlock('wild4_played', { name: 'Coup de bluff', icon: '🌈' });
+  }
+  // Règles No Mercy sur cartes numériques : 7 = échange de main, 0 = rotation
+  if (variant.hasStacking && value === '7') {
+    const others = G.players.map((p, i) => i).filter((i) => i !== G.currentIdx && !G.eliminated.includes(i));
+    if (others.length) {
+      const targetIdx = others[Math.floor(Math.random() * others.length)]; // choix simplifié (aléatoire)
+      const tmp = G.players[G.currentIdx].hand;
+      G.players[G.currentIdx].hand = G.players[targetIdx].hand;
+      G.players[targetIdx].hand = tmp;
+      sdk.toast.info(`Échange de main avec ${G.players[targetIdx].name} !`);
+    }
+  }
+  if (variant.hasStacking && value === '0') {
+    const active = G.players.map((p, i) => i).filter((i) => !G.eliminated.includes(i));
+    const hands = active.map((i) => G.players[i].hand);
+    active.forEach((i, k) => { G.players[i].hand = hands[(k + G.direction + active.length) % active.length]; });
+    sdk.toast.info('🔄 Toutes les mains tournent !');
+  }
   return steps;
+}
+
+/** Règle de Mercy (No Mercy uniquement) : un joueur avec 25+ cartes
+ *  est immédiatement éliminé. Sa main est mise de côté (pas remélangée
+ *  dans le deck tant que la partie n'est pas terminée, conformément
+ *  à la règle officielle). Retourne true si la partie se termine par
+ *  élimination (un seul joueur non-éliminé restant). */
+function checkMercy() {
+  if (!UNO_VARIANTS[G.variant].hasStacking) return false;
+  G.players.forEach((p, i) => {
+    if (!G.eliminated.includes(i) && p.hand.length >= UNO_VARIANTS[G.variant].mercyLimit) {
+      G.eliminated.push(i);
+      sdk.toast.error(`💀 ${p.name} éliminé (${p.hand.length} cartes) !`);
+    }
+  });
+  const remaining = G.players.map((p, i) => i).filter((i) => !G.eliminated.includes(i));
+  if (remaining.length === 1) { endRound(remaining[0], false); return true; }
+  return false;
 }
 
 function playCardAction(playerIdx, cardIdx, chosenColor) {
   const player = G.players[playerIdx];
   const card = player.hand[cardIdx];
+  // Garde de robustesse : en No Mercy, un setTimeout de bot capture un
+  // index de carte, mais si une carte "7" (échange de main) ou "0"
+  // (rotation de toutes les mains) est jouée par un autre joueur
+  // pendant ce délai, la main a changé et cet index peut ne plus
+  // correspondre à une vraie carte. Plutôt que de planter, on relance
+  // proprement le tour du joueur concerné avec son état ACTUEL.
+  if (!card) {
+    console.warn('playCardAction: index de carte invalide (main modifiée entre-temps), relance le tour proprement');
+    renderAll();
+    maybeBotTurn();
+    return;
+  }
+  const face = activeFace(card);
   player.hand.splice(cardIdx, 1);
   G.discard.push(card);
-  G.currentColor = card.color === 'wild' ? chosenColor : card.color;
+  // Ne change G.currentColor que pour les cartes qui ont VRAIMENT une
+  // couleur (normales) ou un vrai choix de couleur validé (Wild
+  // classique). Les nouvelles cartes spéciales No Mercy (wild sans
+  // choix de couleur) laissent la couleur active INCHANGÉE — sinon
+  // elle deviendrait undefined et casserait toute la suite du jeu.
+  if (face.color !== 'wild') G.currentColor = face.color;
+  else if (chosenColor) G.currentColor = chosenColor;
   G.hasPlayedAny = true;
   sdk.stats.increment('cardsPlayed');
   sdk.audio.play('place');
 
-  if (player.hand.length === 0) { endRound(playerIdx); return; }
-  if (player.hand.length === 1) { sdk.toast.success(`${player.name} : UNO !`); sdk.audio.play('unlock'); }
+  try { if (checkMercy()) return; } catch (e) { console.error('Erreur non bloquante dans checkMercy:', e); }
+
+  if (player.hand.length === 0) { endRound(playerIdx, G.stayedAtOne && G.stayedAtOne[playerIdx]); return; }
+  if (player.hand.length === 1) {
+    // Notification/achievement "UNO" — secondaire, ne doit jamais
+    // empêcher la suite du tour de s'exécuter (même schéma défensif
+    // que applyCardEffect ci-dessous).
+    try {
+      sdk.toast.success(`${player.name} : UNO !`); sdk.audio.play('unlock');
+      if (!G.stayedAtOne) G.stayedAtOne = {};
+      G.stayedAtOne[playerIdx] = true;
+    } catch (e) { console.error('Erreur non bloquante dans la notification UNO:', e); }
+  }
 
   const steps = applyCardEffect(card);
   renderAll();
   endTurn(steps);
 }
 
-function endRound(winnerIdx) {
+function endRound(winnerIdx, wonWithoutRedrawing) {
   G.over = true; G.winner = winnerIdx;
   sdk.clearSave();
   sdk.stats.increment('games');
+  sdk.stats.increment('games_' + G.variant); // stat par variante, en plus du compteur global (ne casse pas la lecture existante)
   const humanWon = winnerIdx === 0;
   if (humanWon) {
     sdk.stats.increment('wins');
+    sdk.stats.increment('wins_' + G.variant);
     sdk.audio.play('win');
     const wins = sdk.stats.get('wins');
     sdk.achievement.unlock('first_win', { name: 'Première Victoire', icon: '🎯' });
     if (wins >= 5) sdk.achievement.unlock('wins_5', { name: 'As du Uno', icon: '🏅' });
-    if (G.players[winnerIdx].hand.length === 0) sdk.achievement.unlock('last_card_win', { name: 'Sur le fil', icon: '⚡' });
+    // "Sur le fil" : gagné sans jamais être remonté au-dessus de 1 carte
+    // depuis l'annonce du UNO (aucune pioche/pénalité subie entre les
+    // deux). Avant cette correction, la condition testée était toujours
+    // vraie (hand.length===0, systématique à cet endroit du code) — se
+    // déclenchait donc à CHAQUE victoire, pas seulement dans ce cas précis.
+    if (wonWithoutRedrawing) sdk.achievement.unlock('last_card_win', { name: 'Sur le fil', icon: '⚡' });
   } else {
     sdk.audio.play('lose');
   }
@@ -1508,12 +1954,38 @@ function showVictory(winnerIdx) {
 // ═══════════════════════════════════════════════════════════════
 // HUMAN INTERACTIONS
 // ═══════════════════════════════════════════════════════════════
+/** Seules ces valeurs sont de VRAIS "wild" au sens classique (couleur
+ *  libre choisie par le joueur qui les joue). Les nouvelles cartes
+ *  spéciales de No Mercy (discardall, skipall, draw4/6/10,
+ *  wildreversedraw4, colorroulette) sont marquées color:'wild' pour
+ *  ne pas matcher une couleur de la défausse, mais leur EFFET n'utilise
+ *  jamais un choix de couleur du joueur qui les joue — les traiter
+ *  comme un vrai wild ouvrirait le sélecteur pour rien et laisserait
+ *  G.currentColor devenir undefined (cassant toute la suite du jeu). */
+const NEEDS_COLOR_CHOICE = new Set(['wild', 'wild4', 'wild2', 'wildcolor']);
+
 function humanPlayCard(cardIdx) {
   if (!G || G.over || G.currentIdx !== 0) return;
   const card = G.players[0].hand[cardIdx];
   if (!canPlay(card, topCard(), G.currentColor)) { sdk.toast.error('Cette carte ne peut pas être jouée'); sdk.audio.play('error'); return; }
-  if (card.color === 'wild') { pendingWildPlay = { cardIdx }; document.getElementById('colorPicker').classList.remove('hidden'); return; }
+  if (NEEDS_COLOR_CHOICE.has(activeFace(card).value)) {
+    pendingWildPlay = { cardIdx };
+    updateColorPickerSwatches();
+    document.getElementById('colorPicker').classList.remove('hidden');
+    return;
+  }
   playCardAction(0, cardIdx);
+}
+/** Remplit le sélecteur de couleur avec les 4 bonnes teintes selon la
+ *  variante/face active (Flip Dark utilise un jeu de couleurs
+ *  entièrement différent du Light). */
+function updateColorPickerSwatches() {
+  const cols = (CONFIG.variant === 'flip' && G.side === 'dark') ? DARK_COLORS : COLORS;
+  cols.forEach((color, i) => {
+    const el = document.getElementById('cpSwatch' + i);
+    el.style.background = `var(--u-${color})`;
+    el.onclick = () => pickColor(color);
+  });
 }
 function pickColor(color) {
   document.getElementById('colorPicker').classList.add('hidden');
@@ -1523,6 +1995,19 @@ function pickColor(color) {
 }
 function humanDraw() {
   if (!G || G.over || G.currentIdx !== 0 || G.drawnThisTurn) return;
+  // Stacking (No Mercy) : une pénalité en attente doit être payée en
+  // entier si le joueur ne peut/veut pas l'empiler avec une carte
+  // draw de valeur suffisante — pas de pioche "normale" possible ici.
+  if (G.pendingDraw > 0 && UNO_VARIANTS[G.variant].hasStacking) {
+    const amount = G.pendingDraw;
+    drawN(0, amount);
+    G.pendingDraw = 0;
+    sdk.toast.info(`Tu piochas ${amount} carte(s) (pénalité payée)`);
+    if (checkMercy()) return;
+    renderAll();
+    setTimeout(() => endTurn(1), 700);
+    return;
+  }
   const hasLegal = G.players[0].hand.some((c) => canPlay(c, topCard(), G.currentColor));
   if (hasLegal) { sdk.toast.error('Tu as un coup jouable — joue-le ou termine ton tour'); return; }
   drawN(0, 1);
@@ -1532,6 +2017,12 @@ function humanDraw() {
   const drawn = G.players[0].hand[G.players[0].hand.length - 1];
   if (canPlay(drawn, topCard(), G.currentColor)) sdk.toast.info('Carte piochée jouable — tape dessus, ou passe');
   else { sdk.toast.info('Carte non jouable — tour passé'); setTimeout(() => endTurn(1), 700); }
+}
+function setHandSort(mode) {
+  handSortMode = (handSortMode === mode) ? null : mode; // re-cliquer désactive le tri
+  document.getElementById('sortColorBtn').classList.toggle('sel', handSortMode === 'color');
+  document.getElementById('sortValueBtn').classList.toggle('sel', handSortMode === 'value');
+  renderAll();
 }
 function passTurn() {
   if (!G || G.over || G.currentIdx !== 0 || !G.drawnThisTurn) return;
@@ -1543,8 +2034,9 @@ function passTurn() {
 // le minimax n'apporte rien ici sans modéliser les mains adverses)
 // ═══════════════════════════════════════════════════════════════
 function botPickColor(hand) {
-  const counts = { red: 0, yellow: 0, green: 0, blue: 0 };
-  hand.forEach((c) => { if (counts[c.color] !== undefined) counts[c.color]++; });
+  const cols = (G && CONFIG.variant === 'flip' && G.side === 'dark') ? DARK_COLORS : COLORS;
+  const counts = {}; cols.forEach((c) => { counts[c] = 0; });
+  hand.forEach((c) => { const col = activeFace(c).color; if (counts[col] !== undefined) counts[col]++; });
   return Object.keys(counts).reduce((a, b) => (counts[a] >= counts[b] ? a : b));
 }
 function botTurn(idx) {
@@ -1552,22 +2044,37 @@ function botTurn(idx) {
   const hand = G.players[idx].hand;
   const playable = hand.map((c, i) => ({ c, i })).filter(({ c }) => canPlay(c, topCard(), G.currentColor));
   if (playable.length === 0) {
+    // Stacking (No Mercy) : aucune carte pour empiler la pénalité —
+    // le bot doit payer le cumul entier, pas piocher juste 1 carte.
+    if (G.pendingDraw > 0 && UNO_VARIANTS[G.variant].hasStacking) {
+      const amount = G.pendingDraw;
+      drawN(idx, amount);
+      G.pendingDraw = 0;
+      sdk.toast.info(`${G.players[idx].name} pioche ${amount} carte(s) (pénalité)`);
+      if (checkMercy()) return;
+      renderAll();
+      setTimeout(() => endTurn(1), 600);
+      return;
+    }
     drawN(idx, 1);
     renderAll();
     const drawn = hand[hand.length - 1];
     if (drawn && canPlay(drawn, topCard(), G.currentColor)) {
-      setTimeout(() => playCardAction(idx, hand.length - 1, drawn.color === 'wild' ? botPickColor(hand) : undefined), 500);
+      setTimeout(() => playCardAction(idx, hand.length - 1, NEEDS_COLOR_CHOICE.has(activeFace(drawn).value) ? botPickColor(hand) : undefined), 500);
     } else {
       setTimeout(() => endTurn(1), 600);
     }
     return;
   }
-  playable.sort((a, b) => (a.c.color === 'wild' ? 1 : 0) - (b.c.color === 'wild' ? 1 : 0));
+  playable.sort((a, b) => (activeFace(a.c).color === 'wild' ? 1 : 0) - (activeFace(b.c).color === 'wild' ? 1 : 0));
   const choice = playable[0];
-  setTimeout(() => playCardAction(idx, choice.i, choice.c.color === 'wild' ? botPickColor(hand) : undefined), 550);
+  setTimeout(() => playCardAction(idx, choice.i, NEEDS_COLOR_CHOICE.has(activeFace(choice.c).value) ? botPickColor(hand) : undefined), 550);
 }
 function maybeBotTurn() {
   if (!G || G.over) return;
+  // Défense en profondeur : ne joue jamais pour un joueur éliminé
+  // (No Mercy), même si currentIdx pointait accidentellement dessus.
+  if (G.eliminated && G.eliminated.includes(G.currentIdx)) { endTurn(1); return; }
   if (G.players[G.currentIdx].type === 'bot') botTurn(G.currentIdx);
 }
 
@@ -1576,8 +2083,10 @@ function maybeBotTurn() {
 // ═══════════════════════════════════════════════════════════════
 function cardEl(card, { faceUp = true, playable = false, dim = false, onClick = null } = {}) {
   const el = document.createElement('div');
-  el.className = 'uno-card' + (faceUp ? (card.color === 'wild' ? ' wild' : ' color-' + card.color) : ' back');
-  el.textContent = faceUp ? (SYMBOLS[card.value] || card.value) : '🂠';
+  const face = activeFace(card);
+  el.className = 'uno-card' + (faceUp ? (face.color === 'wild' ? ' wild' : ' color-' + face.color) : ' back');
+  if (CONFIG.variant === 'flip') el.classList.add(G && G.side === 'dark' ? 'flip-dark' : 'flip-light');
+  el.textContent = faceUp ? (SYMBOLS[face.value] || face.value) : '🂠';
   if (playable) { el.classList.add('playable'); if (onClick) el.onclick = onClick; }
   else if (dim) el.classList.add('disabled');
   return el;
@@ -1611,14 +2120,41 @@ function renderAll() {
   const hand = document.getElementById('hand');
   hand.innerHTML = '';
   const isHumanTurn = G.currentIdx === 0 && !G.over;
-  G.players[0].hand.forEach((card, i) => {
+  // Le tri ne change QUE l'ORDRE D'AFFICHAGE — on trie une liste
+  // d'indices originaux, jamais G.players[0].hand elle-même. Chaque
+  // carte garde son vrai index (originalIdx) pour humanPlayCard(),
+  // donc jouer une carte triée reste strictement équivalent à jouer
+  // la même carte non triée.
+  const colorOrder = { red: 0, yellow: 1, green: 2, blue: 3, wild: 4 };
+  const valueRank = (v) => (v >= '0' && v <= '9') ? Number(v) : { skip: 10, reverse: 11, draw2: 12, wild: 13, wild4: 14 }[v];
+  let order = G.players[0].hand.map((_, i) => i);
+  if (handSortMode === 'color') {
+    order.sort((a, b) => {
+      const ca = G.players[0].hand[a], cb = G.players[0].hand[b];
+      return (colorOrder[ca.color] - colorOrder[cb.color]) || (valueRank(ca.value) - valueRank(cb.value));
+    });
+  } else if (handSortMode === 'value') {
+    order.sort((a, b) => {
+      const ca = G.players[0].hand[a], cb = G.players[0].hand[b];
+      return (valueRank(ca.value) - valueRank(cb.value)) || (colorOrder[ca.color] - colorOrder[cb.color]);
+    });
+  }
+  order.forEach((originalIdx) => {
+    const card = G.players[0].hand[originalIdx];
     const playable = isHumanTurn && canPlay(card, top, G.currentColor);
-    hand.appendChild(cardEl(card, { faceUp: true, playable, dim: !playable, onClick: () => humanPlayCard(i) }));
+    hand.appendChild(cardEl(card, { faceUp: true, playable, dim: !playable, onClick: () => humanPlayCard(originalIdx) }));
   });
 
   document.getElementById('drawHint').textContent = isHumanTurn
-    ? (G.drawnThisTurn ? 'Joue la carte piochée, ou passe ton tour' : 'À toi de jouer — tape une carte ou pioche')
+    ? (G.drawnThisTurn ? 'Joue la carte piochée, ou passe ton tour'
+       : (G.players[0].hand.some((c) => canPlay(c, top, G.currentColor)) ? 'À toi de jouer — tape une carte' : '🫵 Aucune carte jouable — pioche !'))
     : (G.players[G.currentIdx] ? `Tour de ${G.players[G.currentIdx].name}` : '');
+  // met en évidence la pile de pioche quand le joueur DOIT piocher (aucun
+  // coup jouable) — c'est précisément le cas que Kevin a pris pour un
+  // blocage du jeu, faute d'indication claire.
+  const mustDraw = isHumanTurn && !G.drawnThisTurn && !G.players[0].hand.some((c) => canPlay(c, top, G.currentColor));
+  document.getElementById('deckPile').classList.toggle('must-draw', mustDraw);
+  document.getElementById('drawHint').classList.toggle('alert', mustDraw);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1633,6 +2169,7 @@ function updateHomeStats() {
   host.innerHTML = '';
   host.appendChild(UI.statCard({ value: sdk.stats.get('games'), label: 'Parties', icon: '🃏' }));
   host.appendChild(UI.statCard({ value: sdk.stats.get('wins'), label: 'Victoires', icon: '🏆' }));
+  document.getElementById('resumeBtnUno').style.display = sdk.hasSave() ? '' : 'none';
 }
 function renderStatsScreen() {
   const grid = document.getElementById('statsGrid');
@@ -1643,6 +2180,21 @@ function renderStatsScreen() {
     { value: sdk.stats.get('cardsPlayed'), label: 'Cartes jouées', icon: '🎴' },
     { value: sdk.stats.get('reversesPlayed'), label: 'Inversions', icon: '🔁' },
   ].forEach((e) => grid.appendChild(UI.statCard(e)));
+
+  // Détail par variante — n'affiche que les variantes réellement
+  // jouées au moins une fois (n'invente aucune statistique).
+  const byVariantHost = document.getElementById('statsByVariant');
+  byVariantHost.innerHTML = '';
+  Object.keys(UNO_VARIANTS).forEach((v) => {
+    const g = sdk.stats.get('games_' + v);
+    if (!g) return;
+    const w = sdk.stats.get('wins_' + v);
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:8px 12px;';
+    row.innerHTML = `<div style="font-size:20px;">${UNO_VARIANTS[v].icon}</div><div style="flex:1;font-size:12px;">${UNO_VARIANTS[v].label} — ${g} partie(s), ${w || 0} victoire(s)</div>`;
+    byVariantHost.appendChild(row);
+  });
+  if (!byVariantHost.children.length) byVariantHost.innerHTML = '<div style="font-size:11px;color:var(--text2);">Joue une partie pour voir le détail par variante ici.</div>';
 
   const list = document.getElementById('achList');
   list.innerHTML = '';
@@ -1671,6 +2223,10 @@ async function confirmLeaveGame() {
 window.setMode = setMode; window.setPlayerCount = setPlayerCount; window.startGame = startGame;
 window.goHome = goHome; window.showScreen = showScreen; window.pickColor = pickColor;
 window.humanDraw = humanDraw;
+window.resumeGame = resumeGame;
+window.showVariantRules = showVariantRules;
+window.setVariant = setVariant;
+window.setHandSort = setHandSort;
 document.getElementById('sstats').addEventListener('transitionend', () => {});
 const _origShowScreen = showScreen;
 window.showScreen = function (id) { _origShowScreen(id); if (id === 'sstats') renderStatsScreen(); };

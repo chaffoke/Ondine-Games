@@ -28,7 +28,16 @@
 .lv-lock{position:absolute;font-size:12px;}
 
 /* ── Jeu ── */
-#sg{padding:8px;gap:6px;align-items:center;overflow-y:auto;}
+#sg{padding:8px;gap:6px;align-items:center;overflow-y:auto;touch-action:none;}
+/* NOTE : touch-action:none désactive aussi le scroll tactile natif de
+   secours ajouté pour les résolutions desktop où le D-pad pouvait
+   déborder (ex. 1280×800, voir overflow-y:auto ci-dessus). Compromis
+   assumé : en usage mobile portrait normal (cible principale), le
+   contenu ne déborde jamais (vérifié à 390×844 et 412×915), donc ce
+   scroll de secours n'est de toute façon jamais nécessaire là où le
+   tactile est utilisé. Le cas qui perdrait ce scroll (tablette
+   tactile en format contraint) est marginal comparé au bénéfice du
+   swipe libre partout, qui est la vraie priorité exprimée. */
 .mz-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:460px;flex-wrap:wrap;gap:4px;}
 .mz-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;font-family:'Fredoka One',cursive;font-size:12px;}
 #hudCombo{color:var(--co);min-width:36px;}

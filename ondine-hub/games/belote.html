@@ -272,7 +272,12 @@ body {
 #statusBelote{font-family:'Fredoka One',cursive;font-size:13px;color:var(--c2);text-align:center;min-height:18px;}
 
 #biddingBelote{display:flex;gap:10px;}
-#handOverBelote, #matchOverBelote{font-family:'Fredoka One',cursive;color:var(--co);text-align:center;font-size:16px;background:rgba(6,8,30,.55);border:1px solid rgba(251,191,36,.3);border-radius:14px;padding:12px 16px;backdrop-filter:blur(4px);}
+#handOverBelote{font-family:'Fredoka One',cursive;color:var(--co);text-align:center;font-size:16px;background:rgba(6,8,30,.55);border:1px solid rgba(251,191,36,.3);border-radius:14px;padding:12px 16px;backdrop-filter:blur(4px);}
+#smatchoverBelote{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:10px;padding:20px;}
+.result-icon{font-size:56px;}
+.result-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--co);}
+.result-btns{display:flex;flex-wrap:wrap;gap:8px;width:100%;max-width:320px;justify-content:center;}
+.result-btns button{flex:1;min-width:130px;}
 #handOverBelote button{margin-top:8px;}
 
 #trickBelote{display:flex;gap:6px;justify-content:center;min-height:70px;align-items:center;}
@@ -325,9 +330,21 @@ body {
     Manche terminée !
     <button class="ondine-btn ondine-btn-primary" onclick="nextHand()">Manche suivante</button>
   </div>
-  <div id="matchOverBelote" style="display:none;"></div>
 
   <div id="myHandBelote"></div>
+</div>
+
+<!-- Fin de MATCH (partie complète) — overlay, cohérent avec le reste
+     du projet (Démineur/2048/Racing/Maze Rush). handOverBelote reste
+     tel quel pour la fin de chaque MANCHE, ceci concerne seulement la
+     fin de la partie entière. -->
+<div class="screen hidden result-overlay" id="smatchoverBelote">
+  <div class="result-icon" id="matchIconBelote">🏆</div>
+  <div class="result-title" id="matchTitleBelote">Partie terminée</div>
+  <div class="result-btns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startMatch()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
 </div>
 
 <div class="screen hidden" id="sstats">
@@ -1826,9 +1843,13 @@ function createUI(sdk) {
 
     document.getElementById('biddingBelote').style.display = phase === 'bidding' && bidStep === 0 ? '' : 'none';
     document.getElementById('handOverBelote').style.display = phase === 'handOver' ? '' : 'none';
-    document.getElementById('matchOverBelote').style.display = phase === 'matchOver' ? '' : 'none';
     if (phase === 'matchOver') {
-      document.getElementById('matchOverBelote').textContent = matchScore[0] > matchScore[1] ? '🏆 Ton équipe gagne la partie !' : '💀 L\u2019équipe adverse gagne...';
+      const won = matchScore[0] > matchScore[1];
+      document.getElementById('matchIconBelote').textContent = won ? '🏆' : '💀';
+      document.getElementById('matchTitleBelote').textContent = won ? 'Ton équipe gagne la partie !' : 'L\u2019équipe adverse gagne...';
+      document.getElementById('smatchoverBelote').classList.remove('hidden');
+    } else {
+      document.getElementById('smatchoverBelote').classList.add('hidden');
     }
 
     document.getElementById('statusBelote').textContent =

@@ -988,11 +988,11 @@ const NotificationService = (function () {
 //        pas que "victories" est "positif" ou que "errors" est
 //        "négatif" — c'est au jeu d'agir en conséquence).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_stats_${gameId}`; }
+function statsKeyFor(gameId) { return `ondine_stats_${gameId}`; }
 
 function readAll(gameId) {
   try {
-    return JSON.parse(localStorage.getItem(keyFor(gameId)) || '{}');
+    return JSON.parse(localStorage.getItem(statsKeyFor(gameId)) || '{}');
   } catch (e) {
     console.warn('[StatsService] lecture corrompue pour', gameId, e);
     return {};
@@ -1000,7 +1000,7 @@ function readAll(gameId) {
 }
 
 function writeAll(gameId, data) {
-  localStorage.setItem(keyFor(gameId), JSON.stringify(data));
+  localStorage.setItem(statsKeyFor(gameId), JSON.stringify(data));
 }
 
 const StatsService = {
@@ -1032,7 +1032,7 @@ const StatsService = {
     return all[key];
   },
   getAll(gameId) { return readAll(gameId); },
-  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  reset(gameId) { localStorage.removeItem(statsKeyFor(gameId)); },
 };
 
 
@@ -1043,14 +1043,14 @@ const StatsService = {
 // RÔLE : savoir quels succès sont débloqués, par jeu. Ne connaît
 //        jamais la LISTE des succès d'un jeu ni leur condition de
 //        déblocage — ça reste entièrement défini côté jeu (via
-//        sdk.achievement.unlock(id), appelé quand le jeu a lui-même
+//        sdk.achievements.unlock(id, name, icon), appelé quand le jeu a lui-même
 //        vérifié sa propre condition).
 // POSSÈDE : une entrée localStorage par jeu (`ondine_ach_<gameId>`).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_ach_${gameId}`; }
+function achKeyFor(gameId) { return `ondine_ach_${gameId}`; }
 
 function readUnlocked(gameId) {
-  try { return JSON.parse(localStorage.getItem(keyFor(gameId)) || '[]'); }
+  try { return JSON.parse(localStorage.getItem(achKeyFor(gameId)) || '[]'); }
   catch (e) { console.warn('[AchievementsService] lecture corrompue pour', gameId, e); return []; }
 }
 
@@ -1065,11 +1065,11 @@ const AchievementsService = {
     const list = readUnlocked(gameId);
     if (list.includes(achId)) return false;
     list.push(achId);
-    localStorage.setItem(keyFor(gameId), JSON.stringify(list));
+    localStorage.setItem(achKeyFor(gameId), JSON.stringify(list));
     return true;
   },
   unlockedList(gameId) { return readUnlocked(gameId); },
-  reset(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  reset(gameId) { localStorage.removeItem(achKeyFor(gameId)); },
 };
 
 
@@ -1148,21 +1148,21 @@ const AudioService = {
 //        de cet état — c'est entièrement défini par le jeu.
 // POSSÈDE : une entrée localStorage par jeu (`ondine_save_<gameId>`).
 // ═══════════════════════════════════════════════════════════════
-function keyFor(gameId) { return `ondine_save_${gameId}`; }
+function saveKeyFor(gameId) { return `ondine_save_${gameId}`; }
 
 const SaveService = {
   write(gameId, state) {
-    try { localStorage.setItem(keyFor(gameId), JSON.stringify(state)); return true; }
+    try { localStorage.setItem(saveKeyFor(gameId), JSON.stringify(state)); return true; }
     catch (e) { console.warn('[SaveService] échec de sauvegarde pour', gameId, e); return false; }
   },
   read(gameId) {
     try {
-      const raw = localStorage.getItem(keyFor(gameId));
+      const raw = localStorage.getItem(saveKeyFor(gameId));
       return raw ? JSON.parse(raw) : null;
     } catch (e) { console.warn('[SaveService] sauvegarde corrompue pour', gameId, e); return null; }
   },
-  hasSave(gameId) { return localStorage.getItem(keyFor(gameId)) !== null; },
-  clear(gameId) { localStorage.removeItem(keyFor(gameId)); },
+  hasSave(gameId) { return localStorage.getItem(saveKeyFor(gameId)) !== null; },
+  clear(gameId) { localStorage.removeItem(saveKeyFor(gameId)); },
 };
 
 
@@ -1596,19 +1596,32 @@ function endGame(won) {
   G.over = true; G.won = won;
   stopTimer();
   sdk.clearSave();
-  sdk.stats.increment('games');
-  const diffKey = CONFIG.difficulty;
-  if (won) {
-    sdk.stats.increment('wins');
-    sdk.stats.setMin('bestTime_' + diffKey, G.elapsed);
-    sdk.audio.play('win');
-    sdk.achievement.unlock('first_win', { name: 'Premier Déminage', icon: '🎯' });
-    if (diffKey === 'beginner') { sdk.achievement.unlock('win_beginner', { name: 'Débutant maîtrisé', icon: '🌱' }); if (G.elapsed < 30) sdk.achievement.unlock('speed_beginner', { name: 'Éclair', icon: '⚡' }); }
-    if (diffKey === 'intermediate') sdk.achievement.unlock('win_intermediate', { name: 'Intermédiaire maîtrisé', icon: '⚡' });
-    if (diffKey === 'expert') sdk.achievement.unlock('win_expert', { name: 'Expert maîtrisé', icon: '🔥' });
-    if (sdk.stats.get('games') >= 20) sdk.achievement.unlock('games_20', { name: 'Vétéran', icon: '🏅' });
-  } else {
-    sdk.audio.play('lose');
+  // Le rapport utilisateur montre un cas où la victoire est bien
+  // détectée et le temps enregistré (visible dans les stats), mais
+  // l'écran de victoire ne s'affiche jamais — signe d'une exception
+  // silencieuse quelque part dans les achievements/stats secondaires
+  // qui interrompt la fonction avant d'atteindre showVictory(). Cause
+  // exacte non reproduite avec certitude malgré plusieurs tentatives
+  // fidèles, mais la correction structurelle est saine dans tous les
+  // cas : l'affichage de fin de partie ne doit JAMAIS dépendre du bon
+  // déroulement de la logique secondaire (achievements, stats).
+  try {
+    sdk.stats.increment('games');
+    const diffKey = CONFIG.difficulty;
+    if (won) {
+      sdk.stats.increment('wins');
+      sdk.stats.setMin('bestTime_' + diffKey, G.elapsed);
+      sdk.audio.play('win');
+      sdk.achievement.unlock('first_win', { name: 'Premier Déminage', icon: '🎯' });
+      if (diffKey === 'beginner') { sdk.achievement.unlock('win_beginner', { name: 'Débutant maîtrisé', icon: '🌱' }); if (G.elapsed < 30) sdk.achievement.unlock('speed_beginner', { name: 'Éclair', icon: '⚡' }); }
+      if (diffKey === 'intermediate') sdk.achievement.unlock('win_intermediate', { name: 'Intermédiaire maîtrisé', icon: '⚡' });
+      if (diffKey === 'expert') sdk.achievement.unlock('win_expert', { name: 'Expert maîtrisé', icon: '🔥' });
+      if (sdk.stats.get('games') >= 20) sdk.achievement.unlock('games_20', { name: 'Vétéran', icon: '🏅' });
+    } else {
+      sdk.audio.play('lose');
+    }
+  } catch (e) {
+    console.error('Erreur non bloquante dans les achievements/stats de fin de partie:', e);
   }
   setTimeout(() => showVictory(won), won ? 400 : 900);
 }
