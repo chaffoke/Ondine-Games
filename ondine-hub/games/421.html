@@ -346,7 +346,16 @@ function validateTurn() {
   if (CONFIG.mode === 'solo') { endSoloTurn(combo); return; }
 
   G.currentIdx++;
-  if (G.currentIdx >= G.players.length) { endLocalGame(); return; }
+  if (G.currentIdx >= G.players.length) {
+    // Le dernier lancer du dernier joueur n'était jamais rendu à
+    // l'écran avant que le classement final n'apparaisse (endLocalGame
+    // court-circuitait le renderAll() normal via ce `return`). On rend
+    // d'abord ces dés, puis on laisse un court délai avant le résultat
+    // — cohérent avec endSoloTurn qui a déjà ce délai.
+    renderAll();
+    setTimeout(endLocalGame, 400);
+    return;
+  }
   G.dice = [1,1,1]; G.held = [false,false,false]; G.rollsUsed = 0;
   document.getElementById('btnRoll').style.display = '';
   document.getElementById('btnValidate').style.display = 'none';

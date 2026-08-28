@@ -155,14 +155,14 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif
 
 .board-wrap{flex:1;width:100%;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:4px;}
 .board{display:inline-grid;gap:2px;background:rgba(14,26,58,.5);border:1px solid var(--border2);border-radius:8px;padding:5px;}
-.cell{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;touch-action:none;
+.cell{width:var(--cell-size, 28px);height:var(--cell-size, 28px);border-radius:4px;display:flex;align-items:center;justify-content:center;touch-action:none;
   font-size:13px;font-weight:900;cursor:pointer;user-select:none;
   background:linear-gradient(160deg,#1a2a52,#132043);border:1px solid rgba(255,255,255,.05);}
 /* Polish desktop (trouvé par capture réelle à 1440px) : cases à taille
    fixe (28px) jamais pensées au-delà du mobile — grille minuscule et
    perdue dans un immense espace vide sur grand écran. Additif : sans
    effet en dessous de 900px. */
-@media (min-width:900px){.cell{width:42px;height:42px;font-size:18px;}}
+
 .cell.revealed{background:rgba(255,255,255,.03);cursor:default;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);}
 .cell.mine-hit{background:rgba(248,113,113,.35);}
 .cell.mine-revealed{background:rgba(248,113,113,.15);}
@@ -1643,7 +1643,20 @@ function updateMineCounter() {
 }
 function renderBoard() {
   const board = document.getElementById('board');
-  board.style.gridTemplateColumns = `repeat(${G.cols}, 28px)`;
+  // Taille de case dynamique : utilise le maximum d'espace disponible
+  // au lieu d'une valeur fixe de 28px qui laissait un plateau minuscule
+  // entouré de vide sur les petites grilles (beginner 9×9, intermediate
+  // 13×13). Les grandes grilles (expert, 20 colonnes) restent limitées
+  // par un plafond raisonnable et gardent leur scroll existant
+  // (.board-wrap{overflow:auto}), qui continue de fonctionner tel quel.
+  const wrap = board.parentElement;
+  const availW = (wrap.clientWidth || window.innerWidth) - 16;
+  const availH = (wrap.clientHeight || window.innerHeight) - 16;
+  const maxCellSize = window.innerWidth >= 900 ? 44 : 40;
+  const cellSize = Math.max(20, Math.min(maxCellSize, Math.floor(Math.min(availW / G.cols, availH / G.rows))));
+  board.style.setProperty('--cell-size', cellSize + 'px');
+  board.style.gridTemplateColumns = `repeat(${G.cols}, ${cellSize}px)`;
+  board.style.fontSize = Math.max(11, Math.round(cellSize * 0.46)) + 'px';
   board.innerHTML = '';
   for (let r = 0; r < G.rows; r++) {
     for (let c = 0; c < G.cols; c++) {

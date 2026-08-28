@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Casse-briques × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;
+  --c1:#38bdf8;--c2:#7dd3fc;--c3:#bae6fd;
+  --cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);
+  --text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;
+  --sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:var(--r2);cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-btn-danger{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.35);color:var(--cr);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;max-width:320px;width:100%;box-shadow:var(--sh2);}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── HOME ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(30px,9vw,42px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+/* ── GAME ── */
+#sg{align-items:center;padding:10px;gap:10px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;}
+.turn-badge{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:6px 14px;font-family:'Fredoka One',cursive;font-size:13px;}
+.turn-dot{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 -2px 3px rgba(0,0,0,.35);}
+.turn-dot.black{background:radial-gradient(circle at 35% 30%,#555,#0a0a0a 70%);}
+.turn-dot.white{background:radial-gradient(circle at 35% 30%,#fff,#cbd5e1 70%);}
+.score-row{display:flex;gap:8px;}
+.score-pill{display:flex;align-items:center;gap:5px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:13px;}
+
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:rgba(6,60,40,.5);border:1px solid var(--border2);border-radius:12px;padding:6px;max-width:min(400px, calc(100vh - 180px));width:100%;aspect-ratio:1;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4, même cause) */
+@media (min-width:900px){.board{max-width:600px;}}
+.cell{position:relative;background:rgba(10,90,60,.55);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cell.hint::after{content:'';width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.35);}
+.disc{width:84%;height:84%;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.4);transform:scale(0) rotateY(0deg);transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
+.disc.show{transform:scale(1);}
+.disc.black{background:radial-gradient(circle at 35% 28%,#4a4a4a,#0a0a0a 72%);}
+.disc.white{background:radial-gradient(circle at 35% 28%,#fff,#c7d2e0 72%);}
+.disc.flip{animation:flipDisc .4s ease;}
+@keyframes flipDisc{0%{transform:scale(1) rotateY(0);}50%{transform:scale(.75) rotateY(90deg);}100%{transform:scale(1) rotateY(0);}}
+.disc.last-move{box-shadow:0 0 0 3px var(--co),0 2px 5px rgba(0,0,0,.4);}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:400px;}
+
+/* ── RESULT ── */
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:280px;margin:12px 0;}
+
+/* ── STATS ── */
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+
+/* ═══════════════════════════════════════════════════════════════
+   CASSE-BRIQUES — CSS spécifique
+   ═══════════════════════════════════════════════════════════════ */
+#bkField{position:relative;width:100%;max-width:420px;aspect-ratio:0.72;background:linear-gradient(160deg,#0a0e28,#050714);border-radius:14px;overflow:hidden;border:2px solid rgba(56,189,248,.25);box-shadow:0 8px 30px rgba(0,0,0,.5);touch-action:none;}
+.bk-brick{position:absolute;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:rgba(255,255,255,.85);box-shadow:inset 0 -2px 4px rgba(0,0,0,.25),inset 0 2px 2px rgba(255,255,255,.15);transition:opacity .15s;}
+.bk-brick.bk-cracked1::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent,transparent 3px,rgba(0,0,0,.25) 3px,rgba(0,0,0,.25) 4px);}
+.bk-brick.bk-cracked2::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent,transparent 2px,rgba(0,0,0,.4) 2px,rgba(0,0,0,.4) 3.5px),repeating-linear-gradient(25deg,transparent,transparent 2px,rgba(0,0,0,.4) 2px,rgba(0,0,0,.4) 3.5px);}
+.bk-brick.bk-unbreakable{background:repeating-linear-gradient(45deg,#334155,#334155 4px,#3f4d63 4px,#3f4d63 8px)!important;}
+.bk-brick.bk-destroying{animation:bkBrickPop .25s forwards;}
+@keyframes bkBrickPop{to{transform:scale(1.4);opacity:0;}}
+#bkPaddle{position:absolute;height:2.6%;background:linear-gradient(180deg,#38bdf8,#0ea5e9);border-radius:6px;bottom:5.5%;box-shadow:0 0 12px rgba(56,189,248,.6),inset 0 2px 2px rgba(255,255,255,.4);}
+.bk-ball{position:absolute;width:2.6%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#cbd5e1);box-shadow:0 0 8px rgba(255,255,255,.7);}
+.bk-ball.bk-fireball{background:radial-gradient(circle at 35% 30%,#fff7d6,#f97316);box-shadow:0 0 12px rgba(249,115,22,.8);}
+.bk-ball.bk-ghost{background:radial-gradient(circle at 35% 30%,#e0f2fe,#94a3b8);opacity:.55;}
+.bk-powerup{position:absolute;width:6%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:0 0 8px currentColor;animation:bkPowerupSpin 2s linear infinite;}
+@keyframes bkPowerupSpin{from{transform:rotate(0);}to{transform:rotate(360deg);}}
+.bk-projectile{position:absolute;width:0.8%;height:2.5%;background:#fbbf24;border-radius:2px;box-shadow:0 0 5px rgba(251,191,36,.8);}
+.bk-explosion{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(248,113,113,.9),rgba(251,191,36,.5) 60%,transparent 80%);animation:bkExplode .35s forwards;pointer-events:none;}
+@keyframes bkExplode{from{transform:scale(0.2);opacity:1;}to{transform:scale(2.2);opacity:0;}}
+#bkShield{position:absolute;left:0;right:0;bottom:2%;height:1.5%;background:linear-gradient(90deg,transparent,#34d399,transparent);box-shadow:0 0 10px rgba(52,211,153,.6);}
+
+/* ── Composants partagés du Hub, absents du template de base extrait ── */
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+.result-overlay{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.75);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.rl-status{text-align:center;font-size:13px;color:var(--text2);min-height:20px;margin:6px 0;}
+
+.bk-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;gap:8px;margin-bottom:8px;font-size:12px;font-weight:800;}
+.bk-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;display:flex;align-items:center;gap:4px;}
+.bk-lives{display:flex;gap:2px;}
+.bk-effects-bar{display:flex;gap:6px;flex-wrap:wrap;width:100%;max-width:420px;min-height:22px;margin-top:6px;}
+.bk-effect-chip{background:var(--glass2);border:1px solid var(--border2);border-radius:8px;padding:2px 8px;font-size:10px;font-weight:800;display:flex;align-items:center;gap:3px;}
+.bk-toast-float{position:absolute;font-size:13px;font-weight:900;color:var(--co);pointer-events:none;animation:bkFloatUp 0.8s forwards;text-shadow:0 1px 3px rgba(0,0,0,.6);}
+@keyframes bkFloatUp{from{transform:translateY(0);opacity:1;}to{transform:translateY(-25px);opacity:0;}}
+
+.mw-modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(4,6,20,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.mw-modal-box{background:linear-gradient(180deg,#0f1530,#080b1e);border:1px solid var(--border2);border-radius:20px;padding:20px;max-width:360px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5);max-height:80vh;overflow-y:auto;}
+.mw-modal-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);margin-bottom:12px;text-align:center;}
+.mw-modal-body{font-size:14px;color:var(--text);line-height:1.6;}
+.mw-modal-body p{margin:0 0 10px;}
+.mw-modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+
+</style>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">CASSE-BRIQUES</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStatsBk"></div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🧱 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" id="resumeBtnBk" onclick="resumeGame()" style="display:none;">▶ Reprendre le niveau</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showRulesBk()">ⓘ Règles</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStatsBk()">📊 Statistiques</button>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="bk-hud">
+    <div class="icon-btn" onclick="confirmLeaveBk()">🏠</div>
+    <div class="bk-hud-item">🎯 <span id="bkScore">0</span></div>
+    <div class="bk-hud-item">📶 Niv. <span id="bkLevel">1</span></div>
+    <div class="bk-hud-item bk-lives" id="bkLives"></div>
+  </div>
+  <div class="bk-effects-bar" id="bkEffectsBar"></div>
+  <div id="bkField">
+    <div id="bkPaddle"></div>
+    <div id="bkShield" style="display:none;"></div>
+  </div>
+  <div class="rl-status" id="bkStatus">Glisse le doigt pour bouger la palette</div>
+</div>
+
+<div class="screen hidden result-overlay" id="swinBk">
+  <div class="res-icon">🏆</div>
+  <div class="res-title">Niveau terminé !</div>
+  <div class="res-sub" id="winStatsBk"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="nextLevelBk()">➡️ Niveau suivant</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<div class="screen hidden result-overlay" id="soverBk">
+  <div class="res-icon">💥</div>
+  <div class="res-title">Partie terminée</div>
+  <div class="res-sub" id="overStatsBk"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<div class="screen hidden" id="sstatsBk">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div class="stats-grid" id="statsGridBk"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CASSE-BRIQUES — moteur pur, séparé de l'interface. Coordonnées en
+// POURCENTAGE (0-100) pour rester robuste au redimensionnement
+// d'écran, comme les autres jeux d'action du Hub (Flappy). État
+// immuable : tick(state, dt, rng) retourne un NOUVEL état, jamais de
+// mutation en place — testable isolément sans DOM.
+// ═══════════════════════════════════════════════════════════════
+
+const FIELD_W = 100, FIELD_H = 100;
+const PADDLE_Y = 94;
+const PADDLE_W_NORMAL = 16, PADDLE_W_BIG = 24, PADDLE_W_SMALL = 10;
+const BALL_RADIUS = 1.3;
+const BASE_BALL_SPEED = 60; // % du terrain par seconde
+const BRICK_ROWS_MAX = 8, BRICK_COLS = 10;
+const BRICK_W = FIELD_W / BRICK_COLS;
+const BRICK_H = 4.2;
+const BRICK_TOP = 8;
+
+const BRICK_TYPES = {
+  normal: { hp: 1, color: '#38bdf8', points: 10 },
+  tough: { hp: 2, color: '#818cf8', points: 20 },
+  verytough: { hp: 3, color: '#f472b6', points: 35 },
+  unbreakable: { hp: Infinity, color: '#475569', points: 0 },
+  explosive: { hp: 1, color: '#f87171', points: 25 },
+  bonus: { hp: 1, color: '#fbbf24', points: 15 },
+};
+
+const POWERUP_TYPES = ['gun', 'widen', 'narrow', 'multiball', 'slow', 'fast', 'magnet', 'fireball', 'ghost', 'scoremult', 'extralife', 'shield'];
+const POWERUP_DURATION = { gun: 8000, widen: 10000, narrow: 7000, slow: 7000, fast: 7000, magnet: 8000, fireball: 6000, ghost: 6000, scoremult: 10000 };
+// malus : narrow, fast (accélère = plus dur), pas de durée pour multiball/extralife/shield (effet immédiat ou passif)
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+/** Génère la disposition de briques d'un niveau. Niveaux prédéfinis
+ *  pour les 5 premiers (progression pédagogique garantie), puis
+ *  génération procédurale AU-DELÀ avec contraintes garantissant la
+ *  jouabilité (voir generateProceduralLevel). */
+function createLevelBricks(levelNum, rng) {
+  const bricks = [];
+  const rows = Math.min(3 + Math.floor(levelNum / 2), BRICK_ROWS_MAX);
+  const layout = getLevelLayout(levelNum, rows, rng);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < BRICK_COLS; c++) {
+      const type = layout[r][c];
+      if (!type) continue;
+      bricks.push({
+        id: r + '_' + c,
+        x: c * BRICK_W, y: BRICK_TOP + r * BRICK_H,
+        w: BRICK_W, h: BRICK_H,
+        type, hp: BRICK_TYPES[type].hp, maxHp: BRICK_TYPES[type].hp,
+        alive: true,
+      });
+    }
+  }
+  return bricks;
+}
+
+function getLevelLayout(levelNum, rows, rng) {
+  const layout = Array.from({ length: rows }, () => Array(BRICK_COLS).fill(null));
+  // Niveau 1-2 : uniquement des briques normales, pas de piège.
+  // Niveau 3+ : introduit progressivement tough/verytough/unbreakable/explosive/bonus.
+  const toughChance = Math.min(0.08 * (levelNum - 2), 0.35);
+  const veryToughChance = Math.min(0.04 * (levelNum - 4), 0.2);
+  const unbreakableChance = levelNum >= 4 ? Math.min(0.03 * (levelNum - 3), 0.12) : 0;
+  const explosiveChance = levelNum >= 3 ? Math.min(0.04 * (levelNum - 2), 0.1) : 0;
+  const bonusChance = 0.08;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < BRICK_COLS; c++) {
+      const roll = rng();
+      let type = 'normal';
+      if (levelNum >= 4 && roll < unbreakableChance) type = 'unbreakable';
+      else if (levelNum >= 3 && roll < unbreakableChance + explosiveChance) type = 'explosive';
+      else if (levelNum >= 4 && roll < unbreakableChance + explosiveChance + veryToughChance) type = 'verytough';
+      else if (levelNum >= 2 && roll < unbreakableChance + explosiveChance + veryToughChance + toughChance) type = 'tough';
+      else if (roll < unbreakableChance + explosiveChance + veryToughChance + toughChance + bonusChance) type = 'bonus';
+      layout[r][c] = type;
+    }
+  }
+  // Garantit la jouabilité : au moins 60% de briques cassables
+  // (jamais unbreakable), sinon le niveau pourrait être injouable.
+  const totalCells = rows * BRICK_COLS;
+  let breakableCount = 0;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < BRICK_COLS; c++) if (layout[r][c] !== 'unbreakable') breakableCount++;
+  if (breakableCount < totalCells * 0.6) {
+    // reconvertit des unbreakable en normal jusqu'à respecter le minimum
+    outer:
+    for (let r = 0; r < rows; r++) for (let c = 0; c < BRICK_COLS; c++) {
+      if (breakableCount >= totalCells * 0.6) break outer;
+      if (layout[r][c] === 'unbreakable') { layout[r][c] = 'normal'; breakableCount++; }
+    }
+  }
+  return layout;
+}
+
+function createInitialState(levelNum, rng) {
+  const bricks = createLevelBricks(levelNum, rng);
+  return {
+    level: levelNum,
+    bricks,
+    paddleX: 50, paddleW: PADDLE_W_NORMAL, paddleTargetX: 50,
+    balls: [{ x: 50, y: PADDLE_Y - 2, vx: BASE_BALL_SPEED * 0.4, vy: -BASE_BALL_SPEED, stuck: true, fireball: false, ghost: false }],
+    lives: 3, score: 0,
+    powerups: [], // objets tombants {x,y,type,vy}
+    activeEffects: {}, // { gun: expiresAtMs, widen: expiresAtMs, ... }
+    projectiles: [], // tirs du power-up "gun" {x,y}
+    over: false, won: false,
+    elapsedMs: 0,
+    shieldActive: false,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PHYSIQUE — collisions balle/mur/palette/brique. Corrections
+// anti-dégénérescence explicites (angle quasi-horizontal interminable,
+// vitesse qui dérive vers zéro) car demandées explicitement.
+// ═══════════════════════════════════════════════════════════════
+
+/** Empêche un angle de balle quasi-horizontal (rebond interminable
+ *  sans jamais retoucher palette/plafond) en forçant une composante
+ *  verticale minimale, sans changer la vitesse totale. */
+function correctBallAngle(vx, vy) {
+  const speed = Math.hypot(vx, vy);
+  const minVy = speed * 0.15;
+  if (Math.abs(vy) < minVy) {
+    const sign = vy >= 0 ? 1 : -1;
+    vy = sign * minVy;
+    const remaining = Math.sqrt(Math.max(0, speed * speed - vy * vy));
+    vx = (vx >= 0 ? 1 : -1) * remaining;
+  }
+  return { vx, vy };
+}
+
+function circleRectCollide(cx, cy, r, rx, ry, rw, rh) {
+  const closestX = clamp(cx, rx, rx + rw);
+  const closestY = clamp(cy, ry, ry + rh);
+  const dx = cx - closestX, dy = cy - closestY;
+  return (dx * dx + dy * dy) < r * r;
+}
+
+/** Détermine l'axe de rebond (horizontal ou vertical) en comparant la
+ *  pénétration selon chaque axe — évite qu'une balle traverse une
+ *  brique par un mauvais choix d'axe de rebond. */
+function resolveBrickBounce(ball, brick) {
+  const overlapLeft = (ball.x + BALL_RADIUS) - brick.x;
+  const overlapRight = (brick.x + brick.w) - (ball.x - BALL_RADIUS);
+  const overlapTop = (ball.y + BALL_RADIUS) - brick.y;
+  const overlapBottom = (brick.y + brick.h) - (ball.y - BALL_RADIUS);
+  const minOverlapX = Math.min(overlapLeft, overlapRight);
+  const minOverlapY = Math.min(overlapTop, overlapBottom);
+  if (minOverlapX < minOverlapY) return 'x';
+  return 'y';
+}
+
+/** Marque une brique détruite ; si explosive, détruit aussi les
+ *  briques adjacentes (sauf incassables). Retourne { bricks, events,
+ *  scoreGain } — events sert à l'UI pour les effets visuels
+ *  (explosion, destruction) sans que l'UI ait à redéviner l'état. */
+function destroyBrick(bricks, brickId, scoreMultiplier) {
+  const target = bricks.find((b) => b.id === brickId);
+  if (!target || !target.alive) return { bricks, events: [], scoreGain: 0 };
+  let newBricks = bricks.map((b) => (b.id === brickId ? { ...b, alive: false } : b));
+  let scoreGain = Math.round(BRICK_TYPES[target.type].points * scoreMultiplier);
+  const events = [{ type: 'destroy', brickId, brickType: target.type }];
+  if (target.type === 'explosive') {
+    const [tr, tc] = brickId.split('_').map(Number);
+    newBricks = newBricks.map((b) => {
+      if (!b.alive || b.type === 'unbreakable') return b;
+      const [r, c] = b.id.split('_').map(Number);
+      if (Math.abs(r - tr) <= 1 && Math.abs(c - tc) <= 1 && b.id !== brickId) {
+        scoreGain += Math.round(BRICK_TYPES[b.type].points * scoreMultiplier);
+        events.push({ type: 'destroy', brickId: b.id, brickType: b.type, chained: true });
+        return { ...b, alive: false };
+      }
+      return b;
+    });
+    events.push({ type: 'explosion', brickId });
+  }
+  return { bricks: newBricks, events, scoreGain };
+}
+
+function spawnPowerupIfLucky(brick, rng) {
+  // Une brique "bonus" génère TOUJOURS un power-up ; les autres ont une
+  // petite chance indépendante (pas trop fréquent, cf. consigne de ne
+  // pas rendre le jeu illisible avec trop d'effets simultanés).
+  if (brick.type === 'bonus') {
+    return { x: brick.x + brick.w / 2, y: brick.y + brick.h / 2, type: POWERUP_TYPES[Math.floor(rng() * POWERUP_TYPES.length)], vy: 22 };
+  }
+  if (rng() < 0.06) {
+    return { x: brick.x + brick.w / 2, y: brick.y + brick.h / 2, type: POWERUP_TYPES[Math.floor(rng() * POWERUP_TYPES.length)], vy: 22 };
+  }
+  return null;
+}
+
+function ballSpeedMultiplier(activeEffects, nowMs) {
+  let mult = 1;
+  if (activeEffects.slow && activeEffects.slow > nowMs) mult *= 0.55;
+  if (activeEffects.fast && activeEffects.fast > nowMs) mult *= 1.6;
+  return mult;
+}
+
+/** Avance l'état d'un pas de temps dt (secondes). Fonction PURE :
+ *  retourne un nouvel état, ne mute jamais l'état reçu. Le résultat
+ *  inclut `events` (liste d'événements survenus CE tick, pour que
+ *  l'UI puisse déclencher les bons effets visuels/sonores sans
+ *  deviner ce qui s'est passé en comparant deux états). */
+function tick(state, dt, rng) {
+  rng = rng || Math.random;
+  if (state.over || state.won) return state;
+  const nowMs = state.elapsedMs + dt * 1000;
+  const events = [];
+
+  // Effets actifs : nettoie ceux expirés
+  const activeEffects = {};
+  for (const key in state.activeEffects) {
+    if (state.activeEffects[key] > nowMs) activeEffects[key] = state.activeEffects[key];
+  }
+  const scoreMultiplier = activeEffects.scoremult ? 2 : 1;
+
+  // Palette : suit la cible tactile, largeur selon les effets actifs,
+  // ne sort jamais du terrain.
+  let paddleW = PADDLE_W_NORMAL;
+  if (activeEffects.widen) paddleW = PADDLE_W_BIG;
+  else if (activeEffects.narrow) paddleW = PADDLE_W_SMALL;
+  const paddleFollowSpeed = Math.min(1, dt * 18); // lissage, pas de téléportation
+  const paddleX = clamp(state.paddleX + (state.paddleTargetX - state.paddleX) * paddleFollowSpeed, paddleW / 2, FIELD_W - paddleW / 2);
+
+  let bricks = state.bricks;
+  let score = state.score;
+  let lives = state.lives;
+  let powerups = state.powerups.map((p) => ({ ...p, y: p.y + p.vy * dt }));
+  let shieldActive = state.shieldActive;
+
+  // Power-ups tombants : capture par la palette, sinon disparaissent hors écran
+  const caughtPowerups = [];
+  powerups = powerups.filter((p) => {
+    if (p.y >= PADDLE_Y - 1.5 && p.y <= PADDLE_Y + 2 && p.x >= paddleX - paddleW / 2 && p.x <= paddleX + paddleW / 2) {
+      caughtPowerups.push(p);
+      return false;
+    }
+    return p.y < FIELD_H + 5;
+  });
+  for (const p of caughtPowerups) {
+    events.push({ type: 'powerup_caught', powerupType: p.type });
+    if (p.type === 'extralife') { lives++; }
+    else if (p.type === 'multiball') { /* géré après, cf. plus bas */ }
+    else if (p.type === 'shield') { shieldActive = true; }
+    else { activeEffects[p.type] = nowMs + (POWERUP_DURATION[p.type] || 8000); }
+  }
+
+  const speedMult = ballSpeedMultiplier(activeEffects, nowMs);
+  let balls = [];
+  let ballsLostThisTick = 0;
+
+  for (let ball of state.balls) {
+    if (ball.stuck) {
+      balls.push({ ...ball, x: paddleX });
+      continue;
+    }
+    let { vx, vy } = correctBallAngle(ball.vx, ball.vy);
+    let x = ball.x + vx * dt * speedMult;
+    let y = ball.y + vy * dt * speedMult;
+
+    // Murs latéraux et plafond
+    if (x - BALL_RADIUS <= 0) { x = BALL_RADIUS; vx = Math.abs(vx); }
+    else if (x + BALL_RADIUS >= FIELD_W) { x = FIELD_W - BALL_RADIUS; vx = -Math.abs(vx); }
+    if (y - BALL_RADIUS <= 0) { y = BALL_RADIUS; vy = Math.abs(vy); }
+
+    // Palette
+    if (y + BALL_RADIUS >= PADDLE_Y && y - BALL_RADIUS <= PADDLE_Y + 2 && vy > 0) {
+      const paddleLeft = paddleX - paddleW / 2, paddleRight = paddleX + paddleW / 2;
+      if (x >= paddleLeft - BALL_RADIUS && x <= paddleRight + BALL_RADIUS) {
+        if (activeEffects.magnet && !ball.stuck) {
+          balls.push({ ...ball, x, y: PADDLE_Y - BALL_RADIUS, vx, vy, stuck: true });
+          continue;
+        }
+        // angle de rebond dépend du point d'impact sur la palette (comme un vrai casse-briques)
+        let hitPos = clamp((x - paddleX) / (paddleW / 2), -1, 1);
+        // Cas dégénéré confirmé par simulation : une balle qui frappe
+        // systématiquement le centre de la palette (hitPos≈0) repart
+        // quasi verticalement en boucle, sans jamais balayer la largeur
+        // du terrain pour atteindre d'autres briques — même principe
+        // que la correction anti-horizontale, dans l'autre sens.
+        if (Math.abs(hitPos) < 0.12) hitPos = (rng() < 0.5 ? -1 : 1) * (0.12 + rng() * 0.08);
+        const speedNow = Math.hypot(vx, vy);
+        vx = hitPos * speedNow * 0.9;
+        vy = -Math.abs(speedNow * Math.sqrt(Math.max(0.1, 1 - (vx / speedNow) ** 2)));
+        y = PADDLE_Y - BALL_RADIUS;
+        events.push({ type: 'paddle_hit' });
+      }
+    }
+
+    // Briques : teste toutes les briques vivantes, traite le premier contact
+    let hitBrickId = null;
+    for (const brick of bricks) {
+      if (!brick.alive) continue;
+      if (circleRectCollide(x, y, BALL_RADIUS, brick.x, brick.y, brick.w, brick.h)) { hitBrickId = brick.id; break; }
+    }
+    if (hitBrickId) {
+      const brick = bricks.find((b) => b.id === hitBrickId);
+      const passThrough = (activeEffects.fireball && brick.type !== 'unbreakable') || (activeEffects.ghost);
+      if (!passThrough) {
+        const axis = resolveBrickBounce({ x, y }, brick);
+        if (axis === 'x') vx = -vx; else vy = -vy;
+      }
+      if (brick.type !== 'unbreakable') {
+        const newHp = brick.hp - 1;
+        if (newHp <= 0) {
+          const result = destroyBrick(bricks, hitBrickId, scoreMultiplier);
+          bricks = result.bricks;
+          score += result.scoreGain;
+          events.push(...result.events);
+          const spawned = spawnPowerupIfLucky(brick, rng);
+          if (spawned) powerups.push(spawned);
+        } else {
+          bricks = bricks.map((b) => (b.id === hitBrickId ? { ...b, hp: newHp } : b));
+          events.push({ type: 'brick_hit', brickId: hitBrickId, hp: newHp });
+        }
+      } else {
+        events.push({ type: 'brick_hit', brickId: hitBrickId, hp: Infinity });
+      }
+    }
+
+    // Balle perdue (tombe sous la palette)
+    if (y - BALL_RADIUS > FIELD_H) {
+      if (shieldActive) {
+        shieldActive = false;
+        y = PADDLE_Y - BALL_RADIUS; vy = -Math.abs(vy); x = paddleX;
+        events.push({ type: 'shield_saved' });
+        balls.push({ ...ball, x, y, vx, vy, stuck: false });
+      } else {
+        ballsLostThisTick++;
+        events.push({ type: 'ball_lost' });
+      }
+      continue;
+    }
+
+    balls.push({ ...ball, x, y, vx, vy, fireball: !!activeEffects.fireball, ghost: !!activeEffects.ghost });
+  }
+
+  // Multiball capturé : ajoute une nouvelle balle (dupliquée depuis une existante)
+  for (const p of caughtPowerups) {
+    if (p.type === 'multiball' && balls.length > 0) {
+      const base = balls[0];
+      const angleOffset = (rng() - 0.5) * 40 * (Math.PI / 180);
+      const speed = Math.hypot(base.vx, base.vy) || BASE_BALL_SPEED;
+      const baseAngle = Math.atan2(base.vy, base.vx);
+      balls.push({ ...base, vx: Math.cos(baseAngle + angleOffset) * speed, vy: Math.sin(baseAngle + angleOffset) * speed, stuck: false });
+    }
+  }
+
+  // Toutes les balles perdues : retire une vie, relance si des vies restent
+  if (balls.length === 0) {
+    lives -= 1;
+    if (lives <= 0) {
+      return { ...state, bricks, score, lives: 0, over: true, elapsedMs: nowMs, events: [...events, { type: 'game_over' }], activeEffects, powerups: [], balls: [] };
+    }
+    balls = [{ x: paddleX, y: PADDLE_Y - 2, vx: BASE_BALL_SPEED * 0.4, vy: -BASE_BALL_SPEED, stuck: true, fireball: false, ghost: false }];
+    events.push({ type: 'life_lost' });
+  }
+
+  // Victoire : plus aucune brique cassable vivante
+  const remainingBreakable = bricks.some((b) => b.alive && b.type !== 'unbreakable');
+  if (!remainingBreakable) {
+    return { ...state, bricks, score, lives, over: false, won: true, elapsedMs: nowMs, events: [...events, { type: 'level_won' }], activeEffects, balls, powerups, paddleX, paddleW };
+  }
+
+  return { ...state, bricks, score, lives, balls, powerups, activeEffects, paddleX, paddleW, elapsedMs: nowMs, events, shieldActive };
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// CASSE-BRIQUES — interface, câblée sur breakout-engine.js
+// ═══════════════════════════════════════════════════════════════
+const POWERUP_ICONS = {
+  gun: '🔫', widen: '↔️', narrow: '↔️', multiball: '🔴', slow: '🐢', fast: '⚡',
+  magnet: '🧲', fireball: '🔥', ghost: '👻', scoremult: '⭐', extralife: '❤️', shield: '🛡️',
+};
+const POWERUP_LABELS = {
+  gun: 'Tir', widen: 'Palette+', narrow: 'Palette-', multiball: 'Multiball', slow: 'Lent', fast: 'Rapide',
+  magnet: 'Aimant', fireball: 'Feu', ghost: 'Fantôme', scoremult: 'x2', extralife: 'Vie', shield: 'Bouclier',
+};
+const POWERUP_IS_MALUS = new Set(['narrow', 'fast']);
+
+const STORE_KEY = 'breakout_ondine_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats: {}, save: null }, loadStore());
+function statGet(k, d) { return k in STORE.stats ? STORE.stats[k] : (d === undefined ? 0 : d); }
+function statInc(k, n) { STORE.stats[k] = (STORE.stats[k] || 0) + (n || 1); saveStore(STORE); return STORE.stats[k]; }
+function statSetMax(k, v) { if (STORE.stats[k] === undefined || v > STORE.stats[k]) { STORE.stats[k] = v; saveStore(STORE); } }
+
+let G = null; // état du moteur
+let running = false;
+let loopTimer = null;
+let lastFrameTime = 0;
+let paddleTargetPct = 50;
+
+function startGame() {
+  G = createInitialState(1, Math.random);
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sg').classList.remove('hidden');
+  buildBricksDom();
+  syncBallsDom();
+  render();
+  persistSave();
+  running = true;
+  lastFrameTime = Date.now();
+  loop();
+}
+
+function resumeGame() {
+  if (!STORE.save) { startGame(); return; }
+  G = STORE.save;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sg').classList.remove('hidden');
+  buildBricksDom();
+  syncBallsDom();
+  render();
+  running = true;
+  lastFrameTime = Date.now();
+  loop();
+}
+
+function persistSave() { STORE.save = G; saveStore(STORE); }
+
+function loop() {
+  if (!running) return;
+  const now = Date.now();
+  let dt = (now - lastFrameTime) / 1000;
+  dt = Math.min(dt, 0.05); // évite un grand saut si l'onglet était en arrière-plan
+  lastFrameTime = now;
+  G.paddleTargetX = paddleTargetPct;
+  const prevBricks = G.bricks;
+  G = tick(G, dt);
+  applyEvents(G.events || [], prevBricks);
+  render();
+  if (G.over) { running = false; finishGameOver(); return; }
+  if (G.won) { running = false; finishLevelWon(); return; }
+  loopTimer = setTimeout(loop, 1000 / 60);
+}
+
+// ── Rendu : les briques sont créées UNE FOIS par niveau puis mises à
+// jour (jamais recréées), balles/bonus/projectiles sont un pool
+// recyclé — pas de recréation DOM à chaque frame, cohérent avec le
+// pattern déjà utilisé par les autres jeux d'action du Hub. ──
+function buildBricksDom() {
+  const field = document.getElementById('bkField');
+  field.querySelectorAll('.bk-brick').forEach((el) => el.remove());
+  for (const brick of G.bricks) {
+    const el = document.createElement('div');
+    el.className = 'bk-brick';
+    el.id = 'brick_' + brick.id;
+    el.style.left = brick.x + '%';
+    el.style.top = brick.y + '%';
+    el.style.width = brick.w + '%';
+    el.style.height = brick.h + '%';
+    el.style.background = BRICK_TYPES[brick.type].color;
+    if (brick.type === 'unbreakable') el.classList.add('bk-unbreakable');
+    field.appendChild(el);
+  }
+}
+
+function updateBrickDom(brickId) {
+  const brick = G.bricks.find((b) => b.id === brickId);
+  const el = document.getElementById('brick_' + brickId);
+  if (!brick || !el) return;
+  if (!brick.alive) {
+    el.classList.add('bk-destroying');
+    setTimeout(() => el.remove(), 260);
+    return;
+  }
+  el.classList.remove('bk-cracked1', 'bk-cracked2');
+  const damageRatio = 1 - brick.hp / brick.maxHp;
+  if (damageRatio > 0.6) el.classList.add('bk-cracked2');
+  else if (damageRatio > 0.25) el.classList.add('bk-cracked1');
+}
+
+let ballPool = [], powerupPool = [], projectilePool = [];
+function syncBallsDom() {
+  const field = document.getElementById('bkField');
+  ballPool.forEach((el) => el.remove());
+  ballPool = G.balls.map(() => { const el = document.createElement('div'); el.className = 'bk-ball'; field.appendChild(el); return el; });
+}
+
+function applyEvents(events, prevBricks) {
+  const field = document.getElementById('bkField');
+  for (const ev of events) {
+    if (ev.type === 'brick_hit' || ev.type === 'destroy') updateBrickDom(ev.brickId);
+    if (ev.type === 'destroy') {
+      const brick = prevBricks.find((b) => b.id === ev.brickId);
+      if (brick) floatScoreText(brick.x + brick.w / 2, brick.y + brick.h / 2, '+' + BRICK_TYPES[ev.brickType].points);
+      playSound('destroy');
+    }
+    if (ev.type === 'explosion') {
+      const brick = prevBricks.find((b) => b.id === ev.brickId);
+      if (brick) {
+        const boom = document.createElement('div');
+        boom.className = 'bk-explosion';
+        boom.style.left = (brick.x - brick.w) + '%';
+        boom.style.top = (brick.y - brick.h) + '%';
+        boom.style.width = (brick.w * 3) + '%';
+        boom.style.height = (brick.h * 3) + '%';
+        field.appendChild(boom);
+        setTimeout(() => boom.remove(), 400);
+        playSound('explosion');
+      }
+    }
+    if (ev.type === 'paddle_hit') playSound('paddle');
+    if (ev.type === 'powerup_caught') { playSound(POWERUP_IS_MALUS.has(ev.powerupType) ? 'malus' : 'bonus'); }
+    if (ev.type === 'life_lost') { playSound('lose_life'); vibrate([60, 40, 60]); }
+    if (ev.type === 'shield_saved') playSound('shield'); 
+  }
+  if (events.some((e) => e.type === 'brick_hit' && e.hp !== Infinity)) playSound('hit');
+}
+
+function floatScoreText(xPct, yPct, text) {
+  const field = document.getElementById('bkField');
+  const el = document.createElement('div');
+  el.className = 'bk-toast-float';
+  el.style.left = xPct + '%';
+  el.style.top = yPct + '%';
+  el.textContent = text;
+  field.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+function render() {
+  if (!G) return;
+  const paddle = document.getElementById('bkPaddle');
+  paddle.style.width = G.paddleW + '%';
+  paddle.style.left = (G.paddleX - G.paddleW / 2) + '%';
+
+  if (ballPool.length !== G.balls.length) syncBallsDom();
+  G.balls.forEach((ball, i) => {
+    const el = ballPool[i];
+    if (!el) return;
+    el.style.left = (ball.x - BALL_RADIUS) + '%';
+    el.style.top = (ball.y - BALL_RADIUS) + '%';
+    el.classList.toggle('bk-fireball', !!ball.fireball);
+    el.classList.toggle('bk-ghost', !!ball.ghost);
+  });
+
+  const field = document.getElementById('bkField');
+  powerupPool.forEach((el) => el.remove());
+  powerupPool = G.powerups.map((p) => {
+    const el = document.createElement('div');
+    el.className = 'bk-powerup';
+    el.style.left = (p.x - 3) + '%';
+    el.style.top = p.y + '%';
+    el.style.color = POWERUP_IS_MALUS.has(p.type) ? '#f87171' : '#34d399';
+    el.style.background = 'rgba(15,10,30,.85)';
+    el.textContent = POWERUP_ICONS[p.type] || '?';
+    field.appendChild(el);
+    return el;
+  });
+
+  document.getElementById('bkShield').style.display = G.shieldActive ? '' : 'none';
+  document.getElementById('bkScore').textContent = G.score;
+  document.getElementById('bkLevel').textContent = G.level;
+  const livesHost = document.getElementById('bkLives');
+  livesHost.innerHTML = '❤️'.repeat(Math.max(0, G.lives));
+
+  const effectsBar = document.getElementById('bkEffectsBar');
+  effectsBar.innerHTML = '';
+  const nowMs = G.elapsedMs;
+  for (const key in G.activeEffects) {
+    const remainMs = G.activeEffects[key] - nowMs;
+    if (remainMs <= 0) continue;
+    const chip = document.createElement('div');
+    chip.className = 'bk-effect-chip';
+    chip.style.color = POWERUP_IS_MALUS.has(key) ? '#f87171' : '#34d399';
+    chip.textContent = (POWERUP_ICONS[key] || '') + ' ' + POWERUP_LABELS[key] + ' ' + Math.ceil(remainMs / 1000) + 's';
+    effectsBar.appendChild(chip);
+  }
+}
+
+function finishLevelWon() {
+  statInc('levelsCompleted');
+  statSetMax('bestScore', G.score);
+  STORE.save = null; saveStore(STORE);
+  document.getElementById('winStatsBk').textContent = 'Score : ' + G.score + ' — Niveau ' + G.level + ' terminé';
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('swinBk').classList.remove('hidden');
+  playSound('win');
+}
+function nextLevelBk() {
+  const nextLevel = G.level + 1;
+  const carryScore = G.score, carryLives = G.lives;
+  G = createInitialState(nextLevel, Math.random);
+  G.score = carryScore; G.lives = carryLives;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sg').classList.remove('hidden');
+  buildBricksDom();
+  syncBallsDom();
+  render();
+  persistSave();
+  running = true;
+  lastFrameTime = Date.now();
+  loop();
+}
+
+function finishGameOver() {
+  statInc('games');
+  statSetMax('bestScore', G.score);
+  STORE.save = null; saveStore(STORE);
+  document.getElementById('overStatsBk').textContent = 'Score final : ' + G.score + ' — Niveau ' + G.level;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('soverBk').classList.remove('hidden');
+  playSound('gameover');
+}
+
+async function confirmLeaveBk() {
+  if (G && !G.over && !G.won) {
+    persistSave();
+  }
+  running = false;
+  if (loopTimer) clearTimeout(loopTimer);
+  goHome();
+}
+function goHome() {
+  running = false;
+  if (loopTimer) clearTimeout(loopTimer);
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sh').classList.remove('hidden');
+  document.getElementById('resumeBtnBk').style.display = STORE.save ? '' : 'none';
+  renderHomeStats();
+}
+function renderHomeStats() {
+  const host = document.getElementById('homeStatsBk');
+  host.innerHTML = '';
+  [{ v: statGet('bestScore'), l: '🏆 Meilleur score' }, { v: statGet('levelsCompleted'), l: '📶 Niveaux réussis' }]
+    .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.style.flex = '1'; el.innerHTML = '<div class="v">' + s.v + '</div><div class="l">' + s.l + '</div>'; host.appendChild(el); });
+}
+function showStatsBk() {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sstatsBk').classList.remove('hidden');
+  const host = document.getElementById('statsGridBk');
+  host.innerHTML = '';
+  [{ v: statGet('games'), l: '🎮 Parties' }, { v: statGet('bestScore'), l: '🏆 Meilleur score' }, { v: statGet('levelsCompleted'), l: '📶 Niveaux réussis' }]
+    .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.innerHTML = '<div class="v">' + s.v + '</div><div class="l">' + s.l + '</div>'; host.appendChild(el); });
+}
+
+function showRulesBk() {
+  showModal('🧱 Comment jouer',
+    '<p>Glisse le doigt sur le terrain pour déplacer la palette. Détruis toutes les briques cassables pour terminer le niveau.</p>' +
+    '<p>Attrape les bonus (verts) et évite les malus (rouges) qui tombent des briques détruites.</p>' +
+    '<p>Les briques grises rayées sont incassables. Les briques rouges explosent et détruisent leurs voisines.</p>',
+    [{ label: 'Compris', variant: 'primary' }]);
+}
+function showModal(title, bodyHTML, buttons) {
+  const overlay = document.createElement('div');
+  overlay.className = 'mw-modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'mw-modal-box';
+  box.innerHTML = '<div class="mw-modal-title">' + title + '</div><div class="mw-modal-body">' + bodyHTML + '</div>';
+  const actions = document.createElement('div');
+  actions.className = 'mw-modal-actions';
+  buttons.forEach((b) => {
+    const btn = document.createElement('button');
+    btn.className = 'ondine-btn ' + (b.variant === 'primary' ? 'ondine-btn-primary' : 'ondine-btn-secondary');
+    btn.textContent = b.label;
+    btn.onclick = () => { document.body.removeChild(overlay); b.onClick && b.onClick(); };
+    actions.appendChild(btn);
+  });
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+// ── Audio léger (Web Audio synthétisé, pattern déjà éprouvé) ──
+let audioCtx = null;
+function tone(freq, dur, type, vol) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type || 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol || 0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.start(); osc.stop(audioCtx.currentTime + dur);
+  } catch (e) {}
+}
+function playSound(name) {
+  const P = {
+    hit: () => tone(500, 0.05, 'square', 0.06),
+    destroy: () => tone(700, 0.07, 'triangle', 0.08),
+    explosion: () => tone(120, 0.2, 'sawtooth', 0.1),
+    paddle: () => tone(300, 0.04, 'sine', 0.06),
+    bonus: () => [660, 880].forEach((f, i) => setTimeout(() => tone(f, 0.1, 'sine', 0.09), i * 60)),
+    malus: () => tone(200, 0.15, 'sawtooth', 0.08),
+    lose_life: () => [300, 200].forEach((f, i) => setTimeout(() => tone(f, 0.15, 'sine', 0.09), i * 100)),
+    shield: () => tone(500, 0.15, 'sine', 0.1),
+    win: () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.2, 'sine', 0.14), i * 100)),
+    gameover: () => [392, 330, 262].forEach((f, i) => setTimeout(() => tone(f, 0.25, 'sine', 0.1), i * 140)),
+  };
+  (P[name] || (() => {}))();
+}
+function vibrate(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+
+// ── Contrôle tactile : glisser le doigt déplace la palette ──
+const bkField = document.getElementById('bkField');
+function updatePaddleFromClientX(clientX) {
+  const rect = bkField.getBoundingClientRect();
+  paddleTargetPct = clamp(((clientX - rect.left) / rect.width) * 100, 0, 100);
+}
+bkField.addEventListener('touchmove', (e) => { e.preventDefault(); updatePaddleFromClientX(e.touches[0].clientX); }, { passive: false });
+bkField.addEventListener('touchstart', (e) => { updatePaddleFromClientX(e.touches[0].clientX); launchStuckBall(); }, { passive: true });
+bkField.addEventListener('mousemove', (e) => { if (e.buttons === 1) updatePaddleFromClientX(e.clientX); });
+bkField.addEventListener('mousedown', (e) => { updatePaddleFromClientX(e.clientX); launchStuckBall(); });
+
+/** Libère toute balle "collée" à la palette (départ de niveau, ou
+ *  après capture par un effet magnet) — un tap/clic sur le terrain la
+ *  lance vers le haut avec un léger angle aléatoire. */
+function launchStuckBall() {
+  if (!G || G.over || G.won) return;
+  let launched = false;
+  G = { ...G, balls: G.balls.map((b) => {
+    if (!b.stuck) return b;
+    launched = true;
+    const angle = (Math.random() - 0.5) * 0.6; // léger angle aléatoire, jamais purement vertical
+    return { ...b, stuck: false, vx: Math.sin(angle) * BASE_BALL_SPEED, vy: -Math.cos(angle) * BASE_BALL_SPEED };
+  }) };
+  if (launched) playSound('paddle');
+}
+
+document.getElementById('resumeBtnBk').style.display = STORE.save ? '' : 'none';
+renderHomeStats();
+
+</script>
+</body>
+</html>

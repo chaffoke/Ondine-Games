@@ -22,7 +22,7 @@
 // même avec du wifi disponible (stale-while-revalidate rafraîchit le
 // cache existant, mais un nom de cache identique ne déclenche pas de
 // nettoyage de l'ancien contenu).
-const CACHE_VERSION = 'ondine-games-v23';
+const CACHE_VERSION = 'ondine-games-v39';
 
 const PRECACHE_FILES = [
   './',
@@ -36,12 +36,15 @@ const PRECACHE_FILES = [
   'games/421.html',
   'games/bataille-navale.html',
   'games/belote.html',
-  'games/blackjack.html',
-  'games/checkers.html',
-  'games/chess.html',
+  'games/casino.html',
   'games/dames.html',
+  'games/chess.html',
   'games/demineur.html',
   'games/flappy.html',
+  'games/breakout.html',
+  'games/reaction-test.html',
+  'games/motus.html',
+  'games/frogger.html',
   'games/game-of-goose.html',
   'games/mahjong.html',
   'games/mastermind.html',

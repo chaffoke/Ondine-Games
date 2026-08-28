@@ -99,6 +99,9 @@ body{background:
 .stats-game-card .name{font-weight:800;font-size:13px;}
 .stats-game-card .details{font-size:10.5px;color:var(--text2);margin-top:2px;display:flex;flex-wrap:wrap;gap:6px;}
 .stats-empty{text-align:center;padding:30px 20px;color:var(--text2);font-size:13px;}
+.stats-search{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--text);margin-bottom:10px;}
+.stats-search::placeholder{color:var(--text2);}
+.stats-game-card.filtered-out{display:none;}
 .empty-state .ic{font-size:40px;margin-bottom:10px;opacity:.5;}
 .empty-state .txt{font-size:13px;}
 </style>
@@ -146,6 +149,7 @@ body{background:
       <div style="width:36px;"></div>
     </div>
     <div id="statsSummary"></div>
+    <input type="text" id="statsSearch" class="stats-search" placeholder="🔍 Rechercher un jeu…" oninput="filterStatsPanel()">
     <div id="statsPerGame"></div>
   </div>
 </div>
@@ -167,13 +171,15 @@ const CATEGORIES = [
   { id:'des', label:'🎲 Dés', short:'Dés' },
   { id:'reflexion', label:'🧠 Réflexion', short:'Réflexion' },
   { id:'action', label:'⚡ Action', short:'Action' },
+  { id:'casino', label:'🎰 Casino', short:'Casino' },
 ];
 const GAMES = [
+  { id:'casino', name:'Meow Casino', icon:'🎰', desc:'Roulette, machine à sous, blackjack — crédits 100% virtuels', path:'games/casino.html', cat:'casino', color:'#fbbf24' },
   { id:'solitaire', name:'Solitaire', icon:'🃏', desc:'Klondike classique', path:'games/solitaire.html', cat:'cartes', color:'#38bdf8' },
   { id:'uno', name:'Uno', icon:'🎴', desc:'Le grand classique en famille', path:'games/uno.html', cat:'cartes', color:'#f472b6' },
   { id:'puissance4', name:'Puissance 4', icon:'🔴', desc:'Aligne 4 pions avant l’IA', path:'games/puissance4.html', cat:'plateau', color:'#fbbf24' },
   { id:'othello', name:'Othello', icon:'⚫', desc:'Retourne le plateau', path:'games/othello.html', cat:'plateau', color:'#818cf8' },
-  { id:'dames', name:'Dames', icon:'⚪', desc:'Règles françaises, dame volante', path:'games/dames.html', cat:'plateau', color:'#fb923c' },
+  { id:'dames', name:'Dames', icon:'⚪', desc:'Françaises ou internationales, au choix', path:'games/dames.html', cat:'plateau', color:'#fb923c' },
   { id:'demineur', name:'Démineur', icon:'💣', desc:'Déjoue les mines', path:'games/demineur.html', cat:'reflexion', color:'#f87171' },
   { id:'sudoku', name:'Sudoku', icon:'🔢', desc:'Logique et chiffres', path:'games/sudoku.html', cat:'reflexion', color:'#34d399' },
   { id:'mastermind', name:'Mastermind', icon:'🧠', desc:'Devine la combinaison secrète', path:'games/mastermind.html', cat:'reflexion', color:'#c084fc' },
@@ -185,15 +191,17 @@ const GAMES = [
   { id:'2048', name:'2048', icon:'🔢', desc:'Fusionne les tuiles jusqu’à 2048', path:'games/2048.html', cat:'reflexion', color:'#fbbf24' },
   { id:'bataille-navale', name:'Bataille Navale', icon:'🚢', desc:'Coule la flotte adverse', path:'games/bataille-navale.html', cat:'plateau', color:'#38bdf8' },
   { id:'belote', name:'Belote', icon:'🃏', desc:'Le classique des jeux de cartes français', path:'games/belote.html', cat:'cartes', color:'#f87171' },
-  { id:'blackjack', name:'Blackjack', icon:'🂡', desc:'Approche-toi de 21 sans le dépasser', path:'games/blackjack.html', cat:'cartes', color:'#34d399' },
-  { id:'checkers', name:'Dames Internationales', icon:'⚪', desc:'Variante internationale sur grand plateau', path:'games/checkers.html', cat:'plateau', color:'#a78bfa' },
   { id:'chess', name:'Échecs', icon:'♟️', desc:'Le jeu de stratégie classique', path:'games/chess.html', cat:'plateau', color:'#94a3b8' },
   { id:'flappy', name:'Flappy Bulle', icon:'🫧', desc:'Franchis les obstacles sans tomber', path:'games/flappy.html', cat:'action', color:'#22d3ee' },
+  { id:'reaction-test', name:'Reaction Test', icon:'⚡', desc:'Teste tes réflexes en 5 manches chronométrées', path:'games/reaction-test.html', cat:'action', color:'#fbbf24' },
+  { id:'motus', name:'Motus', icon:'🔤', desc:'Trouve le mot caché en 6 essais, gestion fine des lettres', path:'games/motus.html', cat:'reflexion', color:'#a78bfa' },
+  { id:'frogger', name:'Frogger', icon:'🐸', desc:'Traverse la route puis la rivière sans te faire écraser', path:'games/frogger.html', cat:'action', color:'#34d399' },
+  { id:'breakout', name:'Casse-briques', icon:'🧱', desc:'Bonus, malus, multiball — détruis toutes les briques', path:'games/breakout.html', cat:'action', color:'#38bdf8' },
   { id:'game-of-goose', name:'Jeu de l’Oie', icon:'🦢', desc:'Avance sur le plateau au fil des dés', path:'games/game-of-goose.html', cat:'plateau', color:'#fb923c' },
   { id:'memory', name:'Memory', icon:'🧠', desc:'Retrouve toutes les paires', path:'games/memory.html', cat:'reflexion', color:'#c084fc' },
   { id:'mille-bornes', name:'Road Trip', icon:'🚗', desc:'Course de bornes en famille', path:'games/mille-bornes.html', cat:'cartes', color:'#f472b6' },
   { id:'morpion', name:'Morpion', icon:'❌', desc:'Aligne 3 symboles avant l’IA', path:'games/morpion.html', cat:'plateau', color:'#60a5fa' },
-  { id:'puzzle15', name:'Puzzle 15', icon:'🧩', desc:'Remets les 15 tuiles dans l’ordre', path:'games/puzzle15.html', cat:'reflexion', color:'#fbbf24' },
+  { id:'puzzle15', name:'Taquin', icon:'🧩', desc:'Remets les tuiles dans l’ordre — 3×3, 4×4 ou 5×5', path:'games/puzzle15.html', cat:'reflexion', color:'#fbbf24' },
   { id:'quarto', name:'Quarto', icon:'⬜', desc:'Aligne 4 pièces partageant un trait', path:'games/quarto.html', cat:'plateau', color:'#f87171' },
   { id:'racing', name:'Ondine Racing', icon:'🏎️', desc:'Course arcade, boost et stratégie', path:'games/racing.html', cat:'action', color:'#818cf8' },
   { id:'rami', name:'Rami', icon:'🀄', desc:'Forme des combinaisons de cartes', path:'games/rami.html', cat:'cartes', color:'#34d399' },
@@ -344,6 +352,10 @@ function formatGameStatLine(stats) {
   if (games !== undefined) parts.push(`🎮 ${games} partie${games > 1 ? 's' : ''}`);
   const wins = pickStat(stats, ['wins', 'victories']);
   if (wins !== undefined) parts.push(`🏆 ${wins} victoire${wins > 1 ? 's' : ''}`);
+  const losses = pickStat(stats, ['losses', 'defeats']);
+  if (losses !== undefined) parts.push(`💀 ${losses} défaite${losses > 1 ? 's' : ''}`);
+  const draws = pickStat(stats, ['draws', 'ties']);
+  if (draws !== undefined) parts.push(`🤝 ${draws} nul${draws > 1 ? 's' : ''}`);
   const bestScore = pickStat(stats, ['bestScore', 'highScore', 'maxTileEver', 'bestBankroll']);
   if (bestScore !== undefined) parts.push(`⭐ ${bestScore}`);
   // meilleur temps : peut être stocké sous des clés composées comme
@@ -364,10 +376,10 @@ function showStatsPanel() {
     {id:'sudoku',name:'Sudoku',icon:'🔢'},{id:'mastermind',name:'Mastermind',icon:'🧠'},{id:'mahjong',name:'Mahjong Solitaire',icon:'🀄'},
     {id:'yams',name:'YAMS',icon:'🎲'},{id:'421',name:'421',icon:'🎲'},{id:'shutthebox',name:'Shut the Box',icon:'📦'},
     {id:'rhythmhero',name:'Rhythm Hero',icon:'🎵'},{id:'2048',name:'2048',icon:'🔢'},{id:'bataille-navale',name:'Bataille Navale',icon:'🚢'},
-    {id:'belote',name:'Belote',icon:'🃏'},{id:'blackjack',name:'Blackjack',icon:'🂡'},{id:'checkers',name:'Dames Internationales',icon:'⚪'},
-    {id:'chess',name:'Échecs',icon:'♟️'},{id:'flappy',name:'Flappy Bulle',icon:'🫧'},{id:'game-of-goose',name:'Jeu de l\u2019Oie',icon:'🦢'},
+    {id:'belote',name:'Belote',icon:'🃏'},{id:'casino',name:'Meow Casino',icon:'🎰'},
+    {id:'chess',name:'Échecs',icon:'♟️'},{id:'breakout',name:'Casse-briques',icon:'🧱'},{id:'reaction-test',name:'Reaction Test',icon:'⚡'},{id:'motus',name:'Motus',icon:'🔤'},{id:'frogger',name:'Frogger',icon:'🐸'},{id:'flappy',name:'Flappy Bulle',icon:'🫧'},{id:'game-of-goose',name:'Jeu de l\u2019Oie',icon:'🦢'},
     {id:'memory',name:'Memory',icon:'🧠'},{id:'mille-bornes',name:'Road Trip',icon:'🚗'},{id:'morpion',name:'Morpion',icon:'❌'},
-    {id:'puzzle15',name:'Puzzle 15',icon:'🧩'},{id:'quarto',name:'Quarto',icon:'⬜'},{id:'racing',name:'Ondine Racing',icon:'🏎️'},
+    {id:'puzzle15',name:'Taquin',icon:'🧩'},{id:'quarto',name:'Quarto',icon:'⬜'},{id:'racing',name:'Ondine Racing',icon:'🏎️'},
     {id:'rami',name:'Rami',icon:'🀄'},{id:'simon',name:'Simon',icon:'🎵'},{id:'snake',name:'Snake',icon:'🐍'},
     {id:'spider',name:'Spider Solitaire',icon:'🕷️'},{id:'tetris',name:'Tetris',icon:'🟦'},{id:'maze-rush',name:'Maze Rush',icon:'🌀'},
     {id:'puzzle-mosaique',name:'Meowdoku',icon:'🐱'},
@@ -396,7 +408,7 @@ function showStatsPanel() {
     listHost.innerHTML = '<div class="stats-empty">Aucune statistique pour le moment — joue à un jeu pour la voir apparaître ici !</div>';
   } else {
     listHost.innerHTML = playedGames.map((g) => `
-      <div class="stats-game-card">
+      <div class="stats-game-card" data-name="${g.name.toLowerCase()}">
         <div class="ic">${g.icon}</div>
         <div class="info">
           <div class="name">${g.name}</div>
@@ -405,11 +417,20 @@ function showStatsPanel() {
       </div>`).join('');
   }
 
+  document.getElementById('statsSearch').value = '';
   document.getElementById('statsPanel').classList.remove('hidden');
+}
+function filterStatsPanel() {
+  const query = document.getElementById('statsSearch').value.trim().toLowerCase();
+  document.querySelectorAll('#statsPerGame .stats-game-card').forEach((card) => {
+    const matches = !query || card.dataset.name.includes(query);
+    card.classList.toggle('filtered-out', !matches);
+  });
 }
 function hideStatsPanel() { document.getElementById('statsPanel').classList.add('hidden'); }
 window.showStatsPanel = showStatsPanel;
 window.hideStatsPanel = hideStatsPanel;
+window.filterStatsPanel = filterStatsPanel;
 
 // Enregistrement du Service Worker — uniquement pour le critère
 // d'installabilité Android/Chrome. Échoue silencieusement en file://

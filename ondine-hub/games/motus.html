@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Motus × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;
+  --c1:#38bdf8;--c2:#7dd3fc;--c3:#bae6fd;
+  --cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);
+  --text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;
+  --sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:var(--r2);cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-btn-danger{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.35);color:var(--cr);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;max-width:320px;width:100%;box-shadow:var(--sh2);}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── HOME ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(30px,9vw,42px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+/* ── GAME ── */
+#sg{align-items:center;padding:10px;gap:10px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;}
+.turn-badge{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:6px 14px;font-family:'Fredoka One',cursive;font-size:13px;}
+.turn-dot{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 -2px 3px rgba(0,0,0,.35);}
+.turn-dot.black{background:radial-gradient(circle at 35% 30%,#555,#0a0a0a 70%);}
+.turn-dot.white{background:radial-gradient(circle at 35% 30%,#fff,#cbd5e1 70%);}
+.score-row{display:flex;gap:8px;}
+.score-pill{display:flex;align-items:center;gap:5px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:13px;}
+
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:rgba(6,60,40,.5);border:1px solid var(--border2);border-radius:12px;padding:6px;max-width:min(400px, calc(100vh - 180px));width:100%;aspect-ratio:1;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4, même cause) */
+@media (min-width:900px){.board{max-width:600px;}}
+.cell{position:relative;background:rgba(10,90,60,.55);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cell.hint::after{content:'';width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.35);}
+.disc{width:84%;height:84%;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.4);transform:scale(0) rotateY(0deg);transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
+.disc.show{transform:scale(1);}
+.disc.black{background:radial-gradient(circle at 35% 28%,#4a4a4a,#0a0a0a 72%);}
+.disc.white{background:radial-gradient(circle at 35% 28%,#fff,#c7d2e0 72%);}
+.disc.flip{animation:flipDisc .4s ease;}
+@keyframes flipDisc{0%{transform:scale(1) rotateY(0);}50%{transform:scale(.75) rotateY(90deg);}100%{transform:scale(1) rotateY(0);}}
+.disc.last-move{box-shadow:0 0 0 3px var(--co),0 2px 5px rgba(0,0,0,.4);}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:400px;}
+
+/* ── RESULT ── */
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:280px;margin:12px 0;}
+
+/* ── STATS ── */
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOTUS — CSS spécifique
+   ═══════════════════════════════════════════════════════════════ */
+.mt-grid{display:flex;flex-direction:column;gap:5px;width:100%;max-width:340px;margin:0 auto;}
+.mt-row{display:flex;gap:5px;justify-content:center;}
+.mt-cell{width:100%;max-width:52px;aspect-ratio:1;border:2px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:22px;color:var(--text);background:var(--glass);text-transform:uppercase;position:relative;}
+.mt-cell.mt-filled{border-color:var(--text2);animation:mtPop .1s ease;}
+@keyframes mtPop{0%{transform:scale(0.9);}100%{transform:scale(1);}}
+.mt-cell.mt-flip{animation:mtFlip .5s ease forwards;}
+@keyframes mtFlip{0%{transform:rotateX(0);}50%{transform:rotateX(90deg);}100%{transform:rotateX(0);}}
+.mt-cell.mt-correct{background:#16a34a;border-color:#16a34a;color:#fff;}
+.mt-cell.mt-present{background:#ca8a04;border-color:#ca8a04;color:#fff;}
+.mt-cell.mt-absent{background:#374151;border-color:#374151;color:#9ca3af;}
+.mt-cell.mt-first{border-color:var(--c1);}
+@keyframes mtShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+.mt-keyboard{display:flex;flex-direction:column;gap:6px;width:100%;max-width:420px;margin-top:16px;}
+.mt-key-row{display:flex;gap:4px;justify-content:center;}
+.mt-key{flex:1;min-width:0;height:46px;border-radius:8px;background:var(--glass2);border:1px solid var(--border2);color:var(--text);
+  font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;text-transform:uppercase;transition:transform .08s;}
+.mt-key:active{transform:scale(.92);}
+.mt-key.mt-wide{flex:1.6;font-size:11px;}
+.mt-key.mt-correct{background:#16a34a;color:#fff;border-color:#16a34a;}
+.mt-key.mt-present{background:#ca8a04;color:#fff;border-color:#ca8a04;}
+.mt-key.mt-absent{background:#1f2937;color:#6b7280;border-color:#1f2937;}
+
+.mt-diff-cards{display:flex;gap:8px;width:100%;max-width:340px;}
+.mt-diff-card{flex:1;background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;font-size:12px;font-weight:800;}
+.mt-diff-card.sel{border-color:var(--c1);background:var(--glass3);}
+
+.mt-play-area{display:flex;flex-direction:column;align-items:center;width:100%;gap:8px;}
+.mt-side-col{display:flex;flex-direction:column;align-items:center;width:100%;}
+@media (orientation: landscape) and (max-height: 500px) {
+  .mt-play-area{flex-direction:row;justify-content:center;align-items:flex-start;gap:20px;}
+  .mt-grid{max-width:min(300px, calc(100vh - 110px));}
+  .mt-cell{max-width:none;}
+  .mt-side-col{width:360px;flex-shrink:0;}
+  .mt-keyboard{margin-top:6px;}
+  .mt-key{height:38px;}
+}
+
+/* ── Composants partagés absents du template extrait ── */
+.rl-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;gap:8px;margin-bottom:8px;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.result-overlay{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.75);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.rl-status{text-align:center;font-size:13px;color:var(--text2);min-height:20px;margin:6px 0;}
+.mw-modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(4,6,20,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.mw-modal-box{background:linear-gradient(180deg,#0f1530,#080b1e);border:1px solid var(--border2);border-radius:20px;padding:20px;max-width:360px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+.mw-modal-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);margin-bottom:12px;text-align:center;}
+.mw-modal-body{font-size:14px;color:var(--text);line-height:1.6;}
+.mw-modal-body p{margin:0 0 10px;}
+.mw-modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+
+</style>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">MOTUS</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStatsMt"></div>
+  <div class="section-title">Difficulté</div>
+  <div class="mt-diff-cards">
+    <div class="mt-diff-card" data-len="5" onclick="setDifficultyMt(5)">🌱 Facile<br>5 lettres</div>
+    <div class="mt-diff-card sel" data-len="6" onclick="setDifficultyMt(6)">⚡ Normal<br>6 lettres</div>
+    <div class="mt-diff-card" data-len="7" onclick="setDifficultyMt(7)">🔥 Difficile<br>7 lettres</div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startGameMt()">🔤 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showRulesMt()">ⓘ Règles</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStatsMt()">📊 Statistiques</button>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="rl-hud">
+    <div class="icon-btn" onclick="confirmLeaveMt()">🏠</div>
+    <div class="section-title" style="margin:0;">Essai <span id="mtAttemptNum">1</span>/<span id="mtAttemptTotal">6</span></div>
+    <div class="icon-btn" onclick="showRulesMt()">ⓘ</div>
+  </div>
+  <div class="mt-play-area">
+    <div class="mt-grid" id="mtGrid"></div>
+    <div class="mt-side-col">
+      <div class="rl-status" id="mtStatus">&nbsp;</div>
+      <div class="mt-keyboard" id="mtKeyboard"></div>
+    </div>
+  </div>
+</div>
+
+<div class="screen hidden result-overlay" id="soverMt">
+  <div class="res-icon" id="mtResultIcon">🎉</div>
+  <div class="res-title" id="mtResultTitle">Bravo !</div>
+  <div class="res-sub" id="mtResultSub"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGameMt()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<div class="screen hidden" id="sstatsMt">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div class="stats-grid" id="statsGridMt"></div>
+</div>
+
+<script>
+const MOTUS_WORDS = {
+  5: ["ROBOT","PLAGE","TIGRE","FLEUR","MONDE","VOILE","GRAND","PONEY","RADIO","CADRE","GLACE","PIANO","TOURS","VERRE","BONUS","FORET","LIVRE","CHAMP","DOUTE","FORME","HERBE","IMAGE","JAUNE","LAMPE","MARDI","NOEUD","OCEAN","PORTE","QUART","ROUTE","SABLE","TABLE","USINE","VIRUS","ZEBRE","ANNEE","BARBE","DANSE","ECOLE","FABLE","GARDE","HOTEL","ISSUE","JETON","LUNDI","METAL","NORME","PRIME","RANCE","SOUPE"],
+  6: ["CHATON","BATEAU","ORANGE","VOYAGE","SOURIS","CHAISE","MOUTON","TOMATE","BUREAU","PLANTE","CARTON","MIROIR","SOLEIL","MARCHE","JARDIN","BOUGIE","NUANCE","PIERRE","ANIMAL","BALLON","CAMION","DESERT","ETOILE","FUSEES","GATEAU","HAMEAU","JOUEUR","KAYAKS","LEGUME","NORMAL","PALAIS","QUARTZ","RENARD","SAUMON","TROUPE","ANANAS","BANANE","CANARD","ETRIER","FORAGE","GUEPES","HUITRE"],
+  7: ["CHATEAU","MUSIQUE","JOURNAL","VOITURE","CHAMBRE","LUMIERE","POISSON","GALAXIE","HORLOGE","INSECTE","JARDINS","LAVANDE","NOUVEAU","GRENIER","UNIVERS","VOYAGES","FRONTON","ECLIPSE","ANTENNE"],
+};
+// ═══════════════════════════════════════════════════════════════
+// MOTUS — moteur pur, séparé de l'interface.
+// ═══════════════════════════════════════════════════════════════
+
+/** Évalue une proposition contre le mot cible, avec la gestion
+ *  CORRECTE des lettres en double (algorithme en 2 passes, comme le
+ *  vrai Wordle/Motus) :
+ *  1) 1ère passe : marque toutes les positions EXACTEMENT correctes,
+ *     et décrémente le compte de lettres restantes disponibles.
+ *  2) 2ème passe : pour chaque lettre non encore marquée, si elle
+ *     existe encore en réserve dans la cible (compte > 0), elle est
+ *     "présente mais mal placée" et consomme UNE occurrence de la
+ *     réserve ; sinon elle est "absente".
+ *  Résultat : si une lettre n'existe qu'une fois dans la cible mais
+ *  apparaît deux fois dans la proposition, seul le premier exemplaire
+ *  (dans l'ordre de traitement, correct EN PRIORITÉ) est marqué
+ *  présent — le second est bien absent, jamais présent à tort. */
+function evaluateGuess(guess, target) {
+  const g = guess.toUpperCase().split('');
+  const t = target.toUpperCase().split('');
+  const n = t.length;
+  const result = Array(n).fill('absent');
+  const remaining = {};
+  for (const ch of t) remaining[ch] = (remaining[ch] || 0) + 1;
+
+  // passe 1 : correspondances exactes
+  for (let i = 0; i < n; i++) {
+    if (g[i] === t[i]) { result[i] = 'correct'; remaining[g[i]]--; }
+  }
+  // passe 2 : présentes mais mal placées, dans la limite du reste disponible
+  for (let i = 0; i < n; i++) {
+    if (result[i] === 'correct') continue;
+    const ch = g[i];
+    if (remaining[ch] > 0) { result[i] = 'present'; remaining[ch]--; }
+  }
+  return result;
+}
+
+function isWinningGuess(evaluation) { return evaluation.every((r) => r === 'correct'); }
+
+function createMotusState(targetWord, maxAttempts) {
+  return {
+    targetWord: targetWord.toUpperCase(),
+    wordLength: targetWord.length,
+    maxAttempts: maxAttempts || 6,
+    attempts: [], // [{ guess, evaluation }]
+    currentInput: targetWord[0].toUpperCase(), // 1ère lettre toujours révélée et fixe
+    over: false,
+    won: false,
+  };
+}
+
+function motusAddLetter(state, letter) {
+  if (state.over) return state;
+  if (state.currentInput.length >= state.wordLength) return state;
+  return { ...state, currentInput: state.currentInput + letter.toUpperCase() };
+}
+
+function motusBackspace(state) {
+  if (state.over) return state;
+  // ne retire jamais la première lettre imposée
+  if (state.currentInput.length <= 1) return state;
+  return { ...state, currentInput: state.currentInput.slice(0, -1) };
+}
+
+/** Valide la proposition en cours. Refuse explicitement un mot
+ *  incomplet (longueur insuffisante) — jamais de validation partielle. */
+function motusSubmit(state) {
+  if (state.over) return { state, error: 'game_over' };
+  if (state.currentInput.length !== state.wordLength) {
+    return { state, error: 'incomplete' };
+  }
+  const evaluation = evaluateGuess(state.currentInput, state.targetWord);
+  const attempts = [...state.attempts, { guess: state.currentInput, evaluation }];
+  const won = isWinningGuess(evaluation);
+  const over = won || attempts.length >= state.maxAttempts;
+  return {
+    state: { ...state, attempts, currentInput: state.targetWord[0], over, won },
+    error: null,
+  };
+}
+
+/** Agrège le meilleur statut connu pour chaque lettre à travers TOUTES
+ *  les tentatives (pour colorer le clavier virtuel) — priorité
+ *  correct > present > absent, jamais dégradé par une tentative
+ *  ultérieure moins favorable. */
+function motusKeyboardStatus(state) {
+  const status = {};
+  const priority = { correct: 3, present: 2, absent: 1 };
+  for (const attempt of state.attempts) {
+    for (let i = 0; i < attempt.guess.length; i++) {
+      const letter = attempt.guess[i];
+      const st = attempt.evaluation[i];
+      if (!status[letter] || priority[st] > priority[status[letter]]) status[letter] = st;
+    }
+  }
+  return status;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// MOTUS — interface, câblée sur motus-engine.js + wordlist.js
+// ═══════════════════════════════════════════════════════════════
+const AZERTY_ROWS = [
+  ['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+  ['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M'],
+  ['⌫', 'W', 'X', 'C', 'V', 'B', 'N', 'OK'],
+];
+
+const STORE_KEY = 'motus_ondine_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats: {} }, loadStore());
+function statGet(k, d) { return k in STORE.stats ? STORE.stats[k] : (d === undefined ? 0 : d); }
+function statInc(k, n) { STORE.stats[k] = (STORE.stats[k] || 0) + (n || 1); saveStore(STORE); return STORE.stats[k]; }
+
+let MT = null;
+let mtWordLength = 6;
+let mtAnimating = false; // bloque toute interaction pendant la révélation lettre par lettre
+
+function setDifficultyMt(len) {
+  mtWordLength = len;
+  document.querySelectorAll('.mt-diff-card').forEach((el) => el.classList.toggle('sel', Number(el.dataset.len) === len));
+}
+
+function startGameMt() {
+  const pool = MOTUS_WORDS[mtWordLength];
+  const target = pool[Math.floor(Math.random() * pool.length)];
+  MT = createMotusState(target, 6);
+  mtAnimating = false;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sg').classList.remove('hidden');
+  document.getElementById('mtAttemptTotal').textContent = MT.maxAttempts;
+  buildGrid();
+  buildKeyboard();
+  render();
+}
+
+function buildGrid() {
+  const host = document.getElementById('mtGrid');
+  host.innerHTML = '';
+  for (let r = 0; r < MT.maxAttempts; r++) {
+    const row = document.createElement('div');
+    row.className = 'mt-row';
+    row.id = 'mtRow' + r;
+    for (let c = 0; c < MT.wordLength; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'mt-cell' + (r === 0 && c === 0 ? ' mt-first' : '');
+      cell.id = 'mtCell' + r + '_' + c;
+      row.appendChild(cell);
+    }
+    host.appendChild(row);
+  }
+}
+
+function buildKeyboard() {
+  const host = document.getElementById('mtKeyboard');
+  host.innerHTML = '';
+  AZERTY_ROWS.forEach((rowLetters) => {
+    const row = document.createElement('div');
+    row.className = 'mt-key-row';
+    rowLetters.forEach((letter) => {
+      const key = document.createElement('div');
+      key.className = 'mt-key' + (letter === '⌫' || letter === 'OK' ? ' mt-wide' : '');
+      key.id = 'mtKey' + letter;
+      key.textContent = letter;
+      key.onclick = () => handleKeyMt(letter);
+      row.appendChild(key);
+    });
+    host.appendChild(row);
+  });
+}
+
+function handleKeyMt(letter) {
+  if (mtAnimating || !MT || MT.over) return;
+  if (letter === '⌫') { MT = motusBackspace(MT); render(); return; }
+  if (letter === 'OK') { submitMt(); return; }
+  MT = motusAddLetter(MT, letter);
+  render();
+}
+
+function submitMt() {
+  if (mtAnimating || !MT || MT.over) return;
+  if (MT.currentInput.length !== MT.wordLength) {
+    document.getElementById('mtStatus').textContent = 'Mot incomplet';
+    shakeCurrentRow();
+    return;
+  }
+  const rowIdx = MT.attempts.length;
+  const result = motusSubmit(MT);
+  if (result.error) return;
+  const evaluation = result.state.attempts[rowIdx].evaluation;
+  const guess = result.state.attempts[rowIdx].guess;
+  MT = result.state;
+
+  // révélation lettre par lettre, animée, AVANT de mettre à jour clavier/statut/fin
+  mtAnimating = true;
+  const n = guess.length;
+  for (let i = 0; i < n; i++) {
+    setTimeout(() => {
+      const cell = document.getElementById('mtCell' + rowIdx + '_' + i);
+      if (!cell) return;
+      cell.textContent = guess[i];
+      cell.classList.add('mt-filled', 'mt-flip');
+      setTimeout(() => cell.classList.add('mt-' + evaluation[i]), 250); // couleur au milieu du flip
+    }, i * 300);
+  }
+  setTimeout(() => {
+    mtAnimating = false;
+    updateKeyboardColors();
+    document.getElementById('mtAttemptNum').textContent = Math.min(MT.attempts.length + 1, MT.maxAttempts);
+    if (MT.over) { setTimeout(finishGameMt, 400); }
+    else { document.getElementById('mtStatus').textContent = ''; }
+  }, n * 300 + 300);
+}
+
+function shakeCurrentRow() {
+  const row = document.getElementById('mtRow' + MT.attempts.length);
+  if (!row) return;
+  row.style.animation = 'none';
+  void row.offsetWidth;
+  row.style.animation = 'mtShake 0.3s';
+}
+
+function render() {
+  if (!MT) return;
+  const rowIdx = MT.attempts.length;
+  for (let c = 0; c < MT.wordLength; c++) {
+    const cell = document.getElementById('mtCell' + rowIdx + '_' + c);
+    if (!cell) continue;
+    const ch = MT.currentInput[c] || '';
+    cell.textContent = ch;
+    cell.classList.toggle('mt-filled', ch !== '');
+  }
+}
+
+function updateKeyboardColors() {
+  const status = motusKeyboardStatus(MT);
+  for (const letter in status) {
+    const key = document.getElementById('mtKey' + letter);
+    if (key) { key.classList.remove('mt-correct', 'mt-present', 'mt-absent'); key.classList.add('mt-' + status[letter]); }
+  }
+}
+
+function finishGameMt() {
+  statInc('gamesPlayed');
+  if (MT.won) statInc('wins');
+  document.getElementById('mtResultIcon').textContent = MT.won ? '🎉' : '😔';
+  document.getElementById('mtResultTitle').textContent = MT.won ? 'Bravo !' : 'Dommage !';
+  document.getElementById('mtResultSub').textContent = MT.won
+    ? 'Trouvé en ' + MT.attempts.length + ' essai(s)'
+    : 'Le mot était : ' + MT.targetWord;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('soverMt').classList.remove('hidden');
+}
+
+async function confirmLeaveMt() {
+  if (MT && !MT.over && MT.attempts.length > 0) {
+    const ok = await mtConfirm('Quitter la partie ?', 'Cette partie sera perdue si tu quittes maintenant.', 'Quitter', 'Continuer');
+    if (!ok) return;
+  }
+  goHome();
+}
+function goHome() {
+  MT = null;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sh').classList.remove('hidden');
+  renderHomeStats();
+}
+function renderHomeStats() {
+  const host = document.getElementById('homeStatsMt');
+  host.innerHTML = '';
+  const played = statGet('gamesPlayed'), wins = statGet('wins');
+  [{ v: played, l: '🎮 Parties' }, { v: played ? Math.round(wins / played * 100) + '%' : '—', l: '🏆 Réussite' }]
+    .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.style.flex = '1'; el.innerHTML = '<div class="v">' + s.v + '</div><div class="l">' + s.l + '</div>'; host.appendChild(el); });
+}
+function showStatsMt() {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sstatsMt').classList.remove('hidden');
+  const host = document.getElementById('statsGridMt');
+  host.innerHTML = '';
+  const played = statGet('gamesPlayed'), wins = statGet('wins');
+  [{ v: played, l: '🎮 Parties jouées' }, { v: wins, l: '🏆 Victoires' }, { v: played - wins, l: '❌ Défaites' }, { v: played ? Math.round(wins / played * 100) + '%' : '—', l: '📈 Taux de réussite' }]
+    .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.innerHTML = '<div class="v">' + s.v + '</div><div class="l">' + s.l + '</div>'; host.appendChild(el); });
+}
+
+function showRulesMt() {
+  showModal('🔤 Comment jouer',
+    '<p>Devine le mot caché en 6 essais. La première lettre est révélée.</p>' +
+    '<p><span style="color:#16a34a;">■</span> Lettre bien placée · <span style="color:#ca8a04;">■</span> Lettre présente mais mal placée · <span style="color:#6b7280;">■</span> Lettre absente</p>' +
+    '<p>Attention aux lettres en double : si une lettre n\u2019apparaît qu\u2019une fois dans le mot mais deux fois dans ta proposition, seule une occurrence sera comptée.</p>',
+    [{ label: 'Compris', variant: 'primary' }]);
+}
+function showModal(title, bodyHTML, buttons) {
+  const overlay = document.createElement('div');
+  overlay.className = 'mw-modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'mw-modal-box';
+  box.innerHTML = '<div class="mw-modal-title">' + title + '</div><div class="mw-modal-body">' + bodyHTML + '</div>';
+  const actions = document.createElement('div');
+  actions.className = 'mw-modal-actions';
+  buttons.forEach((b) => {
+    const btn = document.createElement('button');
+    btn.className = 'ondine-btn ' + (b.variant === 'primary' ? 'ondine-btn-primary' : 'ondine-btn-secondary');
+    btn.textContent = b.label;
+    btn.onclick = () => { document.body.removeChild(overlay); b.onClick && b.onClick(); };
+    actions.appendChild(btn);
+  });
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+function mtConfirm(title, message, confirmLabel, cancelLabel) {
+  return new Promise((resolve) => {
+    showModal(title, '<p>' + message + '</p>', [
+      { label: cancelLabel, variant: 'secondary', onClick: () => resolve(false) },
+      { label: confirmLabel, variant: 'primary', onClick: () => resolve(true) },
+    ]);
+  });
+}
+
+// clavier physique (desktop)
+document.addEventListener('keydown', (e) => {
+  if (!MT || MT.over || document.getElementById('sg').classList.contains('hidden')) return;
+  if (e.key === 'Backspace') { handleKeyMt('⌫'); return; }
+  if (e.key === 'Enter') { handleKeyMt('OK'); return; }
+  const letter = e.key.toUpperCase();
+  if (/^[A-Z]$/.test(letter)) handleKeyMt(letter);
+});
+
+renderHomeStats();
+
+</script>
+</body>
+</html>

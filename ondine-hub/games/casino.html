@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Meow Casino × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;
+  --c1:#38bdf8;--c2:#7dd3fc;--c3:#bae6fd;
+  --cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);
+  --text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;
+  --sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:var(--r2);cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-btn-danger{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.35);color:var(--cr);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;max-width:320px;width:100%;box-shadow:var(--sh2);}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── HOME ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(30px,9vw,42px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+/* ── GAME ── */
+#sg{align-items:center;padding:10px;gap:10px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;}
+.turn-badge{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:6px 14px;font-family:'Fredoka One',cursive;font-size:13px;}
+.turn-dot{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 -2px 3px rgba(0,0,0,.35);}
+.turn-dot.black{background:radial-gradient(circle at 35% 30%,#555,#0a0a0a 70%);}
+.turn-dot.white{background:radial-gradient(circle at 35% 30%,#fff,#cbd5e1 70%);}
+.score-row{display:flex;gap:8px;}
+.score-pill{display:flex;align-items:center;gap:5px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:13px;}
+
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:rgba(6,60,40,.5);border:1px solid var(--border2);border-radius:12px;padding:6px;max-width:min(400px, calc(100vh - 180px));width:100%;aspect-ratio:1;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4, même cause) */
+@media (min-width:900px){.board{max-width:600px;}}
+.cell{position:relative;background:rgba(10,90,60,.55);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cell.hint::after{content:'';width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.35);}
+.disc{width:84%;height:84%;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.4);transform:scale(0) rotateY(0deg);transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
+.disc.show{transform:scale(1);}
+.disc.black{background:radial-gradient(circle at 35% 28%,#4a4a4a,#0a0a0a 72%);}
+.disc.white{background:radial-gradient(circle at 35% 28%,#fff,#c7d2e0 72%);}
+.disc.flip{animation:flipDisc .4s ease;}
+@keyframes flipDisc{0%{transform:scale(1) rotateY(0);}50%{transform:scale(.75) rotateY(90deg);}100%{transform:scale(1) rotateY(0);}}
+.disc.last-move{box-shadow:0 0 0 3px var(--co),0 2px 5px rgba(0,0,0,.4);}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:400px;}
+
+/* ── RESULT ── */
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:280px;margin:12px 0;}
+
+/* ── STATS ── */
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+
+/* ═══════════════════════════════════════════════════════════════
+   MEOW CASINO — CSS spécifique (lobby premium néon + roulette)
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --neon-gold:#fbbf24;--neon-pink:#f472b6;--neon-cyan:#22d3ee;--neon-green:#34d399;--neon-red:#f87171;
+  --felt-green:#0d3b28;--felt-dark:#062015;
+}
+body{background:radial-gradient(ellipse at top, #1a0e2e 0%, #06081e 60%);}
+
+/* ── Balance bar (persistante en haut) ── */
+.cc-balance-bar{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(244,114,182,.1));
+  border:1px solid rgba(251,191,36,.35);border-radius:16px;padding:10px 20px;font-family:'Fredoka One',cursive;font-size:20px;color:var(--neon-gold);
+  box-shadow:0 0 20px rgba(251,191,36,.15);width:100%;max-width:340px;}
+.cc-balance-bar.cc-flash{animation:ccFlash .5s ease;}
+@keyframes ccFlash{0%,100%{box-shadow:0 0 20px rgba(251,191,36,.15);}50%{box-shadow:0 0 40px rgba(251,191,36,.6);}}
+.cc-balance-value{transition:transform .15s;}
+.cc-balance-value.cc-bump{transform:scale(1.15);}
+
+/* ── Lobby ── */
+.cc-lobby-grid{display:flex;flex-direction:column;gap:12px;width:100%;max-width:420px;}
+.cc-game-card{position:relative;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  border:1px solid var(--border2);border-radius:20px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;overflow:hidden;transition:transform .15s;}
+.cc-game-card:active{transform:scale(.97);}
+.cc-game-card::before{content:'';position:absolute;inset:0;background:var(--cc-glow,transparent);opacity:.12;pointer-events:none;}
+.cc-game-icon{font-size:40px;width:64px;height:64px;display:flex;align-items:center;justify-content:center;border-radius:16px;background:rgba(0,0,0,.25);flex-shrink:0;}
+.cc-game-info{flex:1;text-align:left;}
+.cc-game-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--text);}
+.cc-game-desc{font-size:11.5px;color:var(--text2);margin-top:2px;}
+.cc-game-play{background:var(--neon-gold);color:#1a0e02;font-weight:900;font-size:12px;padding:8px 16px;border-radius:12px;white-space:nowrap;}
+.cc-game-card.cc-disabled{opacity:.45;pointer-events:none;}
+
+/* ── Roulette ── */
+.rl-wheel-wrap{position:relative;width:min(300px,80vw);aspect-ratio:1;margin:10px auto;}
+.rl-wheel{width:100%;height:100%;border-radius:50%;position:relative;transition:transform 4s cubic-bezier(.17,.67,.16,.99);
+  box-shadow:0 0 30px rgba(251,191,36,.25), inset 0 0 20px rgba(0,0,0,.5);border:4px solid #7a5c1e;}
+.rl-ball{position:absolute;width:12px;height:12px;background:radial-gradient(circle at 35% 30%,#fff,#ccc);border-radius:50%;
+  top:6px;left:50%;margin-left:-6px;transition:transform 4s cubic-bezier(.12,.6,.2,1);box-shadow:0 0 6px rgba(255,255,255,.7);}
+.rl-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:34%;height:34%;border-radius:50%;
+  background:radial-gradient(circle,#2a1a06,#0d0802);display:flex;align-items:center;justify-content:center;font-size:22px;
+  border:2px solid #7a5c1e;z-index:5;}
+.rl-pointer{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:20px;z-index:6;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));}
+
+.rl-table{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:14px;background:var(--felt-dark);padding:10px;border:1px solid rgba(251,191,36,.2);}
+.rl-numbers-grid{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:38px;gap:2px;min-width:480px;}
+.rl-num-cell{display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:13px;font-weight:800;color:#fff;cursor:pointer;position:relative;user-select:none;}
+.rl-num-cell.red{background:#a91d1d;}
+.rl-num-cell.black{background:#1a1a1a;border:1px solid #333;}
+.rl-num-cell.green{background:#0d6e3f;}
+.rl-num-cell.selected{outline:3px solid var(--neon-gold);outline-offset:-2px;}
+.rl-num-cell .rl-chip-badge{position:absolute;bottom:-4px;right:-4px;background:var(--neon-gold);color:#1a0e02;font-size:9px;font-weight:900;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;}
+.rl-zero-cell{grid-row:1/3;}
+.rl-outside-row{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;min-width:480px;margin-top:2px;}
+.rl-outside-cell{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:8px 4px;text-align:center;font-size:11px;font-weight:800;color:var(--text);cursor:pointer;position:relative;}
+.rl-outside-cell.selected{outline:3px solid var(--neon-gold);outline-offset:-2px;background:rgba(251,191,36,.15);}
+.rl-outside-cell.red-txt{color:#f87171;}
+.rl-outside-cell.black-txt{color:#cbd5e1;}
+
+.rl-chip-selector{display:flex;gap:8px;justify-content:center;width:100%;flex-wrap:wrap;margin:10px 0;}
+.rl-chip{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;cursor:pointer;
+  border:2px solid rgba(255,255,255,.3);box-shadow:0 3px 0 rgba(0,0,0,.35);transition:transform .1s;}
+.rl-chip:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.35);}
+.rl-chip.selected{outline:3px solid #fff;transform:scale(1.1);}
+.rl-chip-10{background:#3b82f6;color:#fff;}
+.rl-chip-50{background:#f87171;color:#fff;}
+.rl-chip-100{background:#34d399;color:#052e1c;}
+.rl-chip-500{background:#a78bfa;color:#1e0a3c;}
+.rl-chip-1000{background:#fbbf24;color:#1a0e02;}
+
+.rl-hud{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:500px;margin-bottom:6px;font-size:12px;font-weight:800;}
+.rl-status{text-align:center;font-size:13px;color:var(--text2);min-height:20px;margin:6px 0;}
+.rl-result-badge{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;margin:0 auto 6px;}
+
+/* ── Effets de gain ── */
+.cc-win-overlay{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:rgba(6,8,30,.75);backdrop-filter:blur(4px);pointer-events:none;}
+.cc-win-amount{font-family:'Fredoka One',cursive;font-size:44px;color:var(--neon-gold);text-shadow:0 0 20px rgba(251,191,36,.8);animation:ccWinPop .5s ease;}
+@keyframes ccWinPop{0%{transform:scale(0.3);opacity:0;}60%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+.cc-confetti{position:absolute;width:8px;height:8px;top:-10px;border-radius:2px;animation:ccConfettiFall linear forwards;}
+@keyframes ccConfettiFall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}
+
+.cc-history-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--glass);border-radius:10px;font-size:12px;margin-bottom:6px;}
+.mw-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:420px;}
+
+/* ── Machine à sous ── */
+.sl-machine{background:linear-gradient(160deg,#2a1a4a,#1a0e2e);border:3px solid #7c3aed;border-radius:24px;padding:14px;box-shadow:0 0 30px rgba(124,58,237,.3), inset 0 0 20px rgba(0,0,0,.4);width:100%;max-width:400px;}
+.sl-reels{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:#0a0620;border-radius:14px;padding:8px;}
+.sl-reel{position:relative;height:150px;overflow:hidden;background:rgba(255,255,255,.04);border-radius:8px;}
+.sl-reel-strip{position:absolute;top:0;left:0;width:100%;display:flex;flex-direction:column;will-change:transform;}
+.sl-symbol{height:50px;display:flex;align-items:center;justify-content:center;font-size:32px;}
+.sl-payline-marker{position:absolute;left:-4px;right:-4px;height:2px;background:rgba(251,191,36,.5);pointer-events:none;z-index:2;}
+.sl-reel::before, .sl-reel::after{content:'';position:absolute;left:0;right:0;height:20px;pointer-events:none;z-index:3;}
+.sl-reel::before{top:0;background:linear-gradient(rgba(10,6,32,.9),transparent);}
+.sl-reel::after{bottom:0;background:linear-gradient(transparent,rgba(10,6,32,.9));}
+.sl-win-highlight{position:absolute;inset:0;border:2px solid var(--neon-gold);border-radius:6px;box-shadow:0 0 10px rgba(251,191,36,.6);animation:slWinBlink 1s infinite;z-index:4;}
+@keyframes slWinBlink{50%{opacity:.3;}}
+.sl-bet-row{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px 0;}
+.sl-bet-btn{width:38px;height:38px;border-radius:50%;background:var(--glass2);border:1px solid var(--border2);font-size:18px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.sl-bet-value{font-family:'Fredoka One',cursive;font-size:18px;color:var(--neon-gold);min-width:80px;text-align:center;}
+.sl-paytable{width:100%;max-width:400px;}
+.sl-paytable-row{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--glass);border-radius:8px;margin-bottom:4px;font-size:12px;}
+
+/* ── Blackjack ── */
+.bj-table{width:100%;max-width:420px;background:radial-gradient(ellipse at top, #0d3b28, #062015);border-radius:24px;padding:16px 12px;border:3px solid #7a5c1e;box-shadow:0 0 30px rgba(13,110,63,.3), inset 0 0 30px rgba(0,0,0,.4);min-height:280px;}
+.bj-zone{margin-bottom:14px;}
+.bj-zone-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;display:flex;justify-content:space-between;}
+.bj-hand{display:flex;gap:-10px;min-height:70px;align-items:center;flex-wrap:wrap;}
+.bj-card{width:44px;height:64px;border-radius:6px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:15px;box-shadow:0 2px 6px rgba(0,0,0,.4);margin-left:-16px;animation:bjDeal .3s ease-out;position:relative;border:1px solid rgba(0,0,0,.15);}
+.bj-card:first-child{margin-left:0;}
+.bj-card.red{color:#d21414;}
+.bj-card.black{color:#111;}
+.bj-card.hidden-card{background:linear-gradient(135deg,#1e3a8a,#1e40af);background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0,rgba(255,255,255,.08) 2px,transparent 2px,transparent 8px);}
+@keyframes bjDeal{from{transform:translateY(-30px) rotate(-8deg);opacity:0;}to{transform:translateY(0) rotate(0);opacity:1;}}
+.bj-hand-active{outline:2px solid var(--neon-gold);border-radius:10px;padding:4px;margin:-4px;}
+.bj-outcome-badge{display:inline-block;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:900;margin-left:8px;}
+.bj-outcome-badge.win{background:rgba(52,211,153,.2);color:var(--neon-green);}
+.bj-outcome-badge.lose{background:rgba(248,113,113,.2);color:var(--neon-red);}
+.bj-outcome-badge.push{background:rgba(255,255,255,.1);color:var(--text2);}
+.hidden{display:none !important;}
+
+/* ── Dés ── */
+.dc-dice-tray{display:flex;gap:20px;justify-content:center;align-items:center;margin:20px auto;min-height:90px;}
+.dc-die{width:70px;height:70px;background:linear-gradient(160deg,#fff,#e2e8f0);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 4px 12px rgba(0,0,0,.4);color:#1a0e02;}
+.dc-die.rolling{animation:dcRoll .12s infinite;}
+@keyframes dcRoll{0%{transform:rotate(0deg);}50%{transform:rotate(15deg) scale(1.05);}100%{transform:rotate(-10deg);}}
+.dc-sum-display{text-align:center;font-family:'Fredoka One',cursive;font-size:26px;color:var(--neon-gold);margin-bottom:6px;}
+.dc-bets-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:420px;margin-bottom:8px;}
+.dc-bets-grid.dc-wide{grid-template-columns:repeat(6,1fr);}
+.dc-bet-cell{background:var(--glass);border:1.5px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;font-size:11px;font-weight:800;cursor:pointer;position:relative;}
+.dc-bet-cell.selected{outline:3px solid var(--neon-gold);outline-offset:-2px;background:rgba(251,191,36,.12);}
+.dc-bet-cell .dc-payout{display:block;font-size:9px;color:var(--text2);margin-top:2px;font-weight:600;}
+.dc-bet-cell .rl-chip-badge{position:absolute;top:-4px;right:-4px;background:var(--neon-gold);color:#1a0e02;font-size:9px;font-weight:900;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;}
+
+/* ── Disposition commune : plateau + contrôles côte à côte en paysage ── */
+.cc-play-area{display:flex;flex-direction:column;align-items:center;width:100%;gap:6px;}
+.cc-play-col{display:flex;flex-direction:column;align-items:center;width:100%;}
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Empiler roue/dés + table de paris verticalement ne laisse plus
+     assez de hauteur en paysage (mesuré : jusqu'à 654px de contenu
+     pour 390px disponibles, boutons de mise et LANCER totalement hors
+     écran). Disposition côte à côte, chaque colonne scrollable
+     verticalement si nécessaire — même principe déjà appliqué à
+     Meowdoku/Snake/Othello. */
+  .cc-play-area{flex-direction:row;align-items:flex-start;gap:14px;max-height:calc(100vh - 60px);}
+  .cc-play-col{width:auto;max-height:calc(100vh - 60px);overflow-y:auto;padding:2px;}
+  .rl-wheel-wrap{width:min(180px,32vh);margin:4px auto;}
+  .rl-table{max-width:340px;}
+  .rl-numbers-grid{min-width:380px;grid-auto-rows:30px;}
+  .rl-outside-row{min-width:380px;}
+  .sl-machine{max-width:340px;}
+  .bj-table{min-height:0;padding:10px 8px;}
+  .dc-dice-tray{margin:8px auto;}
+  .dc-die{width:52px;height:52px;font-size:32px;}
+}
+
+.mw-modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(4,6,20,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.mw-modal-box{background:linear-gradient(180deg,#0f1530,#080b1e);border:1px solid var(--border2);border-radius:20px;padding:20px;max-width:360px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5);max-height:80vh;overflow-y:auto;}
+.mw-modal-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);margin-bottom:12px;text-align:center;}
+.mw-modal-body{font-size:14px;color:var(--text);line-height:1.6;}
+.mw-modal-body p{margin:0 0 10px;}
+.mw-modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+
+</style>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">MEOW CASINO</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div class="cc-balance-bar"><span>🪙</span><span class="cc-balance-value" id="balanceDisplay">10000</span></div>
+
+  <div class="cc-lobby-grid">
+    <div class="cc-game-card" style="--cc-glow:#22d3ee" onclick="openGame('roulette')">
+      <div class="cc-game-icon">🎡</div>
+      <div class="cc-game-info">
+        <div class="cc-game-title">Roulette</div>
+        <div class="cc-game-desc">Roulette européenne, 37 cases, tous types de mises</div>
+      </div>
+      <div class="cc-game-play">Jouer</div>
+    </div>
+    <div class="cc-game-card" style="--cc-glow:#f472b6" onclick="openGame('slots')">
+      <div class="cc-game-icon">🎰</div>
+      <div class="cc-game-info">
+        <div class="cc-game-title">Machine à sous</div>
+        <div class="cc-game-desc">5 rouleaux, Wild, Scatter, 5 lignes de paiement</div>
+      </div>
+      <div class="cc-game-play">Jouer</div>
+    </div>
+    <div class="cc-game-card" style="--cc-glow:#34d399" onclick="openGame('blackjack')">
+      <div class="cc-game-icon">🃏</div>
+      <div class="cc-game-info">
+        <div class="cc-game-title">Blackjack</div>
+        <div class="cc-game-desc">Contre le croupier, blackjack naturel paie 3:2</div>
+      </div>
+      <div class="cc-game-play">Jouer</div>
+    </div>
+    <div class="cc-game-card" style="--cc-glow:#fbbf24" onclick="openGame('dice')">
+      <div class="cc-game-icon">🎲</div>
+      <div class="cc-game-info">
+        <div class="cc-game-title">Dés</div>
+        <div class="cc-game-desc">Somme, pair/impair, petit/grand, double</div>
+      </div>
+      <div class="cc-game-play">Jouer</div>
+    </div>
+  </div>
+
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Statistiques</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="confirmResetBankroll()">🔄 Réinitialiser la bankroll</button>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<!-- ═══════ ROULETTE ═══════ -->
+<div class="screen hidden" id="sroulette">
+  <div class="rl-hud">
+    <div class="icon-btn" onclick="goHome()">🏠</div>
+    <div class="cc-balance-bar" style="padding:6px 14px;font-size:15px;max-width:180px;"><span>🪙</span><span class="cc-balance-value" id="rlBalanceDisplay">10000</span></div>
+    <div class="icon-btn" onclick="showRouletteRules()">ⓘ</div>
+  </div>
+  <div class="cc-play-area">
+    <div class="cc-play-col">
+      <div class="rl-wheel-wrap">
+        <div class="rl-pointer">🔻</div>
+        <div class="rl-wheel" id="rlWheel"></div>
+        <div class="rl-ball" id="rlBall"></div>
+        <div class="rl-center" id="rlCenter">🐱</div>
+      </div>
+      <div class="rl-status" id="rlStatus">Place tes mises puis lance la roue</div>
+      <div class="rl-chip-selector">
+        <div class="rl-chip rl-chip-10" data-val="10" onclick="selectChip(10)">10</div>
+        <div class="rl-chip rl-chip-50 selected" data-val="50" onclick="selectChip(50)">50</div>
+        <div class="rl-chip rl-chip-100" data-val="100" onclick="selectChip(100)">100</div>
+        <div class="rl-chip rl-chip-500" data-val="500" onclick="selectChip(500)">500</div>
+        <div class="rl-chip rl-chip-1000" data-val="1000" onclick="selectChip(1000)">1K</div>
+      </div>
+    </div>
+    <div class="cc-play-col">
+      <div class="rl-table">
+        <div class="rl-numbers-grid" id="rlNumbersGrid"></div>
+        <div class="rl-outside-row" id="rlOutsideRow1"></div>
+        <div class="rl-outside-row" id="rlOutsideRow2"></div>
+      </div>
+
+      <div class="mw-toolbar" style="margin-top:10px;">
+        <button class="ondine-btn ondine-btn-secondary" onclick="clearRouletteBets()">🗑 Effacer</button>
+        <button class="ondine-btn ondine-btn-secondary" onclick="rebetRoulette()">🔁 Remiser</button>
+    <button class="ondine-btn ondine-btn-secondary" id="rlTotalBetDisplay" style="pointer-events:none;">Mise: 0</button>
+    <button class="ondine-btn ondine-btn-primary" id="rlSpinBtn" onclick="spinRouletteUI()">🎡 SPIN</button>
+  </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ STATS ═══════ -->
+<div class="screen hidden" id="sslots">
+  <div class="rl-hud">
+    <div class="icon-btn" onclick="goHome()">🏠</div>
+    <div class="cc-balance-bar" style="padding:6px 14px;font-size:15px;max-width:180px;"><span>🪙</span><span class="cc-balance-value" id="slBalanceDisplay">10000</span></div>
+    <div class="icon-btn" onclick="showSlotsRules()">ⓘ</div>
+  </div>
+  <div class="sl-machine">
+    <div class="sl-reels" id="slReels"></div>
+  </div>
+  <div class="rl-status" id="slStatus">Règle la mise puis lance les rouleaux</div>
+  <div class="sl-bet-row">
+    <div class="sl-bet-btn" onclick="changeSlotsBet(-25)">−</div>
+    <div class="sl-bet-value" id="slBetDisplay">Mise: 50</div>
+    <div class="sl-bet-btn" onclick="changeSlotsBet(25)">+</div>
+  </div>
+  <button class="ondine-btn ondine-btn-primary" id="slSpinBtn" onclick="spinSlotsUI()" style="width:100%;max-width:400px;">🎰 SPIN</button>
+</div>
+
+<!-- ═══════ BLACKJACK ═══════ -->
+<div class="screen hidden" id="sblackjack">
+  <div class="rl-hud">
+    <div class="icon-btn" onclick="goHome()">🏠</div>
+    <div class="cc-balance-bar" style="padding:6px 14px;font-size:15px;max-width:180px;"><span>🪙</span><span class="cc-balance-value" id="bjBalanceDisplay">10000</span></div>
+    <div class="icon-btn" onclick="showBlackjackRules()">ⓘ</div>
+  </div>
+
+  <div id="bjBetScreen">
+    <div class="rl-status">Choisis ta mise</div>
+    <div class="sl-bet-row">
+      <div class="sl-bet-btn" onclick="changeBjBet(-25)">−</div>
+      <div class="sl-bet-value" id="bjBetDisplay">Mise: 100</div>
+      <div class="sl-bet-btn" onclick="changeBjBet(25)">+</div>
+    </div>
+    <button class="ondine-btn ondine-btn-primary" onclick="startBlackjackRound()" style="width:100%;max-width:400px;">🃏 Distribuer</button>
+  </div>
+
+  <div id="bjTableScreen" class="hidden" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <div class="bj-table">
+      <div class="bj-zone">
+        <div class="bj-zone-label"><span>🤖 Croupier</span><span id="bjDealerValue"></span></div>
+        <div class="bj-hand" id="bjDealerHand"></div>
+      </div>
+      <div class="bj-zone" id="bjPlayerZone"></div>
+    </div>
+    <div class="rl-status" id="bjStatus"></div>
+    <div class="mw-toolbar" id="bjActionButtons">
+      <button class="ondine-btn ondine-btn-secondary" onclick="bjActionHit()">➕ Tirer</button>
+      <button class="ondine-btn ondine-btn-secondary" onclick="bjActionStand()">✋ Rester</button>
+      <button class="ondine-btn ondine-btn-secondary" onclick="bjActionDouble()">✖️2 Doubler</button>
+      <button class="ondine-btn ondine-btn-secondary" onclick="bjActionSplit()">✂️ Split</button>
+    </div>
+    <button class="ondine-btn ondine-btn-primary hidden" id="bjNextRoundBtn" onclick="bjBackToBetScreen()" style="width:100%;max-width:400px;">🔄 Nouvelle manche</button>
+  </div>
+</div>
+
+<!-- ═══════ DÉS ═══════ -->
+<div class="screen hidden" id="sdice">
+  <div class="rl-hud">
+    <div class="icon-btn" onclick="goHome()">🏠</div>
+    <div class="cc-balance-bar" style="padding:6px 14px;font-size:15px;max-width:180px;"><span>🪙</span><span class="cc-balance-value" id="dcBalanceDisplay">10000</span></div>
+    <div class="icon-btn" onclick="showDiceRules()">ⓘ</div>
+  </div>
+  <div class="cc-play-area">
+    <div class="cc-play-col">
+      <div class="dc-dice-tray">
+        <div class="dc-die" id="dcDie0">🎲</div>
+        <div class="dc-die" id="dcDie1">🎲</div>
+      </div>
+      <div class="dc-sum-display" id="dcSumDisplay">&nbsp;</div>
+      <div class="rl-status" id="dcStatus">Place tes mises puis lance les dés</div>
+      <div class="rl-chip-selector">
+        <div class="rl-chip rl-chip-10" data-val="10" onclick="selectDiceChip(10)">10</div>
+        <div class="rl-chip rl-chip-50 selected" data-val="50" onclick="selectDiceChip(50)">50</div>
+        <div class="rl-chip rl-chip-100" data-val="100" onclick="selectDiceChip(100)">100</div>
+        <div class="rl-chip rl-chip-500" data-val="500" onclick="selectDiceChip(500)">500</div>
+      </div>
+    </div>
+    <div class="cc-play-col">
+      <div class="section-title" style="text-align:center;max-width:420px;">Somme des 2 dés</div>
+      <div class="dc-bets-grid" id="dcSumGrid"></div>
+      <div class="section-title" style="text-align:center;max-width:420px;">Paris simples</div>
+      <div class="dc-bets-grid dc-wide" id="dcSimpleGrid"></div>
+
+      <div class="mw-toolbar" style="margin-top:6px;">
+        <button class="ondine-btn ondine-btn-secondary" onclick="clearDiceBets()">🗑 Effacer</button>
+        <button class="ondine-btn ondine-btn-secondary" id="dcTotalBetDisplay" style="pointer-events:none;">Mise: 0</button>
+        <button class="ondine-btn ondine-btn-primary" id="dcRollBtn" onclick="rollDiceUI()" style="grid-column:1/3;">🎲 LANCER</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen hidden" id="sstats">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div class="stats-grid" id="statsGridCC"></div>
+  <div class="section-title">Détail par jeu</div>
+  <div id="perGameStatsCC" style="width:100%;margin-bottom:10px;"></div>
+  <div class="section-title" style="margin-top:10px;">Historique récent</div>
+  <div id="historyListCC" style="width:100%;overflow-y:auto;flex:1;"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// MEOW CASINO — architecture commune, séparée de toute interface.
+// Monnaie 100% virtuelle et fictive : aucun lien avec de l'argent
+// réel, aucun dépôt/retrait/achat possible.
+// ═══════════════════════════════════════════════════════════════
+
+/** RNG — générateur pseudo-aléatoire injectable (par défaut
+ *  Math.random, remplaçable par une fonction déterministe pour les
+ *  tests). Le résultat d'un jeu est TOUJOURS déterminé via cette
+ *  fonction AVANT toute animation — jamais l'inverse. */
+function createRNG(seed) {
+  if (seed === undefined) return { next: () => Math.random() };
+  // PRNG déterministe (mulberry32) pour des tests reproductibles
+  let a = seed >>> 0;
+  return {
+    next() {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    },
+  };
+}
+function randInt(rng, maxExclusive) { return Math.floor(rng.next() * maxExclusive); }
+function pickWeighted(rng, items) {
+  // items: [{ value, weight }]
+  const total = items.reduce((s, it) => s + it.weight, 0);
+  let r = rng.next() * total;
+  for (const it of items) { if (r < it.weight) return it.value; r -= it.weight; }
+  return items[items.length - 1].value;
+}
+
+/** Wallet — solde de crédits virtuels, jamais négatif, jamais
+ *  débité/crédité deux fois pour la même transaction (chaque
+ *  opération retourne un id de transaction unique, vérifiable). */
+function createWallet(initialBalance) {
+  let balance = initialBalance;
+  let totalWagered = 0, totalWon = 0, biggestWin = 0, gamesPlayed = 0;
+  let txCounter = 0;
+  const appliedTx = new Set(); // anti double-crédit/débit
+
+  function canAfford(amount) { return amount > 0 && amount <= balance; }
+
+  function placeBet(amount, txId) {
+    txId = txId || 'tx' + (++txCounter);
+    if (appliedTx.has(txId)) return { ok: false, reason: 'duplicate_tx', txId };
+    if (!canAfford(amount)) return { ok: false, reason: 'insufficient_funds', txId };
+    balance -= amount;
+    totalWagered += amount;
+    appliedTx.add(txId);
+    return { ok: true, txId, balance };
+  }
+
+  function creditWin(amount, txId) {
+    txId = txId || 'tx' + (++txCounter);
+    if (appliedTx.has(txId)) return { ok: false, reason: 'duplicate_tx', txId };
+    if (amount > 0) {
+      balance += amount;
+      totalWon += amount;
+      if (amount > biggestWin) biggestWin = amount;
+    }
+    appliedTx.add(txId);
+    return { ok: true, txId, balance };
+  }
+
+  function recordGamePlayed() { gamesPlayed++; }
+
+  function getState() {
+    return { balance, totalWagered, totalWon, biggestWin, gamesPlayed, netProfit: totalWon - totalWagered };
+  }
+
+  function reset(newInitialBalance) {
+    balance = newInitialBalance;
+    totalWagered = 0; totalWon = 0; biggestWin = 0; gamesPlayed = 0;
+    appliedTx.clear(); txCounter = 0;
+  }
+
+  function loadState(state) {
+    balance = state.balance; totalWagered = state.totalWagered || 0; totalWon = state.totalWon || 0;
+    biggestWin = state.biggestWin || 0; gamesPlayed = state.gamesPlayed || 0;
+  }
+
+  return { placeBet, creditWin, canAfford, recordGamePlayed, getState, reset, loadState };
+}
+
+/** History — historique des résultats, borné en taille pour éviter
+ *  une croissance infinie du stockage (garde les N plus récents). */
+function createHistory(maxEntries) {
+  maxEntries = maxEntries || 100;
+  let entries = [];
+  function add(entry) {
+    entries.unshift({ ...entry, ts: Date.now() });
+    if (entries.length > maxEntries) entries.length = maxEntries;
+  }
+  function getAll() { return entries.slice(); }
+  function getRecent(n) { return entries.slice(0, n); }
+  function loadState(saved) { entries = Array.isArray(saved) ? saved.slice(0, maxEntries) : []; }
+  function getState() { return entries; }
+  function clear() { entries = []; }
+  return { add, getAll, getRecent, loadState, getState, clear };
+}
+
+/** Statistics — compteurs agrégés par jeu (parties jouées, misé,
+ *  gagné, plus gros gain), en plus de ceux du wallet global. */
+function createStatistics() {
+  let perGame = {}; // { slots: {played, wagered, won, biggestWin}, ... }
+  function record(game, wagered, won) {
+    if (!perGame[game]) perGame[game] = { played: 0, wagered: 0, won: 0, biggestWin: 0 };
+    const g = perGame[game];
+    g.played++; g.wagered += wagered; g.won += won;
+    if (won > g.biggestWin) g.biggestWin = won;
+  }
+  function get(game) { return perGame[game] || { played: 0, wagered: 0, won: 0, biggestWin: 0 }; }
+  function getAll() { return perGame; }
+  function loadState(saved) { perGame = saved || {}; }
+  function getState() { return perGame; }
+  function reset() { perGame = {}; }
+  return { record, get, getAll, loadState, getState, reset };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ROULETTE EUROPÉENNE — 37 cases (0 à 36), un seul zéro.
+// Le résultat est déterminé AVANT l'animation, jamais l'inverse.
+// ═══════════════════════════════════════════════════════════════
+
+const ROULETTE_RED = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+function rouletteColorOf(n) { return n === 0 ? 'green' : (ROULETTE_RED.has(n) ? 'red' : 'black'); }
+
+/** Types de paris et leur multiplicateur RÉEL de casino (payout ODDS,
+ *  c-à-d le gain NET pour 1 unité misée ; le joueur récupère aussi sa
+ *  mise). Toutes valeurs standard d'une roulette européenne réelle. */
+const BET_PAYOUTS = {
+  straight: 35,   // un numéro plein
+  split: 17,      // 2 numéros adjacents
+  street: 11,     // 3 numéros (ligne)
+  corner: 8,      // 4 numéros (carré)
+  sixline: 5,     // 6 numéros (double rue / transversale)
+  column: 2,      // colonne de 12
+  dozen: 2,       // douzaine de 12
+  redblack: 1,    // rouge/noir
+  evenodd: 1,     // pair/impair
+  lowhigh: 1,     // manque (1-18) / passe (19-36)
+};
+
+function isWinningBet(bet, winningNumber) {
+  switch (bet.type) {
+    case 'straight': return bet.numbers[0] === winningNumber;
+    case 'split':
+    case 'street':
+    case 'corner':
+    case 'sixline':
+      return bet.numbers.includes(winningNumber);
+    case 'column':
+      return winningNumber !== 0 && (winningNumber - bet.column) % 3 === 0 && winningNumber >= bet.column;
+    case 'dozen':
+      if (winningNumber === 0) return false;
+      const d = Math.ceil(winningNumber / 12);
+      return d === bet.dozen;
+    case 'redblack':
+      return rouletteColorOf(winningNumber) === bet.color;
+    case 'evenodd':
+      return winningNumber !== 0 && (winningNumber % 2 === 0 ? 'even' : 'odd') === bet.parity;
+    case 'lowhigh':
+      return winningNumber !== 0 && (winningNumber <= 18 ? 'low' : 'high') === bet.range;
+    default:
+      return false;
+  }
+}
+
+/** Tire le numéro gagnant (0 à 36, uniforme). */
+function spinRoulette(rng) { return randInt(rng, 37); }
+
+/** Calcule le résultat complet pour une liste de mises : gains/pertes
+ *  par mise, total misé, total gagné (mise rendue + gain net inclus). */
+function resolveRouletteBets(bets, winningNumber) {
+  let totalWagered = 0, totalReturned = 0;
+  const details = bets.map((bet) => {
+    totalWagered += bet.amount;
+    const won = isWinningBet(bet, winningNumber);
+    const payout = won ? bet.amount * (BET_PAYOUTS[bet.type] + 1) : 0; // mise rendue + gain
+    totalReturned += payout;
+    return { bet, won, payout };
+  });
+  return { winningNumber, color: rouletteColorOf(winningNumber), details, totalWagered, totalReturned, netResult: totalReturned - totalWagered };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MACHINE À SOUS — 5 rouleaux × 3 lignes, 5 lignes de paiement.
+// Le résultat (grille complète) est déterminé AVANT l'animation,
+// jamais l'inverse. Toutes probabilités/paiements définis ICI,
+// jamais dans l'interface.
+// ═══════════════════════════════════════════════════════════════
+
+const SLOT_SYMBOLS = {
+  cherry:  { icon: '🍒', weight: 30, pay: { 3: 3,   4: 10,  5: 32 } },
+  lemon:   { icon: '🍋', weight: 25, pay: { 3: 5,   4: 13,  5: 48 } },
+  bell:    { icon: '🔔', weight: 18, pay: { 3: 8,   4: 24,  5: 96 } },
+  star:    { icon: '⭐', weight: 12, pay: { 3: 13,  4: 48,  5: 192 } },
+  diamond: { icon: '💎', weight: 8,  pay: { 3: 24,  4: 96,  5: 480 } },
+  seven:   { icon: '7️⃣', weight: 5,  pay: { 3: 64,  4: 256, 5: 1280 } },
+  wild:    { icon: '🐱', weight: 5,  pay: { 3: 96,  4: 384, 5: 1920 } },
+  scatter: { icon: '🎰', weight: 3,  pay: {} }, // paie séparément, pas via une ligne
+};
+const REEL_WEIGHTED_ITEMS = Object.entries(SLOT_SYMBOLS).map(([key, s]) => ({ value: key, weight: s.weight }));
+
+// Paie sur n'importe quelle case, pas seulement sur une ligne — multiplicateur
+// appliqué à la MISE TOTALE du spin (pas à la mise par ligne).
+const SCATTER_PAYOUT = { 3: 3, 4: 13, 5: 48 };
+
+const NUM_REELS = 5, NUM_ROWS = 3;
+const PAYLINES = [
+  [1, 1, 1, 1, 1], // ligne du milieu
+  [0, 0, 0, 0, 0], // ligne du haut
+  [2, 2, 2, 2, 2], // ligne du bas
+  [0, 1, 2, 1, 0], // V
+  [2, 1, 0, 1, 2], // V inversé
+];
+
+function spinReels(rng) {
+  const grid = [];
+  for (let reel = 0; reel < NUM_REELS; reel++) {
+    const col = [];
+    for (let row = 0; row < NUM_ROWS; row++) col.push(pickWeighted(rng, REEL_WEIGHTED_ITEMS));
+    grid.push(col);
+  }
+  return grid; // grid[reelIdx][rowIdx] = symbolKey
+}
+
+/** Évalue une ligne de paiement : compte les symboles identiques
+ *  consécutifs depuis le rouleau 0, le Wild se substituant à
+ *  n'importe quel symbole (sauf Scatter, qui ne compte jamais dans
+ *  une ligne). Retourne le symbole gagnant et le nombre de rouleaux
+ *  consécutifs, ou null si aucune combinaison de 3+ minimum. */
+function evaluateLine(grid, lineRows) {
+  const symbols = lineRows.map((row, reel) => grid[reel][row]);
+  // le symbole de référence est le 1er non-wild rencontré (ou wild si tout est wild)
+  let refSymbol = symbols.find((s) => s !== 'wild' && s !== 'scatter');
+  if (!refSymbol) refSymbol = symbols[0] === 'scatter' ? null : 'wild';
+  if (!refSymbol) return null;
+  let count = 0;
+  for (const s of symbols) {
+    if (s === refSymbol || s === 'wild') count++;
+    else break;
+  }
+  if (count < 3) return null;
+  const payTable = SLOT_SYMBOLS[refSymbol].pay;
+  const multiplier = payTable[count] || 0;
+  if (multiplier === 0) return null;
+  return { symbol: refSymbol, count, multiplier };
+}
+
+/** Résout un spin complet : évalue les 5 lignes + le scatter, calcule
+ *  le gain total pour une mise TOTALE donnée (répartie également
+ *  entre les lignes actives). */
+function resolveSlotSpin(grid, totalBet) {
+  const betPerLine = totalBet / PAYLINES.length;
+  const lineResults = PAYLINES.map((lineRows, idx) => {
+    const evalResult = evaluateLine(grid, lineRows);
+    if (!evalResult) return { lineIndex: idx, win: 0 };
+    return { lineIndex: idx, win: Math.round(betPerLine * evalResult.multiplier), ...evalResult };
+  });
+  const lineWinTotal = lineResults.reduce((s, r) => s + r.win, 0);
+
+  let scatterCount = 0;
+  for (const col of grid) for (const s of col) if (s === 'scatter') scatterCount++;
+  const scatterMultiplier = SCATTER_PAYOUT[scatterCount] || (scatterCount > 5 ? SCATTER_PAYOUT[5] : 0);
+  const scatterWin = Math.round(totalBet * scatterMultiplier);
+
+  const totalWin = lineWinTotal + scatterWin;
+  return { grid, lineResults, scatterCount, scatterWin, totalWin, totalBet };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BLACKJACK — moteur récupéré du jeu blackjack.html du Hub (déjà
+// validé et corrigé dans une session antérieure : le croupier tire
+// ses cartes une à la fois, jamais toutes d'un coup). Règles
+// standard : blackjack naturel paie 3:2, croupier tire jusqu'à 17
+// inclus (s'arrête sur tous les 17, soft compris), 1 split autorisé.
+// ═══════════════════════════════════════════════════════════════
+
+const BJ_SUITS = ['♠', '♥', '♦', '♣'];
+const BJ_RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'V', 'D', 'R', 'A'];
+
+function bjBuildDeck() {
+  const deck = [];
+  let copy = 0;
+  for (let d = 0; d < 4; d++) {
+    for (const s of BJ_SUITS) for (const r of BJ_RANKS) deck.push({ rank: r, suit: s, id: `${r}${s}_${copy++}` });
+  }
+  return deck;
+}
+
+function bjShuffle(deck, rng) {
+  const a = deck.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng.next() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function bjCardRankValue(rank) {
+  if (rank === 'A') return 11;
+  if (['V', 'D', 'R'].includes(rank)) return 10;
+  return parseInt(rank, 10);
+}
+
+/** Calcule le meilleur total ≤21 possible (As compte 11 ou 1). */
+function bjHandValue(hand) {
+  let total = hand.reduce((s, c) => s + bjCardRankValue(c.rank), 0);
+  let aces = hand.filter((c) => c.rank === 'A').length;
+  while (total > 21 && aces > 0) { total -= 10; aces--; }
+  return total;
+}
+function bjIsBust(hand) { return bjHandValue(hand) > 21; }
+function bjIsBlackjack(hand) { return hand.length === 2 && bjHandValue(hand) === 21; }
+
+function bjCreateRound(deck) {
+  const playerHand = [deck.pop(), deck.pop()];
+  const dealerHand = [deck.pop(), deck.pop()];
+  return { deck, playerHands: [{ cards: playerHand, bet: 1, done: false, doubled: false }], dealerHand, activeHandIdx: 0, phase: 'player', results: null };
+}
+
+function bjHit(round) {
+  if (round.phase !== 'player') return round;
+  const hand = round.playerHands[round.activeHandIdx];
+  if (hand.done) return round;
+  const card = round.deck[round.deck.length - 1];
+  const deck = round.deck.slice(0, -1);
+  const newCards = [...hand.cards, card];
+  const newHands = round.playerHands.slice();
+  const bust = bjIsBust(newCards);
+  newHands[round.activeHandIdx] = { ...hand, cards: newCards, done: bust };
+  return bjAdvanceIfNeeded({ ...round, deck, playerHands: newHands });
+}
+
+function bjStand(round) {
+  if (round.phase !== 'player') return round;
+  const newHands = round.playerHands.slice();
+  newHands[round.activeHandIdx] = { ...newHands[round.activeHandIdx], done: true };
+  return bjAdvanceIfNeeded({ ...round, playerHands: newHands });
+}
+
+function bjDouble(round) {
+  if (round.phase !== 'player') return round;
+  const hand = round.playerHands[round.activeHandIdx];
+  if (hand.cards.length !== 2 || hand.done) return round;
+  const card = round.deck[round.deck.length - 1];
+  const deck = round.deck.slice(0, -1);
+  const newCards = [...hand.cards, card];
+  const newHands = round.playerHands.slice();
+  newHands[round.activeHandIdx] = { ...hand, cards: newCards, bet: hand.bet * 2, doubled: true, done: true };
+  return bjAdvanceIfNeeded({ ...round, deck, playerHands: newHands });
+}
+
+/** Split : uniquement si la main active a 2 cartes de même valeur, et
+ *  qu'aucun split n'a déjà eu lieu (1 seul split autorisé). */
+function bjSplit(round) {
+  if (round.phase !== 'player' || round.playerHands.length > 1) return round;
+  const hand = round.playerHands[round.activeHandIdx];
+  if (hand.cards.length !== 2 || bjCardRankValue(hand.cards[0].rank) !== bjCardRankValue(hand.cards[1].rank)) return round;
+  const deck = round.deck.slice();
+  const card1 = deck.pop(), card2 = deck.pop();
+  const handA = { cards: [hand.cards[0], card1], bet: hand.bet, done: false, doubled: false };
+  const handB = { cards: [hand.cards[1], card2], bet: hand.bet, done: false, doubled: false };
+  return { ...round, deck, playerHands: [handA, handB], activeHandIdx: 0 };
+}
+
+function bjAdvanceIfNeeded(round) {
+  const hand = round.playerHands[round.activeHandIdx];
+  if (!hand.done) return round;
+  const nextIdx = round.playerHands.findIndex((h, i) => i > round.activeHandIdx && !h.done);
+  if (nextIdx !== -1) return { ...round, activeHandIdx: nextIdx };
+  return { ...round, phase: 'dealer' };
+}
+
+/** Tire UNE SEULE carte du croupier si nécessaire, ou calcule les
+ *  résultats et passe en 'done' — appelée en boucle côté UI avec un
+ *  rendu et un délai entre chaque appel (jamais toutes les cartes
+ *  d'un coup, bug déjà corrigé dans le jeu autonome d'origine). */
+function bjDealerStep(round) {
+  const allBust = round.playerHands.every((h) => bjIsBust(h.cards));
+  if (!allBust && bjHandValue(round.dealerHand) < 17) {
+    const deck = round.deck.slice();
+    const dealerHand = [...round.dealerHand, deck.pop()];
+    return { ...round, dealerHand, deck };
+  }
+  const results = round.playerHands.map((h) => bjComputeResult(h, round.dealerHand));
+  return { ...round, phase: 'done', results };
+}
+
+function bjComputeResult(hand, dealerHand) {
+  const playerVal = bjHandValue(hand.cards);
+  const dealerVal = bjHandValue(dealerHand);
+  const playerBJ = bjIsBlackjack(hand.cards);
+  const dealerBJ = bjIsBlackjack(dealerHand);
+  if (playerVal > 21) return { outcome: 'bust', payout: -hand.bet };
+  if (playerBJ && dealerBJ) return { outcome: 'push', payout: 0 };
+  if (playerBJ) return { outcome: 'blackjack', payout: hand.bet * 1.5 };
+  if (dealerBJ) return { outcome: 'dealer_blackjack', payout: -hand.bet };
+  if (dealerVal > 21) return { outcome: 'dealer_bust', payout: hand.bet };
+  if (playerVal > dealerVal) return { outcome: 'win', payout: hand.bet };
+  if (playerVal < dealerVal) return { outcome: 'lose', payout: -hand.bet };
+  return { outcome: 'push', payout: 0 };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DÉS — 2 dés à 6 faces, plusieurs types de paris simples.
+// Le résultat est déterminé AVANT l'animation, jamais l'inverse.
+// ═══════════════════════════════════════════════════════════════
+
+function rollDice(rng) { return [1 + randInt(rng, 6), 1 + randInt(rng, 6)]; }
+
+// Paiement pour un pari sur la SOMME EXACTE (2 à 12) — calculé
+// mathématiquement pour un RTP théorique homogène de 93% sur CHAQUE
+// pari (paiement = 0.93 / probabilité − 1), pas seulement quelques
+// paris testés : sans ce calcul, une simulation a montré un RTP
+// variant de 79% à 95% selon le type choisi, ce qui aurait rendu
+// certains paris objectivement meilleurs que d'autres.
+const DICE_SUM_PAYOUT = {
+  2: 32, 3: 15.7, 4: 10.2, 5: 7.4, 6: 5.7,
+  7: 4.6,
+  8: 5.7, 9: 7.4, 10: 10.2, 11: 15.7, 12: 32,
+};
+const DICE_PARITY_PAYOUT = 0.86; // pair/impair (proba 50%)
+const DICE_RANGE_PAYOUT = 1.23;  // petit (2-6) / grand (8-12), le 7 fait perdre les deux (proba 41.67%)
+const DICE_DOUBLE_PAYOUT = 4.6;  // double (paire) — proba 16.67%, identique à somme=7
+
+function isWinningDiceBet(bet, dice) {
+  const sum = dice[0] + dice[1];
+  switch (bet.type) {
+    case 'sum': return sum === bet.value;
+    case 'parity': return (sum % 2 === 0 ? 'even' : 'odd') === bet.parity;
+    case 'range':
+      if (sum === 7) return false;
+      return (sum < 7 ? 'low' : 'high') === bet.range;
+    case 'double': return dice[0] === dice[1];
+    default: return false;
+  }
+}
+function diceBetMultiplier(bet) {
+  switch (bet.type) {
+    case 'sum': return DICE_SUM_PAYOUT[bet.value] || 0;
+    case 'parity': return DICE_PARITY_PAYOUT;
+    case 'range': return DICE_RANGE_PAYOUT;
+    case 'double': return DICE_DOUBLE_PAYOUT;
+    default: return 0;
+  }
+}
+
+/** Résout une liste de mises pour un lancer donné. */
+function resolveDiceBets(bets, dice) {
+  let totalWagered = 0, totalReturned = 0;
+  const sum = dice[0] + dice[1];
+  const details = bets.map((bet) => {
+    totalWagered += bet.amount;
+    const won = isWinningDiceBet(bet, dice);
+    const payout = won ? Math.round(bet.amount * (diceBetMultiplier(bet) + 1)) : 0;
+    totalReturned += payout;
+    return { bet, won, payout };
+  });
+  return { dice, sum, details, totalWagered, totalReturned, netResult: totalReturned - totalWagered };
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// MEOW CASINO — interface, câblée sur core.js + roulette-engine.js
+// ═══════════════════════════════════════════════════════════════
+
+// Ordre RÉEL des numéros sur une roue de roulette européenne physique
+// (différent de l'ordre numérique de la table de paris) — nécessaire
+// pour positionner les segments et calculer l'angle de rotation final.
+const WHEEL_ORDER = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const SEGMENT_ANGLE = 360 / WHEEL_ORDER.length;
+
+const STORE_KEY = 'meowcasino_ondine_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+
+const INITIAL_BANKROLL = 10000;
+let STORE = loadStore();
+const wallet = createWallet(INITIAL_BANKROLL);
+const stats = createStatistics();
+const history = createHistory(100);
+if (STORE.wallet) wallet.loadState(STORE.wallet);
+if (STORE.stats) stats.loadState(STORE.stats);
+if (STORE.history) history.loadState(STORE.history);
+
+function persist() {
+  saveStore({ wallet: wallet.getState(), stats: stats.getState(), history: history.getState(), rlLastBets: lastRouletteBets });
+}
+
+let txSeq = 0;
+function newTxId(prefix) { return prefix + '_' + Date.now() + '_' + (++txSeq); }
+
+// ── Affichage du solde (partagé lobby + jeux) ──
+function refreshBalanceDisplays(bump) {
+  const bal = wallet.getState().balance;
+  document.querySelectorAll('.cc-balance-value').forEach((el) => {
+    if (bump && Number(el.textContent) !== bal) { el.classList.add('cc-bump'); setTimeout(() => el.classList.remove('cc-bump'), 200); }
+    el.textContent = bal;
+  });
+}
+
+function goHome() {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sh').classList.remove('hidden');
+  refreshBalanceDisplays(false);
+}
+
+function openGame(game) {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  if (game === 'roulette') {
+    document.getElementById('sroulette').classList.remove('hidden');
+    initRouletteUIOnce();
+    refreshBalanceDisplays(false);
+  } else if (game === 'slots') {
+    document.getElementById('sslots').classList.remove('hidden');
+    initSlotsUIOnce();
+    refreshBalanceDisplays(false);
+  } else if (game === 'blackjack') {
+    document.getElementById('sblackjack').classList.remove('hidden');
+    bjBackToBetScreen();
+    refreshBalanceDisplays(false);
+  } else if (game === 'dice') {
+    document.getElementById('sdice').classList.remove('hidden');
+    initDiceUIOnce();
+    refreshBalanceDisplays(false);
+  }
+}
+
+async function confirmResetBankroll() {
+  const ok = await ccConfirm('Réinitialiser la bankroll ?', 'Ton solde reviendra à ' + INITIAL_BANKROLL + ' crédits virtuels. Cette action est irréversible.', 'Réinitialiser', 'Annuler');
+  if (!ok) return;
+  wallet.reset(INITIAL_BANKROLL);
+  stats.reset();
+  history.clear();
+  persist();
+  refreshBalanceDisplays(true);
+  toast('Bankroll réinitialisée', false);
+}
+
+function showStats() {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sstats').classList.remove('hidden');
+  const w = wallet.getState();
+  const host = document.getElementById('statsGridCC');
+  host.innerHTML = '';
+  [
+    { v: w.balance, l: '🪙 Solde actuel' },
+    { v: w.gamesPlayed, l: '🎮 Parties jouées' },
+    { v: w.totalWagered, l: '💸 Total misé' },
+    { v: w.totalWon, l: '💰 Total gagné' },
+    { v: w.biggestWin, l: '🏆 Plus gros gain' },
+    { v: (w.netProfit >= 0 ? '+' : '') + w.netProfit, l: '📈 Résultat net' },
+  ].forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.innerHTML = '<div class="v">' + s.v + '</div><div class="l">' + s.l + '</div>'; host.appendChild(el); });
+
+  const perGameHost = document.getElementById('perGameStatsCC');
+  perGameHost.innerHTML = '';
+  const perGame = stats.getAll();
+  const gameLabels = { roulette: '🎡 Roulette', slots: '🎰 Machine à sous', blackjack: '🃏 Blackjack', dice: '🎲 Dés' };
+  const anyPlayed = Object.keys(perGame).some((k) => perGame[k].played > 0);
+  if (!anyPlayed) {
+    perGameHost.innerHTML = '<div style="text-align:center;color:var(--text2);padding:10px;">Aucune partie jouée pour l\u2019instant</div>';
+  } else {
+    Object.keys(gameLabels).forEach((key) => {
+      const g = perGame[key];
+      if (!g || g.played === 0) return;
+      const net = g.won - g.wagered;
+      const row = document.createElement('div');
+      row.className = 'cc-history-row';
+      row.style.flexDirection = 'column';
+      row.style.alignItems = 'flex-start';
+      row.style.gap = '4px';
+      row.innerHTML = '<div style="display:flex;justify-content:space-between;width:100%;"><b>' + gameLabels[key] + '</b><span style="color:' + (net >= 0 ? 'var(--neon-green)' : 'var(--neon-red)') + ';font-weight:800;">' + (net >= 0 ? '+' : '') + net + '</span></div>' +
+        '<div style="font-size:11px;color:var(--text2);">' + g.played + ' parties · misé ' + g.wagered + ' · gagné ' + g.won + ' · record ' + g.biggestWin + '</div>';
+      perGameHost.appendChild(row);
+    });
+  }
+
+  const histHost = document.getElementById('historyListCC');
+  histHost.innerHTML = '';
+  history.getRecent(30).forEach((h) => {
+    const row = document.createElement('div');
+    row.className = 'cc-history-row';
+    const sign = h.net >= 0 ? '+' : '';
+    const color = h.net >= 0 ? 'var(--neon-green)' : 'var(--neon-red)';
+    row.innerHTML = '<span>' + h.icon + ' ' + h.label + '</span><span style="color:' + color + ';font-weight:800;">' + sign + h.net + '</span>';
+    histHost.appendChild(row);
+  });
+  if (!history.getAll().length) histHost.innerHTML = '<div style="text-align:center;color:var(--text2);padding:20px;">Aucune partie jouée pour l\u2019instant</div>';
+}
+
+// ── Modale / toast génériques ──
+function showModal(title, bodyHTML, buttons) {
+  const overlay = document.createElement('div');
+  overlay.className = 'mw-modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'mw-modal-box';
+  box.innerHTML = '<div class="mw-modal-title">' + title + '</div><div class="mw-modal-body">' + bodyHTML + '</div>';
+  const actions = document.createElement('div');
+  actions.className = 'mw-modal-actions';
+  buttons.forEach((b) => {
+    const btn = document.createElement('button');
+    btn.className = 'ondine-btn ' + (b.variant === 'primary' ? 'ondine-btn-primary' : 'ondine-btn-secondary');
+    btn.textContent = b.label;
+    btn.onclick = () => { document.body.removeChild(overlay); b.onClick && b.onClick(); };
+    actions.appendChild(btn);
+  });
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+function ccConfirm(title, message, confirmLabel, cancelLabel) {
+  return new Promise((resolve) => {
+    showModal(title, '<p>' + message + '</p>', [
+      { label: cancelLabel, variant: 'secondary', onClick: () => resolve(false) },
+      { label: confirmLabel, variant: 'primary', onClick: () => resolve(true) },
+    ]);
+  });
+}
+// ── Sons (tons synthétiques via Web Audio, cohérent avec le reste du Hub) ──
+let audioCtx = null;
+function tone(freq, dur, type, vol) {
+  type = type || 'sine'; vol = vol === undefined ? 0.12 : vol;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.start(); osc.stop(audioCtx.currentTime + dur);
+  } catch (e) {}
+}
+function playSound(name) {
+  const P = {
+    chip: () => tone(720, 0.05, 'triangle', 0.1),
+    deal: () => tone(340, 0.04, 'square', 0.06),
+    // perte volontairement DISCRÈTE (un seul ton bref, grave) — les
+    // gains doivent rester spectaculaires, les pertes ne doivent
+    // jamais l'être.
+    lose: () => tone(180, 0.12, 'sine', 0.07),
+    win: () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.18, 'sine', 0.15), i * 90)),
+    bigwin: () => [392, 523, 659, 784, 988, 1175].forEach((f, i) => setTimeout(() => tone(f, 0.22, 'sine', 0.17), i * 80)),
+    error: () => tone(220, 0.15, 'sawtooth', 0.09),
+  };
+  (P[name] || (() => {}))();
+}
+
+let toastTimer = null;
+function toast(msg, isError) {
+  if (isError === undefined) isError = true;
+  if (isError) playSound('error');
+  let host = document.getElementById('toastHostCC');
+  if (!host) { host = document.createElement('div'); host.id = 'toastHostCC'; host.className = 'ondine-toast'; document.body.appendChild(host); }
+  host.textContent = msg;
+  host.classList.add('ondine-toast-show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => host.classList.remove('ondine-toast-show'), 2200);
+}
+
+// ── Effet de gain (confettis + montant animé) ──
+function playWinEffect(amount) {
+  if (amount <= 0) return;
+  const bigWin = amount >= 500;
+  playSound(bigWin ? 'bigwin' : 'win');
+  const overlay = document.createElement('div');
+  overlay.className = 'cc-win-overlay';
+  overlay.innerHTML = '<div class="cc-win-amount">+' + amount + ' 🪙</div>';
+  document.body.appendChild(overlay);
+  const colors = ['#fbbf24', '#f472b6', '#22d3ee', '#34d399', '#a78bfa'];
+  const confettiCount = bigWin ? 60 : 20;
+  for (let i = 0; i < confettiCount; i++) {
+    const c = document.createElement('div');
+    c.className = 'cc-confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDuration = (1 + Math.random() * 1.2) + 's';
+    c.style.animationDelay = (Math.random() * 0.3) + 's';
+    overlay.appendChild(c);
+  }
+  if (navigator.vibrate && bigWin) navigator.vibrate([40, 30, 40]);
+  setTimeout(() => { if (overlay.parentNode) document.body.removeChild(overlay); }, 1800);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ROULETTE
+// ═══════════════════════════════════════════════════════════════
+let rlBets = []; // [{ type, amount, ...cible }]
+let lastRouletteBets = STORE.rlLastBets || [];
+let rlSelectedChip = 50;
+let rlSpinning = false;
+let rlInitDone = false;
+
+function selectChip(v) {
+  rlSelectedChip = v;
+  document.querySelectorAll('.rl-chip').forEach((el) => el.classList.toggle('selected', Number(el.dataset.val) === v));
+}
+
+function betKey(bet) {
+  if (bet.type === 'straight') return 'straight:' + bet.numbers[0];
+  if (bet.type === 'redblack') return 'redblack:' + bet.color;
+  if (bet.type === 'evenodd') return 'evenodd:' + bet.parity;
+  if (bet.type === 'lowhigh') return 'lowhigh:' + bet.range;
+  if (bet.type === 'dozen') return 'dozen:' + bet.dozen;
+  if (bet.type === 'column') return 'column:' + bet.column;
+  return bet.type + ':' + JSON.stringify(bet.numbers || bet);
+}
+
+function addOrIncrementBet(betPartial) {
+  if (rlSpinning) return;
+  const totalAlreadyBet = rlBets.reduce((s, b) => s + b.amount, 0);
+  if (!wallet.canAfford(totalAlreadyBet + rlSelectedChip)) { toast('Solde insuffisant'); return; }
+  const key = betKey(betPartial);
+  const existing = rlBets.find((b) => betKey(b) === key);
+  if (existing) existing.amount += rlSelectedChip;
+  else rlBets.push({ ...betPartial, amount: rlSelectedChip });
+  playSound('chip');
+  renderRouletteBetsUI();
+}
+
+function clearRouletteBets() {
+  if (rlSpinning) return;
+  rlBets = [];
+  renderRouletteBetsUI();
+}
+function rebetRoulette() {
+  if (rlSpinning) return;
+  if (!lastRouletteBets.length) { toast('Aucune mise précédente'); return; }
+  const total = lastRouletteBets.reduce((s, b) => s + b.amount, 0);
+  if (!wallet.canAfford(total)) { toast('Solde insuffisant pour remiser pareil'); return; }
+  rlBets = lastRouletteBets.map((b) => ({ ...b }));
+  renderRouletteBetsUI();
+}
+
+function renderRouletteBetsUI() {
+  const total = rlBets.reduce((s, b) => s + b.amount, 0);
+  document.getElementById('rlTotalBetDisplay').textContent = 'Mise: ' + total;
+  document.querySelectorAll('.rl-num-cell, .rl-outside-cell').forEach((el) => {
+    el.classList.remove('selected');
+    const badge = el.querySelector('.rl-chip-badge');
+    if (badge) badge.remove();
+  });
+  rlBets.forEach((bet) => {
+    const el = document.querySelector('[data-betkey="' + betKey(bet) + '"]');
+    if (el) {
+      el.classList.add('selected');
+      const badge = document.createElement('div');
+      badge.className = 'rl-chip-badge';
+      badge.textContent = bet.amount >= 1000 ? Math.round(bet.amount / 1000) + 'K' : bet.amount;
+      el.appendChild(badge);
+    }
+  });
+}
+
+function buildRouletteTable() {
+  const grid = document.getElementById('rlNumbersGrid');
+  grid.innerHTML = '';
+  const zero = document.createElement('div');
+  zero.className = 'rl-num-cell green rl-zero-cell';
+  zero.textContent = '0';
+  zero.dataset.betkey = betKey({ type: 'straight', numbers: [0] });
+  zero.onclick = () => addOrIncrementBet({ type: 'straight', numbers: [0] });
+  grid.appendChild(zero);
+  // 3 lignes x 12 colonnes (numéros 1 à 36, disposés comme une vraie table)
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 12; col++) {
+      const n = (2 - row) + col * 3 + 1;
+      const cell = document.createElement('div');
+      cell.className = 'rl-num-cell ' + rouletteColorOf(n);
+      cell.textContent = n;
+      cell.dataset.betkey = betKey({ type: 'straight', numbers: [n] });
+      cell.onclick = () => addOrIncrementBet({ type: 'straight', numbers: [n] });
+      grid.appendChild(cell);
+    }
+  }
+  const row1 = document.getElementById('rlOutsideRow1');
+  row1.innerHTML = '';
+  [
+    { label: '1ère douz.', bet: { type: 'dozen', dozen: 1 } },
+    { label: '2e douz.', bet: { type: 'dozen', dozen: 2 } },
+    { label: '3e douz.', bet: { type: 'dozen', dozen: 3 } },
+    { label: 'Col. 1', bet: { type: 'column', column: 1 } },
+    { label: 'Col. 2', bet: { type: 'column', column: 2 } },
+    { label: 'Col. 3', bet: { type: 'column', column: 3 } },
+  ].forEach((item) => {
+    const cell = document.createElement('div');
+    cell.className = 'rl-outside-cell';
+    cell.textContent = item.label;
+    cell.dataset.betkey = betKey(item.bet);
+    cell.onclick = () => addOrIncrementBet(item.bet);
+    row1.appendChild(cell);
+  });
+  const row2 = document.getElementById('rlOutsideRow2');
+  row2.innerHTML = '';
+  [
+    { label: 'Manque\n1-18', bet: { type: 'lowhigh', range: 'low' }, cls: '' },
+    { label: 'Pair', bet: { type: 'evenodd', parity: 'even' }, cls: '' },
+    { label: 'Rouge', bet: { type: 'redblack', color: 'red' }, cls: 'red-txt' },
+    { label: 'Noir', bet: { type: 'redblack', color: 'black' }, cls: 'black-txt' },
+    { label: 'Impair', bet: { type: 'evenodd', parity: 'odd' }, cls: '' },
+    { label: 'Passe\n19-36', bet: { type: 'lowhigh', range: 'high' }, cls: '' },
+  ].forEach((item) => {
+    const cell = document.createElement('div');
+    cell.className = 'rl-outside-cell ' + item.cls;
+    cell.textContent = item.label;
+    cell.dataset.betkey = betKey(item.bet);
+    cell.onclick = () => addOrIncrementBet(item.bet);
+    row2.appendChild(cell);
+  });
+}
+
+function buildRouletteWheel() {
+  const wheel = document.getElementById('rlWheel');
+  const gradientStops = WHEEL_ORDER.map((n, i) => {
+    const color = rouletteColorOf(n) === 'red' ? '#a91d1d' : (rouletteColorOf(n) === 'black' ? '#161616' : '#0d6e3f');
+    const start = (i * SEGMENT_ANGLE).toFixed(2), end = ((i + 1) * SEGMENT_ANGLE).toFixed(2);
+    return color + ' ' + start + 'deg ' + end + 'deg';
+  }).join(',');
+  wheel.style.background = 'conic-gradient(' + gradientStops + ')';
+}
+
+function initRouletteUIOnce() {
+  if (rlInitDone) return;
+  rlInitDone = true;
+  buildRouletteWheel();
+  buildRouletteTable();
+  renderRouletteBetsUI();
+}
+
+function showRouletteRules() {
+  showModal('🎡 Règles de la roulette',
+    '<p>Roulette <b>européenne</b> : 37 cases (0 à 36), un seul zéro.</p>' +
+    '<p><b>Multiplicateurs</b> (gain net pour 1 misé, mise rendue en plus) :</p>' +
+    '<p>Plein: x35 · Cheval: x17 · Transversale: x11 · Carré: x8 · Douzaine/Colonne: x2 · Rouge-Noir/Pair-Impair/Manque-Passe: x1</p>' +
+    '<p>Le zéro ne fait gagner QUE les paris pleins sur 0 (avantage de la maison ≈ 2.7%, comme une vraie roulette européenne).</p>',
+    [{ label: 'Compris', variant: 'primary' }]);
+}
+
+let rlCumulativeRotation = 0;
+async function spinRouletteUI() {
+  if (rlSpinning) return;
+  if (!rlBets.length) { toast('Place au moins une mise'); return; }
+  const total = rlBets.reduce((s, b) => s + b.amount, 0);
+  if (!wallet.canAfford(total)) { toast('Solde insuffisant'); return; }
+
+  rlSpinning = true;
+  document.getElementById('rlSpinBtn').disabled = true;
+  document.getElementById('rlStatus').textContent = 'La roue tourne…';
+
+  // 1) les mises sont verrouillées et débitées MAINTENANT (avant l'animation)
+  const betTx = newTxId('rlbet');
+  const debit = wallet.placeBet(total, betTx);
+  if (!debit.ok) { rlSpinning = false; document.getElementById('rlSpinBtn').disabled = false; toast('Erreur de mise'); return; }
+  refreshBalanceDisplays(true);
+
+  // 2) le résultat est déterminé MAINTENANT par le moteur, AVANT toute
+  // animation — l'animation ne fera QUE représenter ce résultat déjà fixé.
+  const rng = createRNG();
+  const winningNumber = spinRoulette(rng);
+  const result = resolveRouletteBets(rlBets, winningNumber);
+
+  // 3) anime la roue + la bille pour qu'elles s'arrêtent sur le bon numéro.
+  // Angle CUMULATIF (jamais réinitialisé à une valeur absolue fixe) pour
+  // garantir que la roue tourne TOUJOURS dans le même sens, même après
+  // plusieurs spins consécutifs (un angle absolu fixe aurait pu faire
+  // "reculer" visuellement la roue si le numéro suivant nécessitait un
+  // angle plus petit que le précédent).
+  const wheelIdx = WHEEL_ORDER.indexOf(winningNumber);
+  const targetMod = ((-(wheelIdx * SEGMENT_ANGLE + SEGMENT_ANGLE / 2)) % 360 + 360) % 360;
+  const currentMod = ((rlCumulativeRotation % 360) + 360) % 360;
+  let delta = targetMod - currentMod;
+  if (delta <= 0) delta += 360;
+  rlCumulativeRotation += 360 * 5 + delta; // 5 tours complets + ajustement final
+  const wheel = document.getElementById('rlWheel');
+  const ball = document.getElementById('rlBall');
+  wheel.style.transform = 'rotate(' + rlCumulativeRotation + 'deg)';
+  ball.style.transform = 'rotate(' + (-(rlCumulativeRotation * 1.5)) + 'deg)';
+
+  await new Promise((r) => setTimeout(r, 4200));
+
+  // 4) crédite les gains (une seule fois, txId dédié)
+  if (result.totalReturned > 0) wallet.creditWin(result.totalReturned, newTxId('rlwin'));
+  wallet.recordGamePlayed();
+  stats.record('roulette', total, result.totalReturned);
+  history.add({ icon: '🎡', label: 'Roulette · ' + winningNumber + ' ' + (result.color === 'red' ? '🔴' : result.color === 'black' ? '⚫' : '🟢'), net: result.netResult });
+  lastRouletteBets = rlBets.map((b) => ({ ...b }));
+  persist();
+
+  const badgeColor = result.color === 'red' ? '#a91d1d' : result.color === 'black' ? '#1a1a1a' : '#0d6e3f';
+  document.getElementById('rlStatus').innerHTML = '<div class="rl-result-badge" style="background:' + badgeColor + '">' + winningNumber + '</div>' +
+    (result.netResult >= 0 ? 'Gagné ' + result.totalReturned + ' 🪙' : 'Perdu cette manche');
+  refreshBalanceDisplays(true);
+  if (result.totalReturned > 0) playWinEffect(result.totalReturned); else playSound('lose');
+
+  rlBets = [];
+  renderRouletteBetsUI();
+  rlSpinning = false;
+  document.getElementById('rlSpinBtn').disabled = false;
+}
+// ═══════════════════════════════════════════════════════════════
+// MACHINE À SOUS
+// ═══════════════════════════════════════════════════════════════
+let slBet = 50;
+let slSpinning = false;
+let slInitDone = false;
+const SL_FILLER_COUNT = 15; // symboles de remplissage pour l'effet de défilement
+
+function changeSlotsBet(delta) {
+  if (slSpinning) return;
+  slBet = Math.max(25, Math.min(500, slBet + delta));
+  document.getElementById('slBetDisplay').textContent = 'Mise: ' + slBet;
+}
+
+function initSlotsUIOnce() {
+  if (slInitDone) return;
+  slInitDone = true;
+  const reelsHost = document.getElementById('slReels');
+  reelsHost.innerHTML = '';
+  for (let i = 0; i < NUM_REELS; i++) {
+    const reel = document.createElement('div');
+    reel.className = 'sl-reel';
+    reel.id = 'slReel' + i;
+    const strip = document.createElement('div');
+    strip.className = 'sl-reel-strip';
+    strip.id = 'slStrip' + i;
+    reel.appendChild(strip);
+    reelsHost.appendChild(reel);
+  }
+  renderSlotsStrip(Array.from({ length: NUM_REELS }, () => ['cherry', 'lemon', 'bell']), false);
+}
+
+function symbolEl(key) {
+  const div = document.createElement('div');
+  div.className = 'sl-symbol';
+  div.textContent = SLOT_SYMBOLS[key].icon;
+  return div;
+}
+
+function renderSlotsStrip(finalGrid, animate) {
+  const rng = createRNG();
+  for (let i = 0; i < NUM_REELS; i++) {
+    const strip = document.getElementById('slStrip' + i);
+    strip.innerHTML = '';
+    strip.style.transition = 'none';
+    strip.style.transform = 'translateY(0)';
+    if (animate) {
+      for (let f = 0; f < SL_FILLER_COUNT; f++) {
+        const randomSymbol = pickWeighted(rng, REEL_WEIGHTED_ITEMS);
+        strip.appendChild(symbolEl(randomSymbol));
+      }
+    }
+    finalGrid[i].forEach((key) => strip.appendChild(symbolEl(key)));
+  }
+}
+
+function showSlotsRules() {
+  const rows = Object.entries(SLOT_SYMBOLS).filter(([k]) => k !== 'scatter').map(([k, s]) =>
+    '<div class="sl-paytable-row"><span>' + s.icon + ' x3 / x4 / x5</span><span>' + s.pay[3] + ' / ' + s.pay[4] + ' / ' + s.pay[5] + '</span></div>'
+  ).join('');
+  showModal('🎰 Table des gains',
+    '<p>5 rouleaux, 5 lignes de paiement actives en permanence. Le multiplicateur s\u2019applique à la mise PAR LIGNE (mise totale ÷ 5).</p>' +
+    '<div class="sl-paytable">' + rows + '</div>' +
+    '<p style="margin-top:8px;">🐱 <b>Wild</b> remplace n\u2019importe quel symbole (sauf 🎰). 🎰 <b>Scatter</b> paie sur toute la grille, peu importe la ligne : x3=3, x4=13, x5=48 fois la MISE TOTALE.</p>',
+    [{ label: 'Compris', variant: 'primary' }]);
+}
+
+async function spinSlotsUI() {
+  if (slSpinning) return;
+  if (!wallet.canAfford(slBet)) { toast('Solde insuffisant'); return; }
+  slSpinning = true;
+  document.getElementById('slSpinBtn').disabled = true;
+  document.getElementById('slStatus').textContent = 'Les rouleaux tournent…';
+  document.querySelectorAll('.sl-win-highlight').forEach((el) => el.remove());
+
+  const debit = wallet.placeBet(slBet, newTxId('slbet'));
+  if (!debit.ok) { slSpinning = false; document.getElementById('slSpinBtn').disabled = false; toast('Erreur de mise'); return; }
+  refreshBalanceDisplays(true);
+
+  const rng = createRNG();
+  const grid = spinReels(rng);
+  const result = resolveSlotSpin(grid, slBet);
+
+  renderSlotsStrip(grid, true);
+  void document.getElementById('slStrip0').offsetHeight;
+
+  const symbolHeight = 50;
+  const totalDistance = (SL_FILLER_COUNT) * symbolHeight;
+  for (let i = 0; i < NUM_REELS; i++) {
+    const strip = document.getElementById('slStrip' + i);
+    const duration = 1400 + i * 250;
+    setTimeout(() => {
+      strip.style.transition = 'transform ' + duration + 'ms cubic-bezier(0.17,0.67,0.2,0.99)';
+      strip.style.transform = 'translateY(-' + totalDistance + 'px)';
+    }, 30);
+  }
+
+  const totalAnimTime = 1400 + (NUM_REELS - 1) * 250 + 300;
+  await new Promise((r) => setTimeout(r, totalAnimTime));
+
+  if (result.totalWin > 0) wallet.creditWin(result.totalWin, newTxId('slwin'));
+  wallet.recordGamePlayed();
+  stats.record('slots', slBet, result.totalWin);
+  history.add({ icon: '🎰', label: 'Slots · mise ' + slBet, net: result.totalWin - slBet });
+  persist();
+
+  result.lineResults.forEach((lr) => {
+    if (lr.win <= 0) return;
+    const lineRows = PAYLINES[lr.lineIndex];
+    for (let reel = 0; reel < lr.count; reel++) {
+      const reelEl = document.getElementById('slReel' + reel);
+      const marker = document.createElement('div');
+      marker.className = 'sl-win-highlight';
+      marker.style.top = (lineRows[reel] * symbolHeight) + 'px';
+      marker.style.height = symbolHeight + 'px';
+      reelEl.appendChild(marker);
+    }
+  });
+
+  document.getElementById('slStatus').textContent = result.totalWin > 0 ? 'Gagné ' + result.totalWin + ' 🪙 !' : 'Pas de gain cette fois';
+  refreshBalanceDisplays(true);
+  if (result.totalWin > 0) playWinEffect(result.totalWin); else playSound('lose');
+
+  slSpinning = false;
+  document.getElementById('slSpinBtn').disabled = false;
+}
+// ═══════════════════════════════════════════════════════════════
+// BLACKJACK
+// ═══════════════════════════════════════════════════════════════
+let bjBet = 100;
+let bjRound = null;
+let bjBusy = false; // anti double-clic pendant animations/actions
+
+function changeBjBet(delta) {
+  bjBet = Math.max(25, Math.min(1000, bjBet + delta));
+  document.getElementById('bjBetDisplay').textContent = 'Mise: ' + bjBet;
+}
+
+function bjBackToBetScreen() {
+  bjRound = null;
+  document.getElementById('bjTableScreen').classList.add('hidden');
+  document.getElementById('bjBetScreen').classList.remove('hidden');
+  document.getElementById('bjNextRoundBtn').classList.add('hidden');
+  document.getElementById('bjActionButtons').classList.remove('hidden');
+}
+
+function startBlackjackRound() {
+  if (bjBusy) return;
+  if (!wallet.canAfford(bjBet)) { toast('Solde insuffisant'); return; }
+  const debit = wallet.placeBet(bjBet, newTxId('bjbet'));
+  if (!debit.ok) { toast('Erreur de mise'); return; }
+  refreshBalanceDisplays(true);
+
+  const rng = createRNG();
+  const deck = bjShuffle(bjBuildDeck(), rng);
+  bjRound = bjCreateRound(deck);
+  bjRound.playerHands[0].bet = bjBet;
+  playSound('deal');
+
+  document.getElementById('bjBetScreen').classList.add('hidden');
+  document.getElementById('bjTableScreen').classList.remove('hidden');
+  document.getElementById('bjNextRoundBtn').classList.add('hidden');
+  document.getElementById('bjActionButtons').classList.remove('hidden');
+
+  if (bjIsBlackjack(bjRound.playerHands[0].cards)) {
+    bjRound = bjStand(bjRound);
+  }
+  renderBlackjack();
+  if (bjRound.phase === 'dealer') bjRunDealerSequence();
+}
+
+function cardHtml(card, hidden) {
+  if (hidden) return '<div class="bj-card hidden-card"></div>';
+  const isRed = card.suit === '♥' || card.suit === '♦';
+  return '<div class="bj-card ' + (isRed ? 'red' : 'black') + '">' + card.rank + '<span>' + card.suit + '</span></div>';
+}
+
+function renderBlackjack() {
+  if (!bjRound) return;
+  const hideSecondDealerCard = bjRound.phase === 'player';
+  const dealerHost = document.getElementById('bjDealerHand');
+  dealerHost.innerHTML = bjRound.dealerHand.map((c, i) => cardHtml(c, hideSecondDealerCard && i === 1)).join('');
+  document.getElementById('bjDealerValue').textContent = hideSecondDealerCard ? '?' : bjHandValue(bjRound.dealerHand);
+
+  const playerHost = document.getElementById('bjPlayerZone');
+  playerHost.innerHTML = '';
+  bjRound.playerHands.forEach((hand, idx) => {
+    const zone = document.createElement('div');
+    zone.className = 'bj-zone' + (idx === bjRound.activeHandIdx && bjRound.phase === 'player' ? ' bj-hand-active' : '');
+    const label = document.createElement('div');
+    label.className = 'bj-zone-label';
+    let resultBadge = '';
+    if (bjRound.results && bjRound.results[idx]) {
+      const outcome = bjRound.results[idx].outcome;
+      const cls = ['win','blackjack','dealer_bust'].includes(outcome) ? 'win' : (outcome === 'push' ? 'push' : 'lose');
+      const labelText = { win:'Gagné', blackjack:'Blackjack !', dealer_bust:'Croupier bust', push:'Égalité', lose:'Perdu', bust:'Bust', dealer_blackjack:'Croupier BJ' }[outcome] || outcome;
+      resultBadge = '<span class="bj-outcome-badge ' + cls + '">' + labelText + '</span>';
+    }
+    label.innerHTML = '<span>🧑 Toi' + (bjRound.playerHands.length > 1 ? ' (main ' + (idx+1) + ')' : '') + ' — mise ' + hand.bet + resultBadge + '</span><span>' + bjHandValue(hand.cards) + '</span>';
+    const handDiv = document.createElement('div');
+    handDiv.className = 'bj-hand';
+    handDiv.innerHTML = hand.cards.map((c) => cardHtml(c, false)).join('');
+    zone.appendChild(label);
+    zone.appendChild(handDiv);
+    playerHost.appendChild(zone);
+  });
+
+  const hand = bjRound.playerHands[bjRound.activeHandIdx];
+  const canDouble = bjRound.phase === 'player' && hand && hand.cards.length === 2 && !hand.done;
+  const canSplit = bjRound.phase === 'player' && bjRound.playerHands.length === 1 && hand && hand.cards.length === 2 &&
+    bjCardRankValue(hand.cards[0].rank) === bjCardRankValue(hand.cards[1].rank);
+  document.querySelector('[onclick="bjActionDouble()"]').style.opacity = canDouble ? '1' : '.35';
+  document.querySelector('[onclick="bjActionSplit()"]').style.opacity = canSplit ? '1' : '.35';
+  document.getElementById('bjStatus').textContent = bjRound.phase === 'player' ? 'À toi de jouer' : (bjRound.phase === 'dealer' ? 'Le croupier joue…' : '');
+}
+
+function bjActionHit() {
+  if (bjBusy || !bjRound || bjRound.phase !== 'player') return;
+  bjRound = bjHit(bjRound);
+  playSound('deal');
+  renderBlackjack();
+  bjHandleAfterAction();
+}
+function bjActionStand() {
+  if (bjBusy || !bjRound || bjRound.phase !== 'player') return;
+  bjRound = bjStand(bjRound);
+  renderBlackjack();
+  bjHandleAfterAction();
+}
+function bjActionDouble() {
+  if (bjBusy || !bjRound || bjRound.phase !== 'player') return;
+  const hand = bjRound.playerHands[bjRound.activeHandIdx];
+  if (hand.cards.length !== 2 || hand.done) return;
+  if (!wallet.canAfford(hand.bet)) { toast('Solde insuffisant pour doubler'); return; }
+  const debit = wallet.placeBet(hand.bet, newTxId('bjdouble'));
+  if (!debit.ok) { toast('Erreur de mise'); return; }
+  refreshBalanceDisplays(true);
+  bjRound = bjDouble(bjRound); playSound("deal");
+  renderBlackjack();
+  bjHandleAfterAction();
+}
+function bjActionSplit() {
+  if (bjBusy || !bjRound || bjRound.phase !== 'player') return;
+  const hand = bjRound.playerHands[bjRound.activeHandIdx];
+  if (bjRound.playerHands.length > 1 || hand.cards.length !== 2) return;
+  if (bjCardRankValue(hand.cards[0].rank) !== bjCardRankValue(hand.cards[1].rank)) { toast('Split possible seulement avec 2 cartes de même valeur'); return; }
+  if (!wallet.canAfford(hand.bet)) { toast('Solde insuffisant pour split'); return; }
+  const debit = wallet.placeBet(hand.bet, newTxId('bjsplit'));
+  if (!debit.ok) { toast('Erreur de mise'); return; }
+  refreshBalanceDisplays(true);
+  bjRound = bjSplit(bjRound);
+  renderBlackjack();
+}
+
+function bjHandleAfterAction() {
+  if (bjRound.phase === 'dealer') bjRunDealerSequence();
+  else bjCheckRoundEnd();
+}
+function bjRunDealerSequence() {
+  if (!bjRound || bjRound.phase !== 'dealer') { bjCheckRoundEnd(); return; }
+  bjBusy = true;
+  setTimeout(() => {
+    bjRound = bjDealerStep(bjRound); if (bjRound.phase === "dealer") playSound("deal");
+    renderBlackjack();
+    if (bjRound.phase === 'dealer') bjRunDealerSequence();
+    else { bjBusy = false; bjCheckRoundEnd(); }
+  }, 550);
+}
+
+function bjCheckRoundEnd() {
+  if (!bjRound || bjRound.phase !== 'done' || !bjRound.results) return;
+  let totalReturn = 0, totalBetThisRound = 0;
+  bjRound.results.forEach((res, idx) => {
+    const bet = bjRound.playerHands[idx].bet;
+    totalBetThisRound += bet;
+    if (res.payout >= 0) totalReturn += bet + res.payout;
+  });
+  if (totalReturn > 0) wallet.creditWin(totalReturn, newTxId('bjwin'));
+  wallet.recordGamePlayed();
+  const net = totalReturn - totalBetThisRound;
+  stats.record('blackjack', totalBetThisRound, totalReturn);
+  const mainOutcome = bjRound.results[0].outcome;
+  const icon = mainOutcome === 'blackjack' ? '🂡' : (net >= 0 ? '🃏' : '🃏');
+  history.add({ icon, label: 'Blackjack · ' + (bjRound.results.length > 1 ? bjRound.results.length + ' mains' : mainOutcome), net });
+  persist();
+  refreshBalanceDisplays(true);
+  if (totalReturn > totalBetThisRound) playWinEffect(totalReturn - totalBetThisRound);
+  else if (totalReturn < totalBetThisRound) playSound('lose'); // pas de son sur un push (égalité)
+  document.getElementById('bjActionButtons').classList.add('hidden');
+  document.getElementById('bjNextRoundBtn').classList.remove('hidden');
+  document.getElementById('bjStatus').textContent = net >= 0 ? 'Manche terminée · +' + net : 'Manche terminée';
+}
+
+function showBlackjackRules() {
+  showModal('🃏 Règles du Blackjack',
+    '<p>Approche-toi de 21 sans le dépasser. Le croupier tire jusqu\u2019à 17 inclus (s\u2019arrête sur tous les 17).</p>' +
+    '<p><b>Blackjack naturel</b> (As + carte de 10) paie <b>3:2</b>.</p>' +
+    '<p><b>Doubler</b> : double ta mise, tires une seule carte de plus, puis restes automatiquement.</p>' +
+    '<p><b>Split</b> : sépare une paire de même valeur en 2 mains indépendantes, chacune avec sa propre mise (1 split maximum).</p>',
+    [{ label: 'Compris', variant: 'primary' }]);
+}
+// ═══════════════════════════════════════════════════════════════
+// DÉS
+// ═══════════════════════════════════════════════════════════════
+const DICE_FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+let dcBets = [];
+let dcSelectedChip = 50;
+let dcSpinning = false;
+let dcInitDone = false;
+
+function selectDiceChip(v) {
+  dcSelectedChip = v;
+  document.querySelectorAll('#sdice .rl-chip').forEach((el) => el.classList.toggle('selected', Number(el.dataset.val) === v));
+}
+function diceBetKey(bet) {
+  if (bet.type === 'sum') return 'sum:' + bet.value;
+  if (bet.type === 'parity') return 'parity:' + bet.parity;
+  if (bet.type === 'range') return 'range:' + bet.range;
+  return 'double';
+}
+function addOrIncrementDiceBet(betPartial) {
+  if (dcSpinning) return;
+  const totalAlreadyBet = dcBets.reduce((s, b) => s + b.amount, 0);
+  if (!wallet.canAfford(totalAlreadyBet + dcSelectedChip)) { toast('Solde insuffisant'); return; }
+  const key = diceBetKey(betPartial);
+  const existing = dcBets.find((b) => diceBetKey(b) === key);
+  if (existing) existing.amount += dcSelectedChip;
+  else dcBets.push({ ...betPartial, amount: dcSelectedChip });
+  playSound('chip');
+  renderDiceBetsUI();
+}
+function clearDiceBets() {
+  if (dcSpinning) return;
+  dcBets = [];
+  renderDiceBetsUI();
+}
+function renderDiceBetsUI() {
+  const total = dcBets.reduce((s, b) => s + b.amount, 0);
+  document.getElementById('dcTotalBetDisplay').textContent = 'Mise: ' + total;
+  document.querySelectorAll('.dc-bet-cell').forEach((el) => {
+    el.classList.remove('selected');
+    const badge = el.querySelector('.rl-chip-badge');
+    if (badge) badge.remove();
+  });
+  dcBets.forEach((bet) => {
+    const el = document.querySelector('[data-dicebetkey="' + diceBetKey(bet) + '"]');
+    if (el) {
+      el.classList.add('selected');
+      const badge = document.createElement('div');
+      badge.className = 'rl-chip-badge';
+      badge.textContent = bet.amount >= 1000 ? Math.round(bet.amount / 1000) + 'K' : bet.amount;
+      el.appendChild(badge);
+    }
+  });
+}
+
+function initDiceUIOnce() {
+  if (dcInitDone) return;
+  dcInitDone = true;
+  const sumGrid = document.getElementById('dcSumGrid');
+  sumGrid.innerHTML = '';
+  for (let s = 2; s <= 12; s++) {
+    const cell = document.createElement('div');
+    cell.className = 'dc-bet-cell';
+    cell.dataset.dicebetkey = diceBetKey({ type: 'sum', value: s });
+    cell.innerHTML = s + '<span class="dc-payout">x' + (DICE_SUM_PAYOUT[s] + 1).toFixed(1) + '</span>';
+    cell.onclick = () => addOrIncrementDiceBet({ type: 'sum', value: s });
+    sumGrid.appendChild(cell);
+  }
+  const simpleGrid = document.getElementById('dcSimpleGrid');
+  simpleGrid.innerHTML = '';
+  [
+    { label: 'Pair', bet: { type: 'parity', parity: 'even' }, mult: DICE_PARITY_PAYOUT },
+    { label: 'Impair', bet: { type: 'parity', parity: 'odd' }, mult: DICE_PARITY_PAYOUT },
+    { label: 'Petit\n2-6', bet: { type: 'range', range: 'low' }, mult: DICE_RANGE_PAYOUT },
+    { label: 'Grand\n8-12', bet: { type: 'range', range: 'high' }, mult: DICE_RANGE_PAYOUT },
+    { label: 'Double', bet: { type: 'double' }, mult: DICE_DOUBLE_PAYOUT },
+  ].forEach((item) => {
+    const cell = document.createElement('div');
+    cell.className = 'dc-bet-cell';
+    cell.dataset.dicebetkey = diceBetKey(item.bet);
+    cell.innerHTML = item.label + '<span class="dc-payout">x' + (item.mult + 1).toFixed(2) + '</span>';
+    cell.onclick = () => addOrIncrementDiceBet(item.bet);
+    simpleGrid.appendChild(cell);
+  });
+  renderDiceBetsUI();
+}
+
+function showDiceRules() {
+  showModal('🎲 Règles des dés',
+    '<p>2 dés à 6 faces. Mise sur la <b>somme exacte</b> (2 à 12), <b>pair/impair</b>, <b>petit</b> (2-6) / <b>grand</b> (8-12), ou <b>double</b> (les 2 dés identiques).</p>' +
+    '<p>Règle du 7 : quand la somme fait 7, les paris "petit" ET "grand" perdent TOUS LES DEUX (comme au craps).</p>' +
+    '<p>Les multiplicateurs affichés sur chaque case sont calculés pour un avantage de la maison cohérent et homogène, peu importe le pari choisi.</p>',
+    [{ label: 'Compris', variant: 'primary' }]);
+}
+
+async function rollDiceUI() {
+  if (dcSpinning) return;
+  if (!dcBets.length) { toast('Place au moins une mise'); return; }
+  const total = dcBets.reduce((s, b) => s + b.amount, 0);
+  if (!wallet.canAfford(total)) { toast('Solde insuffisant'); return; }
+
+  dcSpinning = true;
+  document.getElementById('dcRollBtn').disabled = true;
+  document.getElementById('dcStatus').textContent = 'Les dés roulent…';
+  document.getElementById('dcSumDisplay').innerHTML = '&nbsp;';
+
+  const debit = wallet.placeBet(total, newTxId('dcbet'));
+  if (!debit.ok) { dcSpinning = false; document.getElementById('dcRollBtn').disabled = false; toast('Erreur de mise'); return; }
+  refreshBalanceDisplays(true);
+
+  const rng = createRNG();
+  const dice = rollDice(rng);
+  const result = resolveDiceBets(dcBets, dice);
+
+  document.getElementById('dcDie0').classList.add('rolling');
+  document.getElementById('dcDie1').classList.add('rolling');
+  await new Promise((r) => setTimeout(r, 1100));
+  document.getElementById('dcDie0').classList.remove('rolling');
+  document.getElementById('dcDie1').classList.remove('rolling');
+  document.getElementById('dcDie0').textContent = DICE_FACES[dice[0]];
+  document.getElementById('dcDie1').textContent = DICE_FACES[dice[1]];
+  document.getElementById('dcSumDisplay').textContent = 'Somme : ' + result.sum;
+
+  if (result.totalReturned > 0) wallet.creditWin(result.totalReturned, newTxId('dcwin'));
+  wallet.recordGamePlayed();
+  stats.record('dice', total, result.totalReturned);
+  history.add({ icon: '🎲', label: 'Dés · somme ' + result.sum, net: result.netResult });
+  persist();
+
+  document.getElementById('dcStatus').textContent = result.netResult >= 0 ? 'Gagné ' + result.totalReturned + ' 🪙 !' : 'Perdu cette manche';
+  refreshBalanceDisplays(true);
+  if (result.totalReturned > 0) playWinEffect(result.totalReturned); else playSound('lose');
+
+  dcBets = [];
+  renderDiceBetsUI();
+  dcSpinning = false;
+  document.getElementById('dcRollBtn').disabled = false;
+}
+
+refreshBalanceDisplays(false);
+</script>
+</body>
+</html>

@@ -1637,8 +1637,20 @@ function createUI(sdk) {
   function spawnNext() {
     const type = nextQueue.shift();
     nextQueue.push(drawFromBag());
-    current = spawnPiece(type);
-    if (isGameOver(grid, current)) { finishGame(); return; }
+    const nextPiece = spawnPiece(type);
+    if (isGameOver(grid, nextPiece)) {
+      // La pièce qui cause le Game Over n'a jamais été réellement
+      // jouée — l'afficher superposée au sommet (déjà plein) serait
+      // confus. On NE remplace PAS `current` (elle garde la pièce
+      // précédente, déjà verrouillée dans `grid` — la redessiner est
+      // sans danger, ses cellules y sont déjà) et on rend d'abord le
+      // plateau dans son dernier état STABLE, visible un court
+      // instant, avant l'écran de fin.
+      render();
+      setTimeout(finishGame, 350);
+      return;
+    }
+    current = nextPiece;
     render();
     startDropTimer();
   }
@@ -1765,6 +1777,49 @@ function createUI(sdk) {
     if (map[e.key]) { e.preventDefault(); map[e.key](); }
   }
   function handleKeyUp(e) { if (e.key === 'ArrowDown') onSoftDropEnd(); }
+
+  // ═══════════════════════════════════════════════════════════════
+  // TACTILE — swipe horizontal = déplacement, swipe bas = descente
+  // rapide, TAP (déplacement minime) = rotation. Attaché UNE SEULE
+  // FOIS sur #sg (jamais recréé, contrairement à la grille interne
+  // qui est reconstruite à chaque render()).
+  // ═══════════════════════════════════════════════════════════════
+  let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+  const TAP_THRESHOLD = 15; // px — en-dessous, c'est un tap, pas un swipe
+  function handleTetrisTouchStart(e) {
+    const t = e.touches[0];
+    touchStartX = t.clientX; touchStartY = t.clientY; touchStartTime = Date.now();
+  }
+  function handleTetrisTouchMove(e) {
+    // empêche le scroll de page UNIQUEMENT si un swipe vertical est en
+    // cours dans cette zone (pas de preventDefault systématique ailleurs)
+    if (!over) e.preventDefault();
+  }
+  function handleTetrisTouchEnd(e) {
+    if (over) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
+    if (Math.abs(dx) < TAP_THRESHOLD && Math.abs(dy) < TAP_THRESHOLD) {
+      onRotate(); // tap court = rotation
+      return;
+    }
+    if (Math.abs(dx) > Math.abs(dy)) {
+      onMove(dx > 0 ? 1 : -1); // swipe horizontal = un déplacement (pas proportionnel à la distance)
+    } else if (dy > 0) {
+      onHardDrop(); // swipe vers le bas suffisamment marqué = descente rapide, naturel au tactile
+    }
+    // swipe vers le haut : volontairement ignoré, pas de comportement
+    // incohérent (pas de "remontée" possible dans Tetris)
+  }
+  function initTetrisTouch() {
+    const zone = document.getElementById('sg');
+    if (!zone || zone.dataset.touchBound) return;
+    zone.dataset.touchBound = '1';
+    zone.addEventListener('touchstart', handleTetrisTouchStart, { passive: true });
+    zone.addEventListener('touchmove', handleTetrisTouchMove, { passive: false });
+    zone.addEventListener('touchend', handleTetrisTouchEnd, { passive: true });
+  }
+  initTetrisTouch();
 
   return {
     startGame, confirmNewGame, onMove, onRotate, onSoftDropStart, onSoftDropEnd, onHardDrop, onHold,

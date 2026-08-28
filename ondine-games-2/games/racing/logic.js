@@ -232,17 +232,43 @@ export function createCar(slotId, carDefId, name, icon, color, isPlayer, upgrade
   };
 }
 
-export function createRace(trackId, playerCarDefId, playerUpgrades, playerStrategy, rng = Math.random) {
+export function createRace(trackId, playerCarDefId, playerUpgrades, playerStrategy, rng = Math.random, difficulty = 'normal') {
   const geo = getGeometry(trackId);
   const opponentDefIds = Object.keys(CARS).filter(id => id !== playerCarDefId);
   const pool = [...opponentDefIds, ...Object.keys(CARS)];
   const cars = [createCar(0, playerCarDefId, 'Toi', CARS[playerCarDefId].icon, CARS[playerCarDefId].color, true, playerUpgrades, playerStrategy)];
+  const aiUpgrades = computeAiUpgrades(playerUpgrades, difficulty);
   for (let i = 0; i < 5; i++) {
     const defId = pool[i % pool.length];
     const opp = OPPONENT_NAMES[i];
-    cars.push(createCar(i+1, defId, opp.name, opp.icon, CARS[defId].color, false, null, 'balanced'));
+    cars.push(createCar(i+1, defId, opp.name, opp.icon, CARS[defId].color, false, { ...aiUpgrades }, 'balanced'));
   }
   return { trackId, totalLength: geo.total * LAPS_PER_RACE, lapLength: geo.total, laps: LAPS_PER_RACE, cars, tick: 0, over: false, startedAt: null };
+}
+
+/** Calcule les améliorations des IA à partir de la progression RÉELLE
+ *  du joueur, pour que le challenge suive sa progression au lieu de
+ *  rester figé au niveau 0 (mesuré : sans ceci, un joueur avec upgrades
+ *  niveau 3 gagne 100% du temps, et ça n'évolue plus jusqu'au niveau
+ *  10 — toute la progression au-delà de 3 devient inutile). Les IA
+ *  restent volontairement EN DESSOUS du joueur (ratio < 1) pour que
+ *  s'améliorer conserve un vrai avantage RESSENTI même à niveau
+ *  modéré — mesuré : un ratio de 0.65 annulait tout gain perçu dès le
+ *  niveau 3 (le joueur restait 3e). Un plafond absolu (AI_LEVEL_CAP)
+ *  garantit qu'même au maximum d'upgrades en difficile, le joueur
+ *  garde une vraie chance de gagner de temps en temps — mesuré : sans
+ *  plafond, un joueur au niveau 10 en difficile ne gagnait JAMAIS
+ *  (0/10), ce qui aurait rendu toute la progression décourageante. */
+const AI_LEVEL_CAP = 9;
+function computeAiUpgrades(playerUpgrades, difficulty) {
+  const ratio = difficulty === 'easy' ? 0.45 : difficulty === 'hard' ? 0.75 : 0.68;
+  const scale = (level) => Math.min(AI_LEVEL_CAP, Math.max(0, Math.round((level || 0) * ratio)));
+  return {
+    engine: scale(playerUpgrades?.engine),
+    turbo: scale(playerUpgrades?.turbo),
+    tires: scale(playerUpgrades?.tires),
+    boost: scale(playerUpgrades?.boost),
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════

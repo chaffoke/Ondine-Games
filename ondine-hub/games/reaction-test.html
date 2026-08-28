@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Reaction Test × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;
+  --c1:#38bdf8;--c2:#7dd3fc;--c3:#bae6fd;
+  --cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);
+  --text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;
+  --sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:var(--r2);cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-btn-danger{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.35);color:var(--cr);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;max-width:320px;width:100%;box-shadow:var(--sh2);}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── HOME ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(30px,9vw,42px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+/* ── GAME ── */
+#sg{align-items:center;padding:10px;gap:10px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;}
+.turn-badge{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:6px 14px;font-family:'Fredoka One',cursive;font-size:13px;}
+.turn-dot{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 -2px 3px rgba(0,0,0,.35);}
+.turn-dot.black{background:radial-gradient(circle at 35% 30%,#555,#0a0a0a 70%);}
+.turn-dot.white{background:radial-gradient(circle at 35% 30%,#fff,#cbd5e1 70%);}
+.score-row{display:flex;gap:8px;}
+.score-pill{display:flex;align-items:center;gap:5px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:13px;}
+
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:rgba(6,60,40,.5);border:1px solid var(--border2);border-radius:12px;padding:6px;max-width:min(400px, calc(100vh - 180px));width:100%;aspect-ratio:1;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4, même cause) */
+@media (min-width:900px){.board{max-width:600px;}}
+.cell{position:relative;background:rgba(10,90,60,.55);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cell.hint::after{content:'';width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.35);}
+.disc{width:84%;height:84%;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.4);transform:scale(0) rotateY(0deg);transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
+.disc.show{transform:scale(1);}
+.disc.black{background:radial-gradient(circle at 35% 28%,#4a4a4a,#0a0a0a 72%);}
+.disc.white{background:radial-gradient(circle at 35% 28%,#fff,#c7d2e0 72%);}
+.disc.flip{animation:flipDisc .4s ease;}
+@keyframes flipDisc{0%{transform:scale(1) rotateY(0);}50%{transform:scale(.75) rotateY(90deg);}100%{transform:scale(1) rotateY(0);}}
+.disc.last-move{box-shadow:0 0 0 3px var(--co),0 2px 5px rgba(0,0,0,.4);}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:400px;}
+
+/* ── RESULT ── */
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:280px;margin:12px 0;}
+
+/* ── STATS ── */
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+
+/* ═══════════════════════════════════════════════════════════════
+   REACTION TEST — CSS spécifique
+   ═══════════════════════════════════════════════════════════════ */
+#rtZone{width:100%;max-width:min(420px, calc(100vh - 160px));aspect-ratio:1;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:background .12s;text-align:center;padding:20px;}
+#rtZone.rt-idle{background:linear-gradient(160deg,#1e293b,#0f172a);border:2px solid var(--border2);}
+#rtZone.rt-waiting{background:linear-gradient(160deg,#7f1d1d,#450a0a);}
+#rtZone.rt-ready{background:linear-gradient(160deg,#14532d,#052e16);animation:rtPulse .4s ease;}
+#rtZone.rt-falsestart{background:linear-gradient(160deg,#78350f,#451a03);}
+#rtZone.rt-result{background:linear-gradient(160deg,#1e293b,#0f172a);border:2px solid var(--c1);}
+@keyframes rtPulse{0%{transform:scale(0.96);}60%{transform:scale(1.02);}100%{transform:scale(1);}}
+.rt-zone-title{font-family:'Fredoka One',cursive;font-size:26px;color:#fff;margin-bottom:8px;}
+.rt-zone-sub{font-size:14px;color:rgba(255,255,255,.75);}
+.rt-zone-time{font-family:'Fredoka One',cursive;font-size:48px;color:var(--neon-gold,#fbbf24);}
+.rt-round-dots{display:flex;gap:6px;justify-content:center;margin:10px 0;}
+.rt-round-dot{width:10px;height:10px;border-radius:50%;background:var(--border2);}
+.rt-round-dot.rt-done{background:var(--c1);}
+.rt-round-dot.rt-current{background:#fff;box-shadow:0 0 6px rgba(255,255,255,.8);}
+.rt-history{display:flex;flex-direction:column;gap:6px;width:100%;max-width:420px;margin-top:10px;}
+.rt-history-row{display:flex;justify-content:space-between;padding:8px 12px;background:var(--glass);border-radius:10px;font-size:13px;}
+
+/* ── Composants partagés absents du template extrait ── */
+.rl-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:420px;gap:8px;margin-bottom:8px;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.result-overlay{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.75);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.mw-modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(4,6,20,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.mw-modal-box{background:linear-gradient(180deg,#0f1530,#080b1e);border:1px solid var(--border2);border-radius:20px;padding:20px;max-width:360px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+.mw-modal-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);margin-bottom:12px;text-align:center;}
+.mw-modal-body{font-size:14px;color:var(--text);line-height:1.6;}
+.mw-modal-body p{margin:0 0 10px;}
+.mw-modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+
+</style>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">REACTION TEST</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStatsRt"></div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startTest()">⚡ Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showRulesRt()">ⓘ Règles</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStatsRt()">📊 Statistiques</button>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="rl-hud">
+    <div class="icon-btn" onclick="goHome()">🏠</div>
+    <div class="section-title" style="margin:0;">Manche <span id="rtRoundNum">1</span>/<span id="rtRoundTotal">5</span></div>
+    <div style="width:36px;"></div>
+  </div>
+  <div class="rt-round-dots" id="rtRoundDots"></div>
+  <div id="rtZone" class="rt-idle">
+    <div class="rt-zone-title" id="rtZoneTitle">Prêt ?</div>
+    <div class="rt-zone-sub" id="rtZoneSub">Touche la zone pour commencer</div>
+  </div>
+  <div class="rt-history" id="rtHistory"></div>
+</div>
+
+<div class="screen hidden result-overlay" id="soverRt">
+  <div class="res-icon">⚡</div>
+  <div class="res-title" id="rtFinalRating">Résultat</div>
+  <div class="res-sub" id="rtFinalStats"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startTest()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<div class="screen hidden" id="sstatsRt">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div class="stats-grid" id="statsGridRt"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// REACTION TEST — moteur pur. Le timing réel (Date.now()) et le
+// délai aléatoire sont TOUJOURS injectés en paramètre, jamais lus
+// directement dans le moteur — permet de tester des scénarios
+// déterministes (faux départ, délai précis) sans dépendre de
+// l'horloge réelle ni de setTimeout.
+// ═══════════════════════════════════════════════════════════════
+
+const RT_MIN_DELAY_MS = 1500, RT_MAX_DELAY_MS = 4000;
+const RT_DEFAULT_ROUNDS = 5;
+
+function rtRandomDelay(rng) {
+  return RT_MIN_DELAY_MS + Math.floor(rng() * (RT_MAX_DELAY_MS - RT_MIN_DELAY_MS));
+}
+
+function createReactionState(numRounds) {
+  numRounds = numRounds || RT_DEFAULT_ROUNDS;
+  return { phase: 'idle', numRounds, round: 0, results: [], waitStartTime: null, delayMs: null, stimulusTime: null };
+}
+
+/** Démarre une nouvelle manche : phase 'waiting', avec un délai
+ *  aléatoire avant que le stimulus n'apparaisse. */
+function rtStartRound(state, now, rng) {
+  if (state.round >= state.numRounds) return state;
+  return { ...state, phase: 'waiting', waitStartTime: now, delayMs: rtRandomDelay(rng), stimulusTime: null };
+}
+
+/** À appeler régulièrement (boucle d'affichage) : fait passer la
+ *  phase 'waiting' à 'ready' quand le délai aléatoire est écoulé. */
+function rtCheckStimulus(state, now) {
+  if (state.phase !== 'waiting') return state;
+  if (now - state.waitStartTime >= state.delayMs) {
+    return { ...state, phase: 'ready', stimulusTime: now };
+  }
+  return state;
+}
+
+/** Le joueur tape/clique. Comportement dépend de la phase :
+ *  - 'waiting' : faux départ (tapé avant le stimulus) ;
+ *  - 'ready'   : temps de réaction mesuré, manche terminée ;
+ *  - autre     : ignoré (évite un tap fantôme pendant un résultat déjà affiché). */
+function rtHandleTap(state, now) {
+  if (state.phase === 'waiting') {
+    return { ...state, phase: 'falsestart' };
+  }
+  if (state.phase === 'ready') {
+    const reactionMs = now - state.stimulusTime;
+    const results = [...state.results, { reactionMs, falseStart: false }];
+    return { ...state, phase: 'result', round: state.round + 1, results };
+  }
+  return state;
+}
+
+/** Après un faux départ, le joueur reconnaît son erreur : la manche
+ *  est comptée (avec pénalité) et on passe à la suivante. */
+function rtAcknowledgeFalseStart(state) {
+  const results = [...state.results, { reactionMs: null, falseStart: true }];
+  return { ...state, phase: 'result', round: state.round + 1, results };
+}
+
+function rtIsTestComplete(state) { return state.round >= state.numRounds; }
+
+function rtComputeSummary(state) {
+  const valid = state.results.filter((r) => !r.falseStart);
+  const falseStarts = state.results.filter((r) => r.falseStart).length;
+  if (valid.length === 0) return { average: null, best: null, falseStarts, validCount: 0 };
+  const times = valid.map((r) => r.reactionMs);
+  const average = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+  const best = Math.min(...times);
+  return { average, best, falseStarts, validCount: valid.length };
+}
+
+function rtRating(avgMs) {
+  if (avgMs === null) return '—';
+  if (avgMs < 200) return '⚡ Éclair';
+  if (avgMs < 250) return '🔥 Excellent';
+  if (avgMs < 320) return '👍 Rapide';
+  if (avgMs < 400) return '🙂 Correct';
+  return '🐢 À améliorer';
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// REACTION TEST — interface, câblée sur reaction-engine.js
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'reactiontest_ondine_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats: {} }, loadStore());
+function statGet(k, d) { return k in STORE.stats ? STORE.stats[k] : (d === undefined ? 0 : d); }
+function statInc(k, n) { STORE.stats[k] = (STORE.stats[k] || 0) + (n || 1); saveStore(STORE); return STORE.stats[k]; }
+function statSetMin(k, v) { if (STORE.stats[k] === undefined || v < STORE.stats[k]) { STORE.stats[k] = v; saveStore(STORE); } }
+
+let RT = null;
+let rtCheckTimer = null; // un seul intervalle actif à la fois, jamais orphelin
+
+function startTest() {
+  stopCheckLoop(); // sécurité anti-timer-orphelin si un ancien test tournait encore
+  RT = createReactionState(5);
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sg').classList.remove('hidden');
+  document.getElementById('rtRoundTotal').textContent = RT.numRounds;
+  renderRoundDots();
+  document.getElementById('rtHistory').innerHTML = '';
+  render();
+  startCheckLoop();
+}
+
+function startCheckLoop() {
+  stopCheckLoop();
+  rtCheckTimer = setInterval(() => {
+    if (!RT) return;
+    const before = RT.phase;
+    RT = rtCheckStimulus(RT, Date.now());
+    if (RT.phase !== before) render();
+  }, 20);
+}
+function stopCheckLoop() { if (rtCheckTimer) { clearInterval(rtCheckTimer); rtCheckTimer = null; } }
+
+function renderRoundDots() {
+  const host = document.getElementById('rtRoundDots');
+  host.innerHTML = '';
+  for (let i = 0; i < RT.numRounds; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'rt-round-dot' + (i < RT.round ? ' rt-done' : (i === RT.round ? ' rt-current' : ''));
+    host.appendChild(dot);
+  }
+}
+
+function handleZoneTap() {
+  if (!RT) return;
+  const now = Date.now();
+  if (RT.phase === 'idle' || RT.phase === 'result' || RT.phase === 'falsestart') {
+    if (RT.phase === 'falsestart') RT = rtAcknowledgeFalseStart(RT);
+    if (rtIsTestComplete(RT)) { finishTest(); return; }
+    RT = rtStartRound(RT, now, Math.random);
+    render();
+    renderRoundDots();
+    return;
+  }
+  if (RT.phase === 'waiting') {
+    RT = rtHandleTap(RT, now);
+    render();
+    playSound('falsestart');
+    return;
+  }
+  if (RT.phase === 'ready') {
+    RT = rtHandleTap(RT, now);
+    render();
+    renderRoundDots();
+    addHistoryRow(RT.results[RT.results.length - 1]);
+    playSound('tap');
+    if (rtIsTestComplete(RT)) setTimeout(finishTest, 900);
+    return;
+  }
+}
+
+function addHistoryRow(result) {
+  const host = document.getElementById('rtHistory');
+  const row = document.createElement('div');
+  row.className = 'rt-history-row';
+  row.innerHTML = result.falseStart
+    ? '<span>Manche ' + RT.round + '</span><span style="color:var(--neon-red,#f87171);">Faux départ</span>'
+    : '<span>Manche ' + RT.round + '</span><span>' + result.reactionMs + ' ms</span>';
+  host.insertBefore(row, host.firstChild);
+}
+
+function render() {
+  if (!RT) return;
+  const zone = document.getElementById('rtZone');
+  const title = document.getElementById('rtZoneTitle');
+  const sub = document.getElementById('rtZoneSub');
+  zone.className = 'rt-' + RT.phase;
+  document.getElementById('rtRoundNum').textContent = Math.min(RT.round + 1, RT.numRounds);
+
+  if (RT.phase === 'idle') { title.textContent = 'Prêt ?'; sub.textContent = 'Touche la zone pour commencer'; zone.innerHTML = ''; zone.appendChild(makeZoneContent('Prêt ?', 'Touche la zone pour commencer')); }
+  else if (RT.phase === 'waiting') { zone.innerHTML = ''; zone.appendChild(makeZoneContent('ATTENDS…', 'Ne touche pas encore')); }
+  else if (RT.phase === 'ready') { zone.innerHTML = ''; zone.appendChild(makeZoneContent('TAPE !', 'Maintenant !')); }
+  else if (RT.phase === 'falsestart') { zone.innerHTML = ''; zone.appendChild(makeZoneContent('TROP TÔT !', 'Touche pour continuer')); }
+  else if (RT.phase === 'result') {
+    const last = RT.results[RT.results.length - 1];
+    zone.innerHTML = '';
+    const div = document.createElement('div');
+    div.innerHTML = '<div class="rt-zone-time">' + last.reactionMs + ' ms</div><div class="rt-zone-sub">' + rtRating(last.reactionMs) + '</div><div class="rt-zone-sub" style="margin-top:14px;">Touche pour continuer</div>';
+    zone.appendChild(div);
+  }
+}
+function makeZoneContent(titleText, subText) {
+  const div = document.createElement('div');
+  div.innerHTML = '<div class="rt-zone-title">' + titleText + '</div><div class="rt-zone-sub">' + subText + '</div>';
+  return div;
+}
+
+function finishTest() {
+  stopCheckLoop();
+  const summary = rtComputeSummary(RT);
+  statInc('testsPlayed');
+  if (summary.best !== null) statSetMin('bestTime', summary.best);
+  document.getElementById('rtFinalRating').textContent = rtRating(summary.average);
+  document.getElementById('rtFinalStats').textContent = summary.average !== null
+    ? 'Moyenne : ' + summary.average + ' ms — Meilleur : ' + summary.best + ' ms' + (summary.falseStarts ? ' — ' + summary.falseStarts + ' faux départ(s)' : '')
+    : 'Que des faux départs — réessaie !';
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('soverRt').classList.remove('hidden');
+}
+
+function goHome() {
+  stopCheckLoop();
+  RT = null;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sh').classList.remove('hidden');
+  renderHomeStats();
+}
+function renderHomeStats() {
+  const host = document.getElementById('homeStatsRt');
+  host.innerHTML = '';
+  const best = statGet('bestTime', null);
+  [{ v: best !== null ? best + ' ms' : '—', l: '🏆 Meilleur temps' }, { v: statGet('testsPlayed'), l: '🎮 Tests effectués' }]
+    .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.style.flex = '1'; el.innerHTML = '<div class="v">' + s.v + '</div><div class="l">' + s.l + '</div>'; host.appendChild(el); });
+}
+function showStatsRt() {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sstatsRt').classList.remove('hidden');
+  const host = document.getElementById('statsGridRt');
+  host.innerHTML = '';
+  const best = statGet('bestTime', null);
+  [{ v: statGet('testsPlayed'), l: '🎮 Tests effectués' }, { v: best !== null ? best + ' ms' : '—', l: '🏆 Meilleur temps' }]
+    .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.innerHTML = '<div class="v">' + s.v + '</div><div class="l">' + s.l + '</div>'; host.appendChild(el); });
+}
+
+function showRulesRt() {
+  showModal('⚡ Comment jouer',
+    '<p>Touche la zone pour lancer une manche. Elle devient <b>rouge</b> : attends sans toucher.</p>' +
+    '<p>Dès qu\u2019elle devient <b>verte</b>, tape le plus vite possible !</p>' +
+    '<p>Si tu touches trop tôt (zone encore rouge), c\u2019est un <b>faux départ</b> — le timing est réellement aléatoire, impossible à deviner.</p>' +
+    '<p>5 manches, puis moyenne et meilleur temps affichés.</p>',
+    [{ label: 'Compris', variant: 'primary' }]);
+}
+function showModal(title, bodyHTML, buttons) {
+  const overlay = document.createElement('div');
+  overlay.className = 'mw-modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'mw-modal-box';
+  box.innerHTML = '<div class="mw-modal-title">' + title + '</div><div class="mw-modal-body">' + bodyHTML + '</div>';
+  const actions = document.createElement('div');
+  actions.className = 'mw-modal-actions';
+  buttons.forEach((b) => {
+    const btn = document.createElement('button');
+    btn.className = 'ondine-btn ' + (b.variant === 'primary' ? 'ondine-btn-primary' : 'ondine-btn-secondary');
+    btn.textContent = b.label;
+    btn.onclick = () => { document.body.removeChild(overlay); b.onClick && b.onClick(); };
+    actions.appendChild(btn);
+  });
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+let audioCtx = null;
+function tone(freq, dur, type, vol) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type || 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol || 0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.start(); osc.stop(audioCtx.currentTime + dur);
+  } catch (e) {}
+}
+function playSound(name) {
+  if (name === 'tap') tone(700, 0.08, 'sine', 0.1);
+  if (name === 'falsestart') tone(180, 0.15, 'sawtooth', 0.08);
+}
+
+const rtZoneEl = document.getElementById('rtZone');
+rtZoneEl.addEventListener('click', handleZoneTap);
+rtZoneEl.addEventListener('touchstart', (e) => { e.preventDefault(); handleZoneTap(); }, { passive: false });
+
+renderHomeStats();
+
+</script>
+</body>
+</html>

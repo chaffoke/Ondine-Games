@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Frogger × Ondine</title>
+<meta name="theme-color" content="#06081e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06081e;--bg2:#090c24;
+  --c1:#38bdf8;--c2:#7dd3fc;--c3:#bae6fd;
+  --cp:#818cf8;--cg:#34d399;--co:#fbbf24;--cr:#f87171;--cm:#f472b6;
+  --glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--glass3:rgba(56,189,248,.07);
+  --border:rgba(56,189,248,.12);--border2:rgba(56,189,248,.22);
+  --text:#e0f2fe;--text2:#94a3b8;
+  --r:14px;--r2:20px;
+  --sh:0 4px 20px rgba(0,0,0,.5);--sh2:0 8px 32px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
+.screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;}
+.screen.hidden{display:none!important;}
+.ondine-btn{font-family:'Fredoka One',cursive;border:none;border-radius:var(--r2);cursor:pointer;transition:transform .12s;}
+.ondine-btn:active{transform:scale(.955);}
+.ondine-btn-primary{background:linear-gradient(135deg,#3730a3,#0e7490);color:#fff;padding:15px 28px;font-size:17px;box-shadow:0 6px 24px rgba(14,116,144,.45);}
+.ondine-btn-secondary{background:var(--glass);border:1.5px solid var(--border);color:var(--text);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-btn-danger{background:rgba(248,113,113,.12);border:1.5px solid rgba(248,113,113,.35);color:var(--cr);padding:11px 22px;font-weight:800;font-size:13px;font-family:'Nunito',sans-serif;}
+.ondine-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,25,60,.92);border:1px solid var(--border2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:700;color:var(--text);backdrop-filter:blur(12px);z-index:9999;opacity:0;transition:all .3s;white-space:nowrap;max-width:80vw;text-align:center;pointer-events:none;}
+.ondine-toast-show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-overlay{position:fixed;inset:0;z-index:9500;background:rgba(6,8,30,.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:22px;max-width:320px;width:100%;box-shadow:var(--sh2);}
+.modal-title{font-family:'Fredoka One',cursive;font-size:17px;color:var(--c2);margin-bottom:10px;text-align:center;}
+.modal-body{font-size:13px;color:var(--text);margin-bottom:16px;text-align:center;line-height:1.5;}
+.modal-actions{display:flex;flex-direction:column;gap:8px;}
+.statCard{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;text-align:center;}
+.statCard .v{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c1);}
+.statCard .l{font-size:8px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.achCard{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:9px 11px;}
+.achCard.unlocked{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.05);}
+.achCard .ic{font-size:22px;}
+.achCard .name{font-weight:800;font-size:12px;}
+.achCard .desc{font-size:9px;color:var(--text2);}
+
+/* ── HOME ── */
+#sh{align-items:center;justify-content:center;text-align:center;padding:20px;gap:10px;overflow-y:auto;}
+.logo{font-family:'Fredoka One',cursive;font-size:clamp(30px,9vw,42px);
+  background:linear-gradient(160deg,#e0f2fe,#7dd3fc 35%,#fff 55%,#bae6fd 80%,#e0f2fe);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--c2);opacity:.65;}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:2.5px;color:var(--text2);font-weight:800;width:100%;max-width:320px;text-align:left;margin-top:6px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:320px;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:var(--r);padding:12px 8px;cursor:pointer;text-align:center;transition:all .15s;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+.opt-icon{font-size:20px;margin-bottom:3px;}
+.opt-name{font-family:'Fredoka One',cursive;font-size:12px;}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.hstats{display:flex;gap:7px;width:100%;max-width:320px;}
+
+/* ── GAME ── */
+#sg{align-items:center;padding:10px;gap:10px;}
+.game-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:400px;}
+.turn-badge{display:flex;align-items:center;gap:7px;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:6px 14px;font-family:'Fredoka One',cursive;font-size:13px;}
+.turn-dot{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 -2px 3px rgba(0,0,0,.35);}
+.turn-dot.black{background:radial-gradient(circle at 35% 30%,#555,#0a0a0a 70%);}
+.turn-dot.white{background:radial-gradient(circle at 35% 30%,#fff,#cbd5e1 70%);}
+.score-row{display:flex;gap:8px;}
+.score-pill{display:flex;align-items:center;gap:5px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:4px 10px;font-family:'Fredoka One',cursive;font-size:13px;}
+
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+.board{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;background:rgba(6,60,40,.5);border:1px solid var(--border2);border-radius:12px;padding:6px;max-width:min(400px, calc(100vh - 180px));width:100%;aspect-ratio:1;box-shadow:var(--sh2);}
+/* Polish desktop (même correctif que Puissance 4, même cause) */
+@media (min-width:900px){.board{max-width:600px;}}
+.cell{position:relative;background:rgba(10,90,60,.55);border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.cell.hint::after{content:'';width:22%;height:22%;border-radius:50%;background:rgba(255,255,255,.35);}
+.disc{width:84%;height:84%;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.4);transform:scale(0) rotateY(0deg);transition:transform .35s cubic-bezier(.34,1.56,.64,1);}
+.disc.show{transform:scale(1);}
+.disc.black{background:radial-gradient(circle at 35% 28%,#4a4a4a,#0a0a0a 72%);}
+.disc.white{background:radial-gradient(circle at 35% 28%,#fff,#c7d2e0 72%);}
+.disc.flip{animation:flipDisc .4s ease;}
+@keyframes flipDisc{0%{transform:scale(1) rotateY(0);}50%{transform:scale(.75) rotateY(90deg);}100%{transform:scale(1) rotateY(0);}}
+.disc.last-move{box-shadow:0 0 0 3px var(--co),0 2px 5px rgba(0,0,0,.4);}
+
+.game-footer{display:flex;gap:8px;width:100%;max-width:400px;}
+
+/* ── RESULT ── */
+#sres{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.6);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.res-icon{font-size:56px;}
+.res-title{font-family:'Fredoka One',cursive;font-size:22px;color:var(--c2);}
+.res-sub{font-size:13px;color:var(--text2);}
+.res-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:280px;margin:12px 0;}
+
+/* ── STATS ── */
+#sstats{align-items:flex-start;padding:16px;overflow-y:auto;gap:0;}
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;}
+.icon-btn{width:36px;height:36px;background:var(--glass);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.ondine-hub-link{margin-top:6px;font-size:11px;font-weight:800;color:var(--text2);opacity:.6;cursor:pointer;text-align:center;padding:6px;}
+
+/* ═══════════════════════════════════════════════════════════════
+   FROGGER — CSS spécifique
+   ═══════════════════════════════════════════════════════════════ */
+#fgField{position:relative;width:100%;max-width:380px;aspect-ratio:9/13;background:#0a0e1e;border-radius:10px;overflow:hidden;border:2px solid rgba(56,189,248,.2);touch-action:none;}
+.fg-lane{position:absolute;left:0;right:0;height:calc(100% / 13);}
+.fg-lane.fg-road{background:#26272b;}
+.fg-lane.fg-road::after{content:'';position:absolute;top:50%;left:0;right:0;height:2px;background:repeating-linear-gradient(90deg,#facc15 0,#facc15 10px,transparent 10px,transparent 20px);transform:translateY(-1px);opacity:.5;}
+.fg-lane.fg-river{background:#0c4a6e;}
+.fg-lane.fg-safe{background:#1a2e1a;}
+.fg-lane.fg-goal{background:#0d3320;}
+.fg-goal-slot{position:absolute;top:8%;bottom:8%;width:calc(100%/9 - 4px);border-radius:6px;background:rgba(6,78,59,.4);border:2px dashed rgba(52,211,153,.4);display:flex;align-items:center;justify-content:center;font-size:60%;}
+.fg-goal-slot.fg-filled{background:rgba(52,211,153,.5);border-style:solid;}
+.fg-obj{position:absolute;top:10%;bottom:10%;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:80%;}
+.fg-obj.fg-car{background:linear-gradient(90deg,#dc2626,#991b1b);}
+.fg-obj.fg-truck{background:linear-gradient(90deg,#ea580c,#9a3412);}
+.fg-obj.fg-log{background:linear-gradient(90deg,#92400e,#78350f);border-radius:20px;}
+.fg-obj.fg-turtle{background:linear-gradient(90deg,#16a34a,#166534);border-radius:50%;}
+.fg-frog{position:absolute;width:calc(100%/9 - 4px);height:calc(100%/13 - 4px);display:flex;align-items:center;justify-content:center;font-size:70%;
+  transition:left .08s linear, top .12s ease-out;z-index:5;filter:drop-shadow(0 0 4px rgba(52,211,153,.6));}
+.fg-frog.fg-squashed{animation:fgSquash .4s forwards;}
+@keyframes fgSquash{to{transform:scale(1.6,0.3);opacity:0;}}
+.fg-frog.fg-drown{animation:fgDrown .4s forwards;}
+@keyframes fgDrown{to{transform:scale(0.2);opacity:0;}}
+
+.fg-hud{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:380px;gap:8px;margin-bottom:6px;font-size:12px;font-weight:800;}
+.fg-hud-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:5px 10px;}
+.fg-dpad{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px;margin:12px auto 0;}
+.fg-dpad-btn{background:var(--glass2);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;}
+.fg-dpad-btn:active{transform:scale(.92);}
+
+/* ── Composants partagés absents du template extrait ── */
+.shead{width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.stitle{font-family:'Fredoka One',cursive;font-size:19px;color:var(--c2);}
+.hbtns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:320px;}
+.result-overlay{align-items:center;justify-content:center;text-align:center;background:rgba(6,8,30,.75);backdrop-filter:blur(6px);z-index:100;gap:8px;padding:20px;}
+.mw-modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(4,6,20,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px;}
+.mw-modal-box{background:linear-gradient(180deg,#0f1530,#080b1e);border:1px solid var(--border2);border-radius:20px;padding:20px;max-width:360px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.5);}
+.mw-modal-title{font-family:'Fredoka One',cursive;font-size:18px;color:var(--c2);margin-bottom:12px;text-align:center;}
+.mw-modal-body{font-size:14px;color:var(--text);line-height:1.6;}
+.mw-modal-body p{margin:0 0 10px;}
+.mw-modal-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+
+</style>
+<body>
+
+<div class="screen" id="sh">
+  <div class="ondine-logo">FROGGER</div>
+  <div class="ondine-logo-sub">× Ondine</div>
+  <div id="homeStatsFg"></div>
+  <button class="ondine-btn ondine-btn-primary" onclick="startGameFg()">🐸 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showRulesFg()">ⓘ Règles</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showStatsFg()">📊 Statistiques</button>
+  <div class="ondine-hub-link" onclick="window.location.href='../index.html'">🎮 Tous les jeux Ondine</div>
+</div>
+
+<div class="screen hidden" id="sg">
+  <div class="fg-hud">
+    <div class="icon-btn" onclick="goHome()">🏠</div>
+    <div class="fg-hud-item">🎯 <span id="fgScore">0</span></div>
+    <div class="fg-hud-item">📶 Niv. <span id="fgLevel">1</span></div>
+    <div class="fg-hud-item" id="fgLives">❤️❤️❤️</div>
+  </div>
+  <div id="fgField"></div>
+  <div class="fg-dpad" id="fgDpad">
+    <div></div><div class="fg-dpad-btn" data-dir="up">⬆️</div><div></div>
+    <div class="fg-dpad-btn" data-dir="left">⬅️</div><div></div><div class="fg-dpad-btn" data-dir="right">➡️</div>
+    <div></div><div class="fg-dpad-btn" data-dir="down">⬇️</div><div></div>
+  </div>
+</div>
+
+<div class="screen hidden result-overlay" id="swinFg">
+  <div class="res-icon">🏆</div>
+  <div class="res-title">Niveau terminé !</div>
+  <div class="res-sub" id="fgWinStats"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="nextLevelFg()">➡️ Niveau suivant</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<div class="screen hidden result-overlay" id="soverFg">
+  <div class="res-icon">💀</div>
+  <div class="res-title">Partie terminée</div>
+  <div class="res-sub" id="fgOverStats"></div>
+  <div class="hbtns">
+    <button class="ondine-btn ondine-btn-primary" onclick="startGameFg()">🔄 Rejouer</button>
+    <button class="ondine-btn ondine-btn-secondary" onclick="goHome()">🏠 Accueil</button>
+  </div>
+</div>
+
+<div class="screen hidden" id="sstatsFg">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">Statistiques</div>
+  </div>
+  <div class="stats-grid" id="statsGridFg"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// FROGGER — moteur pur, séparé de l'interface. Grille discrète pour
+// la position de la grenouille (déplacement par case), coordonnées
+// continues pour les objets mobiles (véhicules/rondins). Toutes les
+// collisions sont calculées à partir des positions RÉELLES des
+// objets, jamais simulées visuellement.
+// ═══════════════════════════════════════════════════════════════
+
+const GRID_COLS = 9, GRID_ROWS = 13;
+const GOAL_ROW = 0, SAFE_MID_ROW = 6, START_ROW = 12;
+const GOAL_SLOT_COLS = [0, 2, 4, 6, 8]; // 5 zones d'arrivée réparties
+
+function laneType(row) {
+  if (row === GOAL_ROW) return 'goal';
+  if (row >= 1 && row <= 5) return 'river';
+  if (row === SAFE_MID_ROW) return 'safe';
+  if (row >= 7 && row <= 11) return 'road';
+  if (row === START_ROW) return 'safe';
+  return 'safe';
+}
+
+/** Construit les voies d'un niveau : vitesse et densité augmentent
+ *  progressivement avec le niveau (difficulté croissante demandée
+ *  explicitement), directions alternées voie par voie. */
+function createLanes(levelNum, rng) {
+  const lanes = [];
+  const speedBase = 8 + levelNum * 1.2;
+  for (let row = 0; row < GRID_ROWS; row++) {
+    const type = laneType(row);
+    if (type === 'safe' || type === 'goal') { lanes.push({ row, type, objects: [] }); continue; }
+    const direction = row % 2 === 0 ? 1 : -1;
+    const speed = (speedBase + rng() * 2) * (type === 'river' ? 0.75 : 1);
+    const objW = type === 'road' ? (rng() < 0.3 ? 2 : 1.2) : (rng() < 0.4 ? 3 : 1.8);
+    const gap = type === 'road' ? Math.max(2.2, 4.5 - levelNum * 0.15) : Math.max(2.5, 5 - levelNum * 0.1);
+    const objects = [];
+    let x = rng() * gap;
+    while (x < GRID_COLS + gap) { objects.push({ x, w: objW }); x += objW + gap; }
+    lanes.push({ row, type, direction, speed, objects, objW, gap });
+  }
+  return lanes;
+}
+
+function createFroggerState(levelNum, rng) {
+  return {
+    level: levelNum,
+    lanes: createLanes(levelNum, rng),
+    frog: { col: 4, row: START_ROW, ridingDrift: 0 },
+    lives: 3,
+    score: 0,
+    goalsFilled: Array(GOAL_SLOT_COLS.length).fill(false),
+    over: false,
+    won: false,
+    elapsedMs: 0,
+    bestRow: START_ROW, // pour le score de progression (plus petit = plus avancé)
+  };
+}
+
+function wrapX(x, w) {
+  if (x > GRID_COLS) return x - (GRID_COLS + w * 2);
+  if (x < -w) return x + (GRID_COLS + w * 2);
+  return x;
+}
+
+/** Avance tous les objets mobiles d'un pas de temps. Fonction PURE. */
+function advanceLanes(lanes, dt) {
+  return lanes.map((lane) => {
+    if (lane.type !== 'road' && lane.type !== 'river') return lane;
+    const objects = lane.objects.map((o) => ({ ...o, x: wrapX(o.x + lane.direction * lane.speed * dt, o.w) }));
+    return { ...lane, objects };
+  });
+}
+
+/** Vérifie si la grenouille (à sa position col actuelle, largeur ~1
+ *  case) chevauche un objet de la voie donnée. Collision calculée sur
+ *  les positions RÉELLES (x continu de l'objet vs col de la grenouille),
+ *  jamais une approximation visuelle. */
+function frogOverlapsObject(frogCol, obj) {
+  const frogLeft = frogCol, frogRight = frogCol + 1;
+  const objLeft = obj.x, objRight = obj.x + obj.w;
+  return frogLeft < objRight && frogRight > objLeft;
+}
+
+function findLane(lanes, row) { return lanes.find((l) => l.row === row); }
+
+/** Avance la simulation d'un pas de temps : fait bouger les voies,
+ *  gère les conséquences pour la grenouille (portée par un rondin,
+ *  noyade, écrasement). Retourne le nouvel état + `events`. */
+function tick(state, dt) {
+  if (state.over || state.won) return state;
+  const lanes = advanceLanes(state.lanes, dt);
+  const events = [];
+  let frog = { ...state.frog };
+  let lives = state.lives;
+
+  const lane = findLane(lanes, frog.row);
+  if (lane && lane.type === 'river') {
+    // La vérification de portage doit utiliser la position VISUELLE
+    // actuelle (déjà dérivée depuis le tick précédent), pas la
+    // position entière figée — sinon un rondin qui avance "s'échappe"
+    // de sous une grenouille immobile en quelques ticks, provoquant
+    // une fausse noyade (bug trouvé par simulation prolongée : après
+    // 3 ticks à peine, la grenouille se noyait alors qu'elle n'avait
+    // pas bougé et restait sur le même rondin).
+    const checkCol = frog.visualCol !== undefined ? frog.visualCol : frog.col;
+    const ridingLog = lane.objects.find((o) => frogOverlapsObject(checkCol, o));
+    if (ridingLog) {
+      frog.ridingDrift = (frog.ridingDrift || 0) + lane.direction * lane.speed * dt;
+      frog.visualCol = checkCol + lane.direction * lane.speed * dt;
+      frog.col = Math.round(frog.visualCol);
+      if (frog.visualCol < 0 || frog.visualCol > GRID_COLS - 1) {
+        events.push({ type: 'drowned' });
+        lives--;
+        frog = resetFrog();
+      }
+    } else {
+      events.push({ type: 'drowned' });
+      lives--;
+      frog = resetFrog();
+    }
+  } else {
+    frog.ridingDrift = 0;
+    frog.visualCol = frog.col;
+  }
+
+  if (lane && lane.type === 'road') {
+    const hit = lane.objects.some((o) => frogOverlapsObject(frog.col, o));
+    if (hit) {
+      events.push({ type: 'squashed' });
+      lives--;
+      frog = resetFrog();
+    }
+  }
+
+  if (lives <= 0) {
+    return { ...state, lanes, frog, lives: 0, over: true, events, elapsedMs: state.elapsedMs + dt * 1000 };
+  }
+
+  return { ...state, lanes, frog, lives, events, elapsedMs: state.elapsedMs + dt * 1000 };
+}
+
+function resetFrog() { return { col: 4, row: START_ROW, ridingDrift: 0, visualCol: 4 }; }
+
+/** Déplace la grenouille d'une case dans une direction. Gère
+ *  l'atteinte d'une zone de but (validée seulement si alignée sur un
+ *  slot LIBRE ; sinon collision avec la bordure = perte de vie, comme
+ *  le vrai Frogger). Fonction séparée du tick temporel : chaque appui
+ *  déplace d'une case, indépendamment de la boucle d'animation. */
+function moveFrog(state, direction) {
+  if (state.over || state.won) return state;
+  // synchronise la position logique avec la dérive visuelle accumulée
+  // sur un rondin AVANT d'appliquer le déplacement demandé — sans
+  // cela, un déplacement après une dérive repartirait de l'ancienne
+  // position figée, désynchronisée de ce que le joueur voit à l'écran.
+  let col = state.frog.visualCol !== undefined ? Math.round(state.frog.visualCol) : state.frog.col;
+  col = Math.max(0, Math.min(GRID_COLS - 1, col));
+  let row = state.frog.row;
+  if (direction === 'up') row -= 1;
+  else if (direction === 'down') row += 1;
+  else if (direction === 'left') col -= 1;
+  else if (direction === 'right') col += 1;
+  col = Math.max(0, Math.min(GRID_COLS - 1, col));
+  row = Math.max(GOAL_ROW, Math.min(START_ROW, row));
+
+  const events = [];
+  let lives = state.lives;
+  let goalsFilled = state.goalsFilled;
+  let score = state.score;
+  let frog = { ...state.frog, col, row, ridingDrift: 0, visualCol: col };
+  let over = state.over, won = state.won;
+
+  if (row < state.bestRow) score += 10; // bonus de progression, une seule fois par nouvelle avancée
+  const bestRow = Math.min(row, state.bestRow);
+
+  if (row === GOAL_ROW) {
+    const slotIdx = GOAL_SLOT_COLS.indexOf(col);
+    if (slotIdx !== -1 && !state.goalsFilled[slotIdx]) {
+      goalsFilled = state.goalsFilled.slice();
+      goalsFilled[slotIdx] = true;
+      score += 50;
+      events.push({ type: 'goal_reached', slotIdx });
+      frog = resetFrog();
+      if (goalsFilled.every((g) => g)) { over = true; won = true; events.push({ type: 'level_won' }); }
+    } else {
+      events.push({ type: 'squashed' }); // slot déjà pris ou mal aligné = collision avec la bordure
+      lives--;
+      frog = resetFrog();
+      if (lives <= 0) { over = true; }
+    }
+  }
+
+  return { ...state, frog, lives, goalsFilled, score, over, won, events, bestRow };
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// FROGGER — interface, câblée sur frogger-engine.js
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'frogger_ondine_v1';
+function loadStore() { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; } }
+function saveStore(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+let STORE = Object.assign({ stats: {} }, loadStore());
+function statGet(k, d) { return k in STORE.stats ? STORE.stats[k] : (d === undefined ? 0 : d); }
+function statInc(k, n) { STORE.stats[k] = (STORE.stats[k] || 0) + (n || 1); saveStore(STORE); return STORE.stats[k]; }
+function statSetMax(k, v) { if (STORE.stats[k] === undefined || v > STORE.stats[k]) { STORE.stats[k] = v; saveStore(STORE); } }
+
+let FG = null;
+let running = false;
+let loopTimer = null;
+let lastFrameTime = 0;
+let objEls = []; // pool d'éléments DOM par voie, recréés uniquement au changement de niveau
+
+function startGameFg() { startLevel(1, 0, 3); }
+function nextLevelFg() { startLevel(FG.level + 1, FG.score, FG.lives); }
+
+function startLevel(levelNum, carryScore, carryLives) {
+  stopLoop();
+  FG = createFroggerState(levelNum, Math.random);
+  FG.score = carryScore; FG.lives = carryLives;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sg').classList.remove('hidden');
+  document.getElementById('fgLevel').textContent = levelNum;
+  buildField();
+  render();
+  running = true;
+  lastFrameTime = Date.now();
+  loop();
+}
+
+function stopLoop() { running = false; if (loopTimer) { clearTimeout(loopTimer); loopTimer = null; } }
+
+function buildField() {
+  const field = document.getElementById('fgField');
+  field.innerHTML = '';
+  objEls = [];
+  FG.lanes.forEach((lane) => {
+    const laneEl = document.createElement('div');
+    laneEl.className = 'fg-lane fg-' + lane.type;
+    laneEl.style.top = (lane.row / GRID_ROWS * 100) + '%';
+    field.appendChild(laneEl);
+    if (lane.type === 'goal') {
+      GOAL_SLOT_COLS.forEach((col, i) => {
+        const slot = document.createElement('div');
+        slot.className = 'fg-goal-slot';
+        slot.id = 'fgGoalSlot' + i;
+        slot.style.left = (col / GRID_COLS * 100) + '%';
+        slot.textContent = '🏠';
+        field.appendChild(slot);
+      });
+    }
+    const laneObjEls = lane.objects.map(() => {
+      const el = document.createElement('div');
+      el.className = 'fg-obj ' + (lane.type === 'road' ? (Math.random() < 0.3 ? 'fg-truck' : 'fg-car') : (Math.random() < 0.4 ? 'fg-log' : 'fg-turtle'));
+      el.style.top = (lane.row / GRID_ROWS * 100) + '%';
+      el.style.height = (100 / GRID_ROWS) + '%';
+      el.textContent = lane.type === 'road' ? (el.className.includes('truck') ? '🚚' : '🚗') : (el.className.includes('log') ? '' : '🐢');
+      field.appendChild(el);
+      return el;
+    });
+    objEls.push(laneObjEls);
+  });
+  const frogEl = document.createElement('div');
+  frogEl.className = 'fg-frog';
+  frogEl.id = 'fgFrogEl';
+  frogEl.textContent = '🐸';
+  field.appendChild(frogEl);
+}
+
+function loop() {
+  if (!running) return;
+  const now = Date.now();
+  let dt = Math.min((now - lastFrameTime) / 1000, 0.05);
+  lastFrameTime = now;
+  FG = tick(FG, dt);
+  applyEvents(FG.events || []);
+  render();
+  if (FG.over) { running = false; setTimeout(finishGameOver, FG.won ? 0 : 500); return; }
+  if (FG.won) { running = false; setTimeout(finishLevelWon, 300); return; }
+  loopTimer = setTimeout(loop, 1000 / 50);
+}
+
+function applyEvents(events) {
+  const frogEl = document.getElementById('fgFrogEl');
+  for (const ev of events) {
+    if (ev.type === 'squashed') { frogEl.classList.add('fg-squashed'); setTimeout(() => frogEl.classList.remove('fg-squashed'), 400); playSound('squash'); vibrate([50]); }
+    if (ev.type === 'drowned') { frogEl.classList.add('fg-drown'); setTimeout(() => frogEl.classList.remove('fg-drown'), 400); playSound('drown'); }
+    if (ev.type === 'goal_reached') { document.getElementById('fgGoalSlot' + ev.slotIdx).classList.add('fg-filled'); document.getElementById('fgGoalSlot' + ev.slotIdx).textContent = '🐸'; playSound('goal'); }
+  }
+}
+
+function render() {
+  if (!FG) return;
+  FG.lanes.forEach((lane, laneIdx) => {
+    lane.objects.forEach((obj, i) => {
+      const el = objEls[laneIdx][i];
+      if (el) el.style.left = (obj.x / GRID_COLS * 100) + '%';
+      if (el) el.style.width = (obj.w / GRID_COLS * 100) + '%';
+    });
+  });
+  const frogEl = document.getElementById('fgFrogEl');
+  if (frogEl) {
+    const col = FG.frog.visualCol !== undefined ? FG.frog.visualCol : FG.frog.col;
+    frogEl.style.left = (col / GRID_COLS * 100) + '%';
+    frogEl.style.top = (FG.frog.row / GRID_ROWS * 100) + '%';
+  }
+  document.getElementById('fgScore').textContent = FG.score;
+  document.getElementById('fgLives').textContent = '❤️'.repeat(Math.max(0, FG.lives));
+}
+
+function handleMoveFg(direction) {
+  if (!FG || FG.over || FG.won) return;
+  FG = moveFrog(FG, direction);
+  render();
+  applyEvents(FG.events || []);
+  if (FG.won) { running = false; stopLoop(); setTimeout(finishLevelWon, 300); }
+  else if (FG.over) { running = false; stopLoop(); setTimeout(finishGameOver, 500); }
+}
+
+function finishLevelWon() {
+  statInc('levelsCompleted');
+  statSetMax('bestScore', FG.score);
+  document.getElementById('fgWinStats').textContent = 'Score : ' + FG.score + ' — Niveau ' + FG.level + ' terminé';
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('swinFg').classList.remove('hidden');
+  playSound('win');
+}
+function finishGameOver() {
+  statInc('games');
+  statSetMax('bestScore', FG.score);
+  document.getElementById('fgOverStats').textContent = 'Score final : ' + FG.score + ' — Niveau ' + FG.level;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('soverFg').classList.remove('hidden');
+  playSound('gameover');
+}
+
+function goHome() {
+  stopLoop();
+  FG = null;
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sh').classList.remove('hidden');
+  renderHomeStats();
+}
+function renderHomeStats() {
+  const host = document.getElementById('homeStatsFg');
+  host.innerHTML = '';
+  [{ v: statGet('bestScore'), l: '🏆 Meilleur score' }, { v: statGet('levelsCompleted'), l: '📶 Niveaux réussis' }]
+    .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.style.flex = '1'; el.innerHTML = '<div class="v">' + s.v + '</div><div class="l">' + s.l + '</div>'; host.appendChild(el); });
+}
+function showStatsFg() {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.add('hidden'));
+  document.getElementById('sstatsFg').classList.remove('hidden');
+  const host = document.getElementById('statsGridFg');
+  host.innerHTML = '';
+  [{ v: statGet('games'), l: '🎮 Parties' }, { v: statGet('bestScore'), l: '🏆 Meilleur score' }, { v: statGet('levelsCompleted'), l: '📶 Niveaux réussis' }]
+    .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.innerHTML = '<div class="v">' + s.v + '</div><div class="l">' + s.l + '</div>'; host.appendChild(el); });
+}
+function showRulesFg() {
+  showModal('🐸 Comment jouer',
+    '<p>Glisse le doigt (ou utilise les flèches) pour déplacer la grenouille et traverser la route puis la rivière.</p>' +
+    '<p>Sur la route, évite les véhicules. Sur la rivière, reste sur les rondins/tortues, sinon tu te noies.</p>' +
+    '<p>Atteins toutes les zones d\u2019arrivée (🏠) pour terminer le niveau.</p>',
+    [{ label: 'Compris', variant: 'primary' }]);
+}
+function showModal(title, bodyHTML, buttons) {
+  const overlay = document.createElement('div');
+  overlay.className = 'mw-modal-overlay';
+  const box = document.createElement('div');
+  box.className = 'mw-modal-box';
+  box.innerHTML = '<div class="mw-modal-title">' + title + '</div><div class="mw-modal-body">' + bodyHTML + '</div>';
+  const actions = document.createElement('div');
+  actions.className = 'mw-modal-actions';
+  buttons.forEach((b) => {
+    const btn = document.createElement('button');
+    btn.className = 'ondine-btn ' + (b.variant === 'primary' ? 'ondine-btn-primary' : 'ondine-btn-secondary');
+    btn.textContent = b.label;
+    btn.onclick = () => { document.body.removeChild(overlay); b.onClick && b.onClick(); };
+    actions.appendChild(btn);
+  });
+  box.appendChild(actions);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+let audioCtx = null;
+function tone(freq, dur, type, vol) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type || 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol || 0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.start(); osc.stop(audioCtx.currentTime + dur);
+  } catch (e) {}
+}
+function playSound(name) {
+  if (name === 'squash') tone(150, 0.2, 'sawtooth', 0.12);
+  if (name === 'drown') tone(300, 0.25, 'sine', 0.1);
+  if (name === 'goal') tone(880, 0.15, 'sine', 0.12);
+  if (name === 'win') [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.2, 'sine', 0.13), i * 100));
+  if (name === 'gameover') [392, 330, 262].forEach((f, i) => setTimeout(() => tone(f, 0.25, 'sine', 0.1), i * 140));
+}
+function vibrate(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); }
+
+// ── Contrôle par glissement : seuil minimal pour éviter qu'un simple
+// tap sans mouvement ne déclenche un déplacement accidentel. ──
+const fgField = document.getElementById('fgField');
+let touchStartX = 0, touchStartY = 0;
+const SWIPE_THRESHOLD = 24;
+fgField.addEventListener('touchstart', (e) => { const t = e.touches[0]; touchStartX = t.clientX; touchStartY = t.clientY; }, { passive: true });
+fgField.addEventListener('touchend', (e) => {
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
+  if (Math.hypot(dx, dy) < SWIPE_THRESHOLD) return; // tap simple, pas un swipe -> ignoré
+  if (Math.abs(dx) > Math.abs(dy)) handleMoveFg(dx > 0 ? 'right' : 'left');
+  else handleMoveFg(dy > 0 ? 'down' : 'up');
+}, { passive: true });
+
+document.querySelectorAll('.fg-dpad-btn').forEach((btn) => {
+  btn.addEventListener('click', () => handleMoveFg(btn.dataset.dir));
+});
+document.addEventListener('keydown', (e) => {
+  if (!FG || document.getElementById('sg').classList.contains('hidden')) return;
+  const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+  if (map[e.key]) { e.preventDefault(); handleMoveFg(map[e.key]); }
+});
+
+renderHomeStats();
+
+</script>
+</body>
+</html>

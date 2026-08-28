@@ -308,11 +308,15 @@ body {
   </div>
 
   <button class="ondine-btn ondine-btn-primary" onclick="startGame()">♟️ Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showQuartoTutorial()">ⓘ Comment jouer ?</button>
   <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
 </div>
 
 <div class="screen hidden" id="sg">
-  <div class="ondine-icon-btn" onclick="goHome()" style="align-self:flex-start;">🏠</div>
+  <div style="display:flex;justify-content:space-between;width:100%;max-width:340px;">
+    <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
+    <div class="ondine-icon-btn" onclick="showQuartoTutorial()">ⓘ</div>
+  </div>
   <div id="quartoStatus"></div>
   <div id="quartoBoard"></div>
   <div class="section-title" style="text-align:center;max-width:320px;">Pièces disponibles</div>
@@ -1814,6 +1818,24 @@ function createUI(sdk) {
     return `${color}${shape}${fill}${size}`;
   }
 
+  /** Tutoriel — explique la règle fondamentale de Quarto avec un vrai
+   *  exemple utilisant pieceGlyph(), les mêmes glyphes que ceux
+   *  réellement affichés en jeu (pas une illustration inventée). */
+  function showQuartoTutorial() {
+    const body = document.createElement('div');
+    body.innerHTML = `
+      <p><b>But du jeu :</b> aligner 4 pièces qui partagent AU MOINS une caractéristique commune (une ligne, une colonne ou une diagonale du plateau 4×4).</p>
+      <p><b>Les pièces</b> ont chacune 4 caractéristiques, chacune à 2 valeurs possibles :</p>
+      <p style="font-size:20px;text-align:center;margin:10px 0;">${pieceGlyph(0)} &nbsp; ${pieceGlyph(15)}</p>
+      <p>⬜/🟫 couleur — ●/■ forme — S/L taille — plein/˚creux</p>
+      <p><b>La règle qui change tout :</b> tu ne choisis PAS la pièce que TU joues. C'est ton adversaire qui te la donne, et c'est TOI qui choisis ensuite la pièce qu'IL devra jouer.</p>
+      <p>Donc pour gagner, réfléchis à deux niveaux : où placer la pièce qu'on t'a donnée, ET quelle pièce tu peux donner sans risque à l'adversaire.</p>
+      <p><b>Exemple :</b> si 3 pièces alignées sont toutes ⬜ (blanches), ne donne jamais une autre pièce blanche à l'adversaire — il gagnerait en la plaçant sur la case restante.</p>`;
+    const closeBtn = UI.button('Compris', { variant: 'primary', onClick: () => modal.close() });
+    const modal = UI.modal({ title: '🎯 Comment jouer à Quarto', bodyEl: body, actions: [closeBtn] });
+    document.body.appendChild(modal.el);
+  }
+
   function renderHome() {
     const host = document.getElementById('homeStatsQuarto');
     host.innerHTML = '';
@@ -1834,7 +1856,7 @@ function createUI(sdk) {
   }
   function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
 
-  return { setMode, setDiff, startGame, goHome, showStats, renderHome };
+  return { setMode, setDiff, startGame, goHome, showStats, renderHome, showQuartoTutorial };
 }
 
 
@@ -1856,6 +1878,7 @@ window.setDiff = game.setDiff;
 window.startGame = game.startGame;
 window.goHome = game.goHome;
 window.showStats = game.showStats;
+window.showQuartoTutorial = game.showQuartoTutorial;
 
 </script>
 </body>

@@ -272,6 +272,13 @@ body {
 #banner2048{font-family:'Fredoka One',cursive;font-size:16px;color:var(--co);}
 
 #grid2048{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:320px;aspect-ratio:1;background:rgba(0,0,0,.25);padding:8px;border-radius:16px;}
+/* Couche d'animation de translation — superposée à #grid2048 pendant
+   un mouvement (250ms), puis masquée. Les tuiles y sont positionnées
+   en absolu, calculées en % pour rester cohérentes avec le gap/padding
+   réels de la grille CSS Grid, sans jamais toucher à sa structure. */
+#gridAnimLayer{position:absolute;inset:0;pointer-events:none;display:none;}
+#gridAnimLayer.active{display:block;}
+.tile2048-ghost{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:800;transition:left .15s ease-in-out,top .15s ease-in-out;box-sizing:border-box;}
 .tile2048{border-radius:10px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-weight:800;transition:all .1s;}
 /* Animations de transition (Kevin : "on comprend pas trop les
    transitions") — la tuile nouvellement apparue grandit depuis rien,
@@ -323,7 +330,10 @@ body {
     <div class="box"><div class="n" id="best2048">0</div><div class="l">Record</div></div>
   </div>
   <div id="banner2048"></div>
-  <div id="grid2048"></div>
+  <div id="gridWrap2048" style="position:relative;width:100%;max-width:320px;">
+    <div id="grid2048"></div>
+    <div id="gridAnimLayer"></div>
+  </div>
   <div class="footer2048">
     <button class="ondine-btn ondine-btn-secondary" id="undoBtn2048" onclick="undo2048()">↩️ Annuler</button>
     <button class="ondine-btn ondine-btn-secondary" onclick="confirmNewGame()">🔄 Nouvelle</button>
@@ -1489,26 +1499,36 @@ function spawnTile(grid, rng = Math.random) {
 }
 
 function slideLineLeft(line) {
-  const vals = line.filter((v) => v !== 0);
+  // Conserve l'INDEX D'ORIGINE (dans `line`, 0..3) de chaque valeur non
+  // nulle, en plus de la valeur elle-même — nécessaire pour que le
+  // rendu puisse animer une vraie translation (tuile A part d'ici,
+  // arrive là) sans toucher au résultat logique du moteur (le champ
+  // `line` retourné reste identique à avant, tous les appelants
+  // existants qui l'ignorent ne sont pas affectés).
+  const valsWithIdx = [];
+  line.forEach((v, idx) => { if (v !== 0) valsWithIdx.push({ v, origIdx: idx }); });
   const out = [];
   const mergedAt = []; // positions (dans la ligne compactée 0..3) où une fusion vient d'avoir lieu
+  const fromIndices = []; // pour chaque case de `out`, le ou les index d'origine (1 = déplacement simple, 2 = fusion)
   let gained = 0;
   let i = 0;
-  while (i < vals.length) {
-    if (i + 1 < vals.length && vals[i] === vals[i + 1]) {
-      const merged = vals[i] * 2;
+  while (i < valsWithIdx.length) {
+    if (i + 1 < valsWithIdx.length && valsWithIdx[i].v === valsWithIdx[i + 1].v) {
+      const merged = valsWithIdx[i].v * 2;
       out.push(merged);
       mergedAt.push(out.length - 1);
+      fromIndices.push([valsWithIdx[i].origIdx, valsWithIdx[i + 1].origIdx]);
       gained += merged;
       i += 2;
     } else {
-      out.push(vals[i]);
+      out.push(valsWithIdx[i].v);
+      fromIndices.push([valsWithIdx[i].origIdx]);
       i += 1;
     }
   }
-  while (out.length < SIZE) out.push(0);
+  while (out.length < SIZE) { out.push(0); fromIndices.push([]); }
   const moved = out.some((v, j) => v !== line[j]);
-  return { line: out, gained, moved, mergedAt };
+  return { line: out, gained, moved, mergedAt, fromIndices };
 }
 
 function getLine(grid, dir, i) {
@@ -1534,6 +1554,7 @@ function move(grid, dir) {
   let gained = 0;
   let moved = false;
   const mergedCells = [];
+  const moveMap = {}; // { [indexGrilleFinale]: [indexGrilleOrigine, ...] } — pour l'animation de translation
   for (let i = 0; i < SIZE; i++) {
     const line = getLine(grid, dir, i);
     const result = slideLineLeft(line);
@@ -1550,8 +1571,20 @@ function move(grid, dir) {
       setLine(markerGrid, dir, i, marker);
       markerGrid.forEach((v, idx) => { if (v) mergedCells.push(idx); });
     }
+    // position 0..3 dans le référentiel de CETTE ligne -> index réel de
+    // grille. Vaut pour la grille de départ ET d'arrivée : c'est un
+    // mapping purement géométrique (dépend seulement de i/dir), pas du
+    // contenu des cases.
+    const posGrid = Array(SIZE * SIZE).fill(-1);
+    setLine(posGrid, dir, i, [0, 1, 2, 3]);
+    const lineToGrid = (linePos) => posGrid.indexOf(linePos);
+    result.fromIndices.forEach((origins, outLinePos) => {
+      if (!origins.length) return;
+      const finalIdx = lineToGrid(outLinePos);
+      moveMap[finalIdx] = origins.map(lineToGrid);
+    });
   }
-  return { grid: next, gained, moved, mergedCells };
+  return { grid: next, gained, moved, mergedCells, moveMap };
 }
 
 function hasAnyMove(grid) {
@@ -1622,11 +1655,84 @@ function createUI(sdk) {
     sdk.save.write({ grid, score, over, won, continuedAfterWin });
   }
 
+  let animating = false;
   function doMove(dir) {
-    if (over) return;
+    if (over || animating) return;
     if (won && !continuedAfterWin) return; // attend le choix "continuer" ou "nouvelle partie"
     const result = move(grid, dir);
     if (!result.moved) return;
+    animateMove(grid, result, dir);
+  }
+
+  /** Anime la translation réelle des tuiles (grille AVANT -> grille
+   *  APRÈS), en se basant sur moveMap (case finale -> cases d'origine)
+   *  calculé par le moteur sans jamais le modifier. Bloque les entrées
+   *  pendant toute la durée (`animating`), pour ne jamais corrompre
+   *  l'état si le joueur enchaîne des swipes/touches rapidement. */
+  function animateMove(beforeGrid, result, dir) {
+    animating = true;
+    const layer = document.getElementById('gridAnimLayer');
+    const gridEl = document.getElementById('grid2048');
+    const wrapEl = document.getElementById('gridWrap2048');
+    layer.innerHTML = '';
+
+    // Mesure les positions RÉELLES de chaque case (avant de cacher la
+    // grille normale), relatives au conteneur wrapper — garantit un
+    // alignement parfait avec le CSS Grid réel (gap+padding cumulés),
+    // plutôt que de dupliquer sa formule de positionnement en JS.
+    const wrapRect = wrapEl.getBoundingClientRect();
+    const cellRects = Array.from(gridEl.children).map((cell) => {
+      const r = cell.getBoundingClientRect();
+      return { left: r.left - wrapRect.left, top: r.top - wrapRect.top, width: r.width, height: r.height };
+    });
+
+    // inverse moveMap : pour chaque case D'ORIGINE, sa case de
+    // DESTINATION finale (et si elle fusionne, avec quelle autre case).
+    const destOf = {}; // { [indexOrigine]: indexFinal }
+    Object.entries(result.moveMap).forEach(([finalIdx, origins]) => {
+      origins.forEach((o) => { destOf[o] = Number(finalIdx); });
+    });
+
+    const ghosts = [];
+    beforeGrid.forEach((v, i) => {
+      if (!v) return;
+      const dest = destOf[i];
+      if (dest === undefined) return; // ne devrait pas arriver si moved=true, sécurité
+      const from = cellRects[i];
+      const el = document.createElement('div');
+      el.className = 'tile2048-ghost';
+      el.textContent = v;
+      el.style.background = tileColor(v);
+      el.style.color = tileTextColor(v);
+      el.style.fontSize = v >= 1024 ? '20px' : v >= 128 ? '24px' : '28px';
+      el.style.left = `${from.left}px`;
+      el.style.top = `${from.top}px`;
+      el.style.width = `${from.width}px`;
+      el.style.height = `${from.height}px`;
+      layer.appendChild(el);
+      ghosts.push({ el, dest });
+    });
+
+    gridEl.style.visibility = 'hidden';
+    layer.classList.add('active');
+
+    // force un repaint de la position de départ AVANT d'appliquer la
+    // transition vers l'arrivée, sinon le navigateur peut fusionner les
+    // deux états et sauter l'animation (bug de timing CSS classique).
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        ghosts.forEach(({ el, dest }) => {
+          const to = cellRects[dest];
+          el.style.left = `${to.left}px`;
+          el.style.top = `${to.top}px`;
+        });
+      });
+    });
+
+    setTimeout(() => finishAnimatedMove(result), 170);
+  }
+
+  function finishAnimatedMove(result) {
     history.push({ grid, score });
     grid = result.grid;
     score += result.gained;
@@ -1653,6 +1759,9 @@ function createUI(sdk) {
       sdk.audio.play('lose');
     }
     persist();
+    document.getElementById('gridAnimLayer').classList.remove('active');
+    document.getElementById('grid2048').style.visibility = '';
+    animating = false;
     render();
   }
 
@@ -1716,7 +1825,12 @@ function createUI(sdk) {
       banner.style.display = 'none';
       document.getElementById('overScore2048').textContent = score;
       document.getElementById('overBest2048').textContent = sdk.stats.get('bestScore', 0);
-      document.getElementById('sover2048').classList.remove('hidden');
+      // Les animations .tile-new/.tile-merged (180ms, voir CSS) viennent
+      // d'être déclenchées par ce même appel à render() — sans délai,
+      // le dernier mouvement qui bloque la partie pouvait provoquer une
+      // fusion immédiatement masquée par l'overlay Game Over apparaissant
+      // au même instant (même pattern de bug que Puissance 4/Quarto).
+      setTimeout(() => document.getElementById('sover2048').classList.remove('hidden'), 220);
     } else {
       document.getElementById('sover2048').classList.add('hidden');
       if (won && !continuedAfterWin) { banner.textContent = '🏆 2048 atteint !'; banner.style.display = ''; }

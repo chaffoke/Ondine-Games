@@ -308,8 +308,35 @@ body {
     <div class="opt-card" id="diffHard" onclick="setDifficulty('difficile')">🔥 Difficile</div>
   </div>
   <button class="ondine-btn ondine-btn-primary" onclick="startMatch()">🃏 Jouer</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="openLearn()">🎓 Apprendre la Belote</button>
   <button class="ondine-btn ondine-btn-secondary" onclick="showRules()">ⓘ Règles</button>
   <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
+</div>
+
+<!-- ═══════ MODE APPRENTISSAGE ═══════ -->
+<div class="screen hidden" id="slearn">
+  <div class="shead">
+    <div class="icon-btn" onclick="goHome()">←</div>
+    <div class="stitle">🎓 Apprendre la Belote</div>
+  </div>
+  <div id="learnMenu" style="width:100%;display:flex;flex-direction:column;gap:10px;overflow-y:auto;"></div>
+</div>
+
+<div class="screen hidden" id="slearnContent">
+  <div class="shead">
+    <div class="icon-btn" onclick="learnBackToMenu()">←</div>
+    <div class="stitle" id="learnContentTitle"></div>
+  </div>
+  <div id="learnContentBody" style="width:100%;overflow-y:auto;flex:1;"></div>
+  <button class="ondine-btn ondine-btn-primary" id="learnNextBtn" onclick="learnNext()">Suivant →</button>
+</div>
+
+<div class="screen hidden" id="slearnQuiz">
+  <div class="shead">
+    <div class="icon-btn" onclick="learnBackToMenu()">←</div>
+    <div class="stitle">Défi</div>
+  </div>
+  <div id="quizBody" style="width:100%;overflow-y:auto;flex:1;"></div>
 </div>
 
 <div class="screen hidden" id="sg">
@@ -1877,6 +1904,117 @@ function createUI(sdk) {
     });
   }
   function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
+  // ═══════════════════════════════════════════════════════════════
+  // MODE APPRENTISSAGE — modules courts + défis interactifs. Toutes
+  // les valeurs affichées (ordres, points) viennent DIRECTEMENT des
+  // constantes réelles du moteur (TRUMP_ORDER, NONTRUMP_POINTS, etc.)
+  // pour garantir qu'elles correspondent exactement aux règles
+  // réellement appliquées en jeu — jamais une variante différente.
+  // ═══════════════════════════════════════════════════════════════
+  const LEARN_MODULES = [
+    { id: 'basics', icon: '🃏', title: 'Les bases',
+      body: `<p>La Belote se joue à 4, en 2 équipes : toi + le joueur en face de toi, contre les 2 autres.</p>
+      <p>Chaque joueur reçoit 8 cartes. Le but : remporter un maximum de <b>points</b> dans les plis (les cartes jouées à chaque tour).</p>
+      <p>Les cartes utilisées vont du 7 à l'As, dans les 4 couleurs (♠ ♥ ♦ ♣) — 32 cartes au total.</p>` },
+    { id: 'trump', icon: '👑', title: "L'atout",
+      body: `<p>Une couleur est désignée comme <b>atout</b> à chaque donne. Une carte d'atout bat toujours une carte d'une autre couleur.</p>
+      <p>L'ordre change à l'atout ! Du plus faible au plus fort :</p>
+      <p style="font-family:monospace;font-size:16px;letter-spacing:2px;">${TRUMP_ORDER.join(' → ')}</p>
+      <p>Le Valet d'atout est donc la carte la plus forte du jeu, suivi du 9 d'atout.</p>
+      <p>Hors atout, l'ordre est plus classique :</p>
+      <p style="font-family:monospace;font-size:16px;letter-spacing:2px;">${NONTRUMP_ORDER.join(' → ')}</p>` },
+    { id: 'points', icon: '💯', title: 'La valeur des cartes',
+      body: `<p>Chaque carte vaut des points quand elle est remportée dans un pli. La valeur change selon si c'est l'atout ou non :</p>
+      <div style="display:flex;gap:16px;margin-top:10px;">
+        <div style="flex:1;"><b>Hors atout</b><br>${Object.entries(NONTRUMP_POINTS).map(([r,v])=>`${r} = ${v}`).join('<br>')}</div>
+        <div style="flex:1;"><b>À l'atout</b><br>${Object.entries(TRUMP_POINTS).map(([r,v])=>`${r} = ${v}`).join('<br>')}</div>
+      </div>
+      <p style="margin-top:10px;">Remarque : le 9 et le Valet valent bien plus à l'atout que dans les autres couleurs !</p>` },
+    { id: 'follow', icon: '⚖️', title: 'Fournir et couper',
+      body: `<p><b>Obligatoire</b> : si la couleur demandée est dans ta main, tu dois jouer une carte de cette couleur (tu dois "fournir").</p>
+      <p>Si tu n'as pas la couleur demandée, tu dois <b>couper</b> (jouer une carte d'atout) — sauf si ton partenaire est déjà en train de remporter le pli, auquel cas tu peux jouer n'importe quelle carte.</p>
+      <p>Le joueur qui a joué la carte la plus forte (selon les ordres vus précédemment) remporte le pli et ses points.</p>` },
+  ];
+
+  function openLearn() {
+    const host = document.getElementById('learnMenu');
+    host.innerHTML = LEARN_MODULES.map((m, i) =>
+      `<button class="ondine-btn ondine-btn-secondary" style="justify-content:flex-start;" onclick="learnOpenModule(${i})">${m.icon} ${m.title}</button>`
+    ).join('') + `<button class="ondine-btn ondine-btn-primary" style="margin-top:8px;" onclick="learnStartQuiz()">🎯 Passer aux défis</button>`;
+    sdk.navigation.go('slearn');
+  }
+  let learnModuleIdx = 0;
+  function learnOpenModule(i) {
+    learnModuleIdx = i;
+    const m = LEARN_MODULES[i];
+    document.getElementById('learnContentTitle').textContent = `${m.icon} ${m.title}`;
+    document.getElementById('learnContentBody').innerHTML = m.body;
+    document.getElementById('learnNextBtn').textContent = i < LEARN_MODULES.length - 1 ? 'Suivant →' : '🎯 Passer aux défis';
+    sdk.navigation.go('slearnContent');
+  }
+  function learnNext() {
+    if (learnModuleIdx < LEARN_MODULES.length - 1) learnOpenModule(learnModuleIdx + 1);
+    else learnStartQuiz();
+  }
+  function learnBackToMenu() { openLearn(); }
+
+  // Défis : questions basées sur les VRAIES valeurs du moteur. Le
+  // corrigé n'est jamais un texte fixe indépendant des données — il
+  // est recalculé depuis TRUMP_ORDER/TRUMP_POINTS/NONTRUMP_POINTS,
+  // pour ne jamais désynchroniser le quiz des règles réelles.
+  function buildLearnQuiz() {
+    const strongestTrump = TRUMP_ORDER[TRUMP_ORDER.length - 1];
+    const strongestNonTrump = NONTRUMP_ORDER[NONTRUMP_ORDER.length - 1];
+    return [
+      { q: `Quelle est la carte la plus forte à l'atout ?`, options: shuffleArr([strongestTrump, strongestNonTrump, '10', 'Q']), correct: strongestTrump,
+        explain: `Le ${strongestTrump} d'atout est la carte la plus forte du jeu, avant même l'As.` },
+      { q: `Combien vaut le 9 d'atout ?`, options: shuffleArr([String(TRUMP_POINTS['9']), String(NONTRUMP_POINTS['9']), '10', '3']), correct: String(TRUMP_POINTS['9']),
+        explain: `À l'atout, le 9 vaut ${TRUMP_POINTS['9']} points — bien plus que dans les autres couleurs (0 point).` },
+      { q: `Tu n'as pas la couleur demandée et ton partenaire n'est pas maître du pli. Que dois-tu faire ?`, options: shuffleArr(['Couper (jouer atout)', 'Jouer n\u2019importe quelle carte', 'Passer ton tour']), correct: 'Couper (jouer atout)',
+        explain: `Tu dois obligatoirement couper si tu ne peux pas fournir la couleur, sauf si ton partenaire est déjà maître du pli.` },
+      { q: `Combien vaut l'As hors atout ?`, options: shuffleArr([String(NONTRUMP_POINTS['A']), String(TRUMP_POINTS['A']), '4', '20']), correct: String(NONTRUMP_POINTS['A']),
+        explain: `L'As vaut ${NONTRUMP_POINTS['A']} points hors atout comme à l'atout — c'est la même valeur dans les deux cas.` },
+    ];
+  }
+  let learnQuiz = [], learnQuizIdx = 0, learnQuizScore = 0;
+  function learnStartQuiz() {
+    learnQuiz = buildLearnQuiz();
+    learnQuizIdx = 0; learnQuizScore = 0;
+    sdk.navigation.go('slearnQuiz');
+    renderLearnQuizQuestion();
+  }
+  function renderLearnQuizQuestion() {
+    const host = document.getElementById('quizBody');
+    if (learnQuizIdx >= learnQuiz.length) {
+      host.innerHTML = `<div style="text-align:center;padding:20px;">
+        <div style="font-size:40px;">🏆</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:20px;margin:10px 0;">Score : ${learnQuizScore} / ${learnQuiz.length}</div>
+        <button class="ondine-btn ondine-btn-primary" onclick="learnStartQuiz()">🔄 Refaire les défis</button>
+        <button class="ondine-btn ondine-btn-secondary" onclick="goHome()" style="margin-top:8px;">🏠 Accueil</button>
+      </div>`;
+      return;
+    }
+    const item = learnQuiz[learnQuizIdx];
+    host.innerHTML = `<div style="padding:10px;">
+      <div style="font-weight:800;margin-bottom:14px;">${item.q}</div>
+      ${item.options.map(o => `<button class="ondine-btn ondine-btn-secondary quiz-option" style="margin-bottom:8px;width:100%;" onclick="learnAnswerQuiz('${o.replace(/'/g,"\\'")}')">${o}</button>`).join('')}
+      <div id="quizFeedback" style="margin-top:10px;"></div>
+    </div>`;
+  }
+  function learnAnswerQuiz(answer) {
+    const item = learnQuiz[learnQuizIdx];
+    const correct = answer === item.correct;
+    if (correct) learnQuizScore++;
+    document.getElementById('quizFeedback').innerHTML = `
+      <div style="padding:10px;border-radius:10px;background:${correct ? 'rgba(52,211,153,.15)' : 'rgba(248,113,113,.15)'};">
+        ${correct ? '✅ Bonne réponse !' : '❌ Pas tout à fait.'} ${item.explain}
+      </div>
+      <button class="ondine-btn ondine-btn-primary" style="margin-top:10px;width:100%;" onclick="learnNextQuizQuestion()">Continuer</button>`;
+    // désactive les boutons de réponse pour éviter de changer d'avis après coup
+    document.querySelectorAll('#quizBody .quiz-option').forEach(b => b.disabled = true);
+  }
+  function learnNextQuizQuestion() { learnQuizIdx++; renderLearnQuizQuestion(); }
+
   function showRules() {
     const overlay = document.getElementById('modalOverlay');
     overlay.innerHTML = `<div class="ondine-modal-box"><div class="ondine-modal-title">🃏 Règles de Belote</div>
@@ -1889,7 +2027,8 @@ function createUI(sdk) {
     document.getElementById('mdCloseB').onclick = () => overlay.classList.add('hidden');
   }
 
-  return { setDifficulty, startMatch, playerBid, nextHand, goHome, showStats, showRules, renderHome };
+  return { setDifficulty, startMatch, playerBid, nextHand, goHome, showStats, showRules, renderHome,
+    openLearn, learnOpenModule, learnNext, learnBackToMenu, learnStartQuiz, learnAnswerQuiz, learnNextQuizQuestion };
 }
 
 
@@ -1913,6 +2052,13 @@ window.nextHand = game.nextHand;
 window.goHome = game.goHome;
 window.showStats = game.showStats;
 window.showRules = game.showRules;
+window.openLearn = game.openLearn;
+window.learnOpenModule = game.learnOpenModule;
+window.learnNext = game.learnNext;
+window.learnBackToMenu = game.learnBackToMenu;
+window.learnStartQuiz = game.learnStartQuiz;
+window.learnAnswerQuiz = game.learnAnswerQuiz;
+window.learnNextQuizQuestion = game.learnNextQuizQuestion;
 
 </script>
 </body>

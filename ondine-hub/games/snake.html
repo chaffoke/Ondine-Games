@@ -263,11 +263,24 @@ body {
 #homeStatsSnake{display:flex;gap:7px;width:100%;max-width:300px;}
 
 #sg{align-items:center;padding:10px;gap:8px;touch-action:none;}
+.snake-play-area{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;}
+.snake-controls{display:flex;flex-direction:column;align-items:center;gap:10px;}
+/* Paysage sur petit écran : empiler plateau (300px+) + HUD + d-pad
+   (164px fixe) + bouton verticalement ne laisse plus assez de hauteur
+   (confirmé : d-pad et bouton complètement hors écran, jeu injouable
+   au tactile). On passe en disposition côte à côte, plateau réduit et
+   d-pad légèrement réduit, pour que tout reste visible et accessible. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .snake-play-area{flex-direction:row;justify-content:center;align-items:center;gap:16px;}
+  #snakeGrid{max-width:min(320px, calc(100vh - 90px));}
+  .dpad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px);}
+}
 .snake-hud{display:flex;gap:16px;font-family:'Fredoka One',cursive;font-size:14px;}
 #snakeOverBanner{font-family:'Fredoka One',cursive;color:var(--cr);font-size:15px;}
 
-#snakeGrid{display:grid;grid-template-columns:repeat(16,1fr);gap:1px;width:100%;max-width:320px;aspect-ratio:1;background:rgba(0,0,0,.3);padding:4px;border-radius:12px;}
-.scell{background:transparent;border-radius:1px;}
+#snakeGrid{display:grid;grid-template-columns:repeat(16,1fr);gap:1px;width:100%;max-width:320px;aspect-ratio:1;background:#0f1a3d;padding:4px;border-radius:12px;border:2px solid rgba(56,189,248,.25);box-shadow:inset 0 2px 8px rgba(0,0,0,.4);}
+.scell{background:rgba(255,255,255,.05);border-radius:1px;}
+.scell.alt{background:rgba(255,255,255,.09);}
 .scell.body{background:var(--cg);border-radius:3px;}
 .scell.head{background:var(--c1);border-radius:4px;}
 .scell.food{background:var(--cr);border-radius:50%;}
@@ -295,13 +308,17 @@ body {
     <span id="snakeBest"></span>
   </div>
   <div id="snakeOverBanner" style="display:none;">💀 Game Over</div>
-  <div id="snakeGrid"></div>
-  <div class="dpad">
-    <div></div><div class="dpad-btn" onclick="handleDirection('up')">⬆️</div><div></div>
-    <div class="dpad-btn" onclick="handleDirection('left')">⬅️</div><div></div><div class="dpad-btn" onclick="handleDirection('right')">➡️</div>
-    <div></div><div class="dpad-btn" onclick="handleDirection('down')">⬇️</div><div></div>
+  <div class="snake-play-area">
+    <div id="snakeGrid"></div>
+    <div class="snake-controls">
+      <div class="dpad">
+        <div></div><div class="dpad-btn" onclick="handleDirection('up')">⬆️</div><div></div>
+        <div class="dpad-btn" onclick="handleDirection('left')">⬅️</div><div></div><div class="dpad-btn" onclick="handleDirection('right')">➡️</div>
+        <div></div><div class="dpad-btn" onclick="handleDirection('down')">⬇️</div><div></div>
+      </div>
+      <button class="ondine-btn ondine-btn-secondary" onclick="confirmNewGame()">🔄 Nouvelle partie</button>
+    </div>
   </div>
-  <button class="ondine-btn ondine-btn-secondary" onclick="confirmNewGame()">🔄 Nouvelle partie</button>
 </div>
 
 <div class="screen hidden" id="sstats">
@@ -1562,7 +1579,8 @@ function createUI(sdk) {
         const isHead = game.snake[0].x === x && game.snake[0].y === y;
         const isBody = !isHead && snakeSet.has(`${x},${y}`);
         const isFood = game.food && game.food.x === x && game.food.y === y;
-        el.className = 'scell' + (isHead ? ' head' : '') + (isBody ? ' body' : '') + (isFood ? ' food' : '');
+        const isAlt = (x + y) % 2 === 1;
+        el.className = 'scell' + (isAlt ? ' alt' : '') + (isHead ? ' head' : '') + (isBody ? ' body' : '') + (isFood ? ' food' : '');
         host.appendChild(el);
       }
     }

@@ -1509,7 +1509,11 @@ function createUI(sdk) {
     flashButton(color);
     if (result === 'wrong') {
       sdk.audio.play('error');
-      finishGame();
+      // Le bouton pressé par erreur vient de s'allumer (flashButton,
+      // ci-dessus) — sans délai, le bandeau Game Over apparaissait
+      // instantanément par-dessus, avant que le joueur ait pu voir
+      // clairement quelle touche il venait de presser en trop.
+      setTimeout(finishGame, 250);
       return;
     }
     if (result === 'sequence_complete') {

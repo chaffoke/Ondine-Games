@@ -418,7 +418,7 @@ export function createUI(sdk) {
 
   function startRace() {
     if (!selectedTrackId) selectedTrackId = profile.unlockedTracks[0];
-    race = createRace(selectedTrackId, profile.selectedCar, profile.upgrades, 'balanced');
+    race = createRace(selectedTrackId, profile.selectedCar, profile.upgrades, 'balanced', Math.random, selectedDifficulty);
     const diffKey = selectedDifficulty === 'easy' ? 0 : selectedDifficulty === 'hard' ? 2 : 1;
     difficulties = race.cars.map((c, i) => i === 0 ? null : ['easy','normal','hard'][diffKey]);
     over = false;
@@ -448,7 +448,13 @@ export function createUI(sdk) {
       rankAtLastLapStart = player.rank;
     }
     renderRaceFrame();
-    if (race.over) finishRace();
+    // Le classement (finishRank) est définitif dès qu'une voiture
+    // franchit la ligne : une fois assigné, il ne change plus jamais
+    // (seules les voitures encore en course peuvent se disputer les
+    // rangs ENTRE ELLES, jamais dépasser une voiture déjà classée).
+    // Le joueur n'a donc aucune raison d'attendre que les 5 IA aient
+    // toutes fini — dès qu'IL a fini, son résultat est acquis.
+    if (player.finished) finishRace();
   }
 
   function startRaceLoop() {

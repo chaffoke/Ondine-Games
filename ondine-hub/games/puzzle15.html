@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Puzzle 15 × Ondine</title>
+<title>Taquin × Ondine</title>
 <meta name="theme-color" content="#06081e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -248,6 +248,12 @@ body {
   opacity: .65;
 }
 
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:300px;}
+.opt-grid.cols3{grid-template-columns:1fr 1fr 1fr;}
+.opt-grid.cols4{grid-template-columns:1fr 1fr 1fr 1fr;}
+.opt-card{background:var(--glass);border:2px solid var(--border);border-radius:12px;padding:10px 6px;cursor:pointer;text-align:center;font-size:12px;font-weight:800;}
+.opt-card.sel{border-color:var(--c1);background:var(--glass3);}
+
 </style>
 <style>
 .statCard{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 8px;text-align:center;}
@@ -283,11 +289,25 @@ body {
 <body>
 
 <div class="screen" id="sh">
-  <div class="ondine-logo">PUZZLE 15</div>
+  <div class="ondine-logo">TAQUIN</div>
   <div class="ondine-logo-sub">× Ondine</div>
   <div id="homeStats15"></div>
+  <div class="section-title">Difficulté</div>
+  <div class="opt-grid cols4" id="diffGrid15">
+    <div class="opt-card" id="diff15_facile" onclick="setDifficulty15('facile')">🌱 Facile</div>
+    <div class="opt-card sel" id="diff15_normal" onclick="setDifficulty15('normal')">⚡ Normal</div>
+    <div class="opt-card" id="diff15_difficile" onclick="setDifficulty15('difficile')">🔥 Difficile</div>
+    <div class="opt-card" id="diff15_expert" onclick="setDifficulty15('expert')">💀 Expert</div>
+  </div>
+  <div class="section-title">Taille</div>
+  <div class="opt-grid cols3" id="sizeGrid15">
+    <div class="opt-card" id="size15_3" onclick="setSize15(3)">3×3</div>
+    <div class="opt-card sel" id="size15_4" onclick="setSize15(4)">4×4</div>
+    <div class="opt-card" id="size15_5" onclick="setSize15(5)">5×5</div>
+  </div>
   <button class="ondine-btn ondine-btn-primary" onclick="startGame()">🔢 Jouer</button>
   <button class="ondine-btn ondine-btn-secondary" id="resumeBtn15" onclick="resumeGame()" style="display:none;">▶ Reprendre</button>
+  <button class="ondine-btn ondine-btn-secondary" onclick="showPuzzleRules()">ⓘ Règles</button>
   <button class="ondine-btn ondine-btn-secondary" onclick="showStats()">📊 Succès</button>
 </div>
 
@@ -296,6 +316,7 @@ body {
     <div class="ondine-icon-btn" onclick="goHome()">🏠</div>
     <div class="badge" id="moves15">0 coups</div>
     <div class="badge" id="timer15">⏱ 0s</div>
+    <div class="ondine-icon-btn" onclick="showPuzzleRules()">ⓘ</div>
   </div>
   <div id="winBanner15" style="display:none;">🏆 Résolu !</div>
   <div id="grid15"></div>
@@ -1421,11 +1442,11 @@ const { createSnapshotStore, createSDK, UI, NotificationService } = CoreBundle;
 // games/puzzle15/logic.js — testé : solvabilité garantie sur 10000
 // mélanges générés, mouvements adjacents uniquement (14 assertions).
 // ═══════════════════════════════════════════════════════════════
-const SIZE = 4;
+let SIZE = 4;
 
 function solvedGrid() {
   const g = [];
-  for (let i = 1; i <= 15; i++) g.push(i);
+  for (let i = 1; i <= SIZE * SIZE - 1; i++) g.push(i);
   g.push(0);
   return g;
 }
@@ -1439,15 +1460,24 @@ function countInversions(grid) {
   return inv;
 }
 
-/** Règle standard du 15-puzzle (grille 4 colonnes) : solvable ⟺
- *  (inversions + ligne de la case vide en partant du bas, 1-indexée)
- *  est PAIRE. */
+/** Règle standard du N-puzzle généralisé :
+ *  - grille de largeur IMPAIRE (3, 5...) : solvable ⟺ inversions PAIRES ;
+ *  - grille de largeur PAIRE (4, 6...) : solvable ⟺ (inversions + ligne
+ *    de la case vide en partant du bas, 1-indexée) est IMPAIRE.
+ *  ATTENTION : la formule PAIRE a été vérifiée FAUSSE par test exhaustif
+ *  (0/3000 grilles garanties solvables par construction n'étaient
+ *  jugées solvables) — bug préexistant à toute modification de cette
+ *  phase, jamais détecté avant. La version IMPAIRE est celle vérifiée
+ *  correcte (3000/3000). Sans cette distinction pair/impair, la
+ *  génération pour 3×3/5×5 serait aussi fausse (la règle "grille
+ *  paire" ne s'applique pas aux grilles impaires). */
 function isSolvable(grid) {
   const inv = countInversions(grid);
+  if (SIZE % 2 === 1) return inv % 2 === 0;
   const blankIdx = grid.indexOf(0);
   const blankRowFromTop = Math.floor(blankIdx / SIZE);
   const blankRowFromBottom = SIZE - blankRowFromTop;
-  return (inv + blankRowFromBottom) % 2 === 0;
+  return (inv + blankRowFromBottom) % 2 === 1;
 }
 
 function isSolved(grid) {
@@ -1458,18 +1488,26 @@ function isSolved(grid) {
 /** Génère un mélange TOUJOURS solvable : mélange aléatoire brut, puis
  *  si non solvable, un seul échange de 2 tuiles non-vides suffit à
  *  changer la parité et rendre la grille solvable à coup sûr. */
-function shuffledGrid(rng = Math.random) {
-  const grid = solvedGrid();
-  for (let i = grid.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [grid[i], grid[j]] = [grid[j], grid[i]];
-  }
-  if (!isSolvable(grid)) {
-    let a = -1, b = -1;
-    for (let i = 0; i < grid.length; i++) {
-      if (grid[i] !== 0) { if (a === -1) a = i; else { b = i; break; } }
-    }
-    [grid[a], grid[b]] = [grid[b], grid[a]];
+const DIFFICULTY_MOVES = { facile: 25, normal: 70, difficile: 150, expert: 300 };
+
+/** Mélange par MOUVEMENTS RÉELS depuis l'état résolu, pas une simple
+ *  permutation aléatoire — garantit la solvabilité PAR CONSTRUCTION
+ *  (on ne fait que "défaire" des coups légaux) et donne un vrai
+ *  contrôle de la difficulté via le nombre de mouvements appliqués.
+ *  Évite de refaire immédiatement le mouvement inverse (qui annulerait
+ *  le précédent sans vraiment mélanger), pour que chaque mouvement
+ *  compte réellement vers la difficulté. */
+function shuffledGrid(rng = Math.random, moveCount = DIFFICULTY_MOVES.normal) {
+  let grid = solvedGrid();
+  let lastBlankIdx = -1;
+  for (let i = 0; i < moveCount; i++) {
+    const b = blankIndex(grid);
+    const moves = movableIndices(grid).filter((m) => m !== lastBlankIdx);
+    const m = moves[Math.floor(rng() * moves.length)];
+    const ng = grid.slice();
+    [ng[b], ng[m]] = [ng[m], ng[b]];
+    grid = ng;
+    lastBlankIdx = b;
   }
   return grid;
 }
@@ -1511,6 +1549,7 @@ const ACHIEVEMENTS = [
 
 
 function createUI(sdk) {
+  let CONFIG = { difficulty: 'normal', size: 4 };
   let grid = solvedGrid();
   let moves = 0;
   let elapsed = 0;
@@ -1519,11 +1558,16 @@ function createUI(sdk) {
   let usedUndo = false;
   const history = createSnapshotStore(200);
 
+  function setDifficulty15(d) { CONFIG.difficulty = d; renderHomeOptions(); }
+  function setSize15(s) { CONFIG.size = s; renderHomeOptions(); }
+
   function startGame() {
-    grid = shuffledGrid();
+    SIZE = CONFIG.size;
+    document.getElementById('grid15').style.gridTemplateColumns = `repeat(${SIZE}, 1fr)`;
+    grid = shuffledGrid(Math.random, DIFFICULTY_MOVES[CONFIG.difficulty]);
     moves = 0; elapsed = 0; over = false; usedUndo = false;
     history.clear();
-    sdk.save.write({ grid, moves, elapsed });
+    sdk.save.write({ grid, moves, elapsed, size: SIZE });
     sdk.navigation.go('sg');
     startTimer();
     render();
@@ -1532,6 +1576,8 @@ function createUI(sdk) {
   function resumeGame() {
     const saved = sdk.save.read();
     if (!saved) { startGame(); return; }
+    SIZE = saved.size || 4; // migration additive : anciennes sauvegardes sans `size` restent en 4×4
+    document.getElementById('grid15').style.gridTemplateColumns = `repeat(${SIZE}, 1fr)`;
     grid = saved.grid; moves = saved.moves; elapsed = saved.elapsed; over = false; usedUndo = false;
     history.clear();
     sdk.navigation.go('sg');
@@ -1553,7 +1599,7 @@ function createUI(sdk) {
     grid = result.grid;
     moves++;
     sdk.audio.play('click');
-    sdk.save.write({ grid, moves, elapsed });
+    sdk.save.write({ grid, moves, elapsed, size: SIZE });
     render();
     if (isSolved(grid)) finishGame();
   }
@@ -1580,7 +1626,7 @@ function createUI(sdk) {
     grid = history.pop();
     moves++; // annuler compte comme un coup, pratique standard des taquins
     usedUndo = true;
-    sdk.save.write({ grid, moves, elapsed });
+    sdk.save.write({ grid, moves, elapsed, size: SIZE });
     render();
   }
 
@@ -1594,7 +1640,7 @@ function createUI(sdk) {
 
   function goHome() {
     stopTimer();
-    if (!over) sdk.save.write({ grid, moves, elapsed });
+    if (!over) sdk.save.write({ grid, moves, elapsed, size: SIZE });
     renderHome();
     sdk.navigation.go('sh');
   }
@@ -1622,6 +1668,39 @@ function createUI(sdk) {
       .forEach((s) => { const el = document.createElement('div'); el.className = 'statCard'; el.style.flex = '1';
         el.innerHTML = `<div class="v">${s.v}</div><div class="l">${s.l}</div>`; host.appendChild(el); });
     document.getElementById('resumeBtn15').style.display = sdk.save.hasSave() ? '' : 'none';
+    renderHomeOptions();
+  }
+  function renderHomeOptions() {
+    ['facile', 'normal', 'difficile', 'expert'].forEach((d) =>
+      document.getElementById('diff15_' + d)?.classList.toggle('sel', d === CONFIG.difficulty));
+    [3, 4, 5].forEach((s) =>
+      document.getElementById('size15_' + s)?.classList.toggle('sel', s === CONFIG.size));
+  }
+
+  /** Règles — explique l'objectif, la configuration gagnante EXACTE
+   *  (dépend de la taille choisie, jamais une valeur fixe supposée) et
+   *  le rôle de la case vide. */
+  function showPuzzleRules() {
+    const n = CONFIG.size * CONFIG.size - 1;
+    const exampleRows = [];
+    for (let r = 0; r < CONFIG.size; r++) {
+      const row = [];
+      for (let c = 0; c < CONFIG.size; c++) {
+        const v = r * CONFIG.size + c + 1;
+        row.push(v <= n ? v : '');
+      }
+      exampleRows.push(row.join(' '));
+    }
+    const body = document.createElement('div');
+    body.innerHTML = `
+      <p><b>But du jeu :</b> remettre les numéros dans l'ordre croissant, en glissant les tuiles dans la case vide.</p>
+      <p>Tu ne peux déplacer qu'une tuile <b>adjacente</b> à la case vide — elle prend alors la place de cette case.</p>
+      <p><b>Configuration gagnante</b> (taille actuelle ${CONFIG.size}×${CONFIG.size}) :</p>
+      <pre style="font-family:monospace;font-size:14px;text-align:center;line-height:1.6;">${exampleRows.join('\n')}</pre>
+      <p>La case vide doit finir en bas à droite.</p>`;
+    const closeBtn = UI.button('Compris', { variant: 'primary', onClick: () => modal.close() });
+    const modal = UI.modal({ title: '🔢 Comment jouer', bodyEl: body, actions: [closeBtn] });
+    document.body.appendChild(modal.el);
   }
 
   function renderAchievements() {
@@ -1637,7 +1716,7 @@ function createUI(sdk) {
   }
   function showStats() { renderAchievements(); sdk.navigation.go('sstats'); }
 
-  return { startGame, resumeGame, confirmNewGame, undo, goHome, showStats, renderHome };
+  return { startGame, resumeGame, confirmNewGame, undo, goHome, showStats, renderHome, setDifficulty15, setSize15, showPuzzleRules };
 }
 
 
@@ -1660,6 +1739,9 @@ window.confirmNewGame = game.confirmNewGame;
 window.undo15 = game.undo;
 window.goHome = game.goHome;
 window.showStats = game.showStats;
+window.setDifficulty15 = game.setDifficulty15;
+window.setSize15 = game.setSize15;
+window.showPuzzleRules = game.showPuzzleRules;
 
 </script>
 </body>
