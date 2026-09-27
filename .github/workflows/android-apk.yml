@@ -28,9 +28,17 @@ jobs:
         working-directory: android
         run: gradle assembleRelease --no-daemon
 
+      - name: Sign APK for direct installation
+        working-directory: android
+        run: |
+          keytool -genkeypair -v             -keystore ondine-debug.keystore             -alias ondine             -keyalg RSA             -keysize 2048             -validity 10000             -storepass android             -keypass android             -dname "CN=Ondine Games, OU=Ondine, O=Ondine, L=Cherbourg, ST=Normandie, C=FR"
+          BT=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          "$BT/apksigner" sign             --ks ondine-debug.keystore             --ks-pass pass:android             --key-pass pass:android             --out app/build/outputs/apk/release/ondine-games.apk             app/build/outputs/apk/release/app-release-unsigned.apk
+          "$BT/apksigner" verify --verbose app/build/outputs/apk/release/ondine-games.apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ondine-games-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          path: android/app/build/outputs/apk/release/ondine-games.apk
           if-no-files-found: error
